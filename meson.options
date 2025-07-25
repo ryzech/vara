@@ -1,0 +1,8 @@
+option('build_variant', type : 'combo',
+       choices : ['debug', 'release'],
+       value : 'debug',
+       description : 'Build variant')
+
+option('build_tests', type : 'boolean',
+       value : true,
+       description : 'Build test suite')

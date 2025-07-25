@@ -1,0 +1,5 @@
+.idea/
+bin/
+buildDir/
+subprojects/*
+!subprojects/*.wrap
