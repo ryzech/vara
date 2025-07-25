@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <archimedes/archimedes.h>
+#include <core/core.h>
 #include <core/defines.h>
 #include <core/logger.h>
 

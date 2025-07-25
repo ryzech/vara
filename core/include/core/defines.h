@@ -59,18 +59,18 @@ typedef _Bool b8;
 
 /** @brief A range, typically of memory */
 typedef struct range {
-  /** @brief The offset in bytes. */
-  u64 offset;
-  /** @brief The size in bytes. */
-  u64 size;
+	/** @brief The offset in bytes. */
+	u64 offset;
+	/** @brief The size in bytes. */
+	u64 size;
 } range;
 
 /** @brief A range, typically of memory */
 typedef struct range32 {
-  /** @brief The offset in bytes. */
-  i32 offset;
-  /** @brief The size in bytes. */
-  i32 size;
+	/** @brief The offset in bytes. */
+	i32 offset;
+	/** @brief The size in bytes. */
+	i32 size;
 } range32;
 
 /** @brief True.*/

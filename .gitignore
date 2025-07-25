@@ -1,5 +1,7 @@
 .idea/
+.xcode/
 bin/
+build/
 buildDir/
 subprojects/*
 !subprojects/*.wrap

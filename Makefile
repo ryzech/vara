@@ -2,6 +2,9 @@
 BUILDS = debug release
 BIN_DIR = bin
 
+# Detect platform
+UNAME_S := $(shell uname -s)
+
 # Default target
 all: debug
 
@@ -12,6 +15,13 @@ setup-debug:
 		echo "Setting up debug build..."; \
 		meson setup $(BIN_DIR)/build-debug --buildtype=debug; \
 	fi
+ifeq ($(UNAME_S),Darwin)
+	@mkdir -p $(BIN_DIR)
+	@if [ ! -d "$(BIN_DIR)/xcode" ]; then \
+		echo "Setting up Xcode project..."; \
+		meson setup $(BIN_DIR)/xcode --backend=xcode; \
+	fi
+endif
 
 setup-release:
 	@mkdir -p $(BIN_DIR)
@@ -19,8 +29,29 @@ setup-release:
 		echo "Setting up release build..."; \
 		meson setup $(BIN_DIR)/build-release --buildtype=release; \
 	fi
+ifeq ($(UNAME_S),Darwin)
+	@mkdir -p $(BIN_DIR)
+	@if [ ! -f "$(BIN_DIR)/xcode/$(shell basename $(PWD)).xcodeproj/project.pbxproj" ]; then \
+		echo "Setting up Xcode project..."; \
+		meson setup $(BIN_DIR)/xcode --backend=xcode; \
+	fi
+endif
 
 setup-all: setup-debug setup-release
+
+# Open Xcode project (macOS only)
+open-xcode: setup-debug
+ifeq ($(UNAME_S),Darwin)
+	@PROJECT_FILE=$$(find $(BIN_DIR)/xcode -name "*.xcodeproj" | head -n 1); \
+	if [ -n "$$PROJECT_FILE" ]; then \
+		echo "Opening Xcode project: $$PROJECT_FILE"; \
+		open "$$PROJECT_FILE"; \
+	else \
+		echo "No Xcode project found in $(BIN_DIR)/xcode/"; \
+	fi
+else
+	@echo "Xcode is only available on macOS"
+endif
 
 # Build targets
 debug: setup-debug
@@ -78,13 +109,6 @@ test-debug: debug
 test-release: release
 	meson test -C $(BIN_DIR)/build-release
 
-# Install targets
-install-debug: debug
-	meson install -C $(BIN_DIR)/build-debug
-
-install-release: release
-	meson install -C $(BIN_DIR)/build-release
-
 # Clean targets
 clean:
 	rm -rf $(BIN_DIR)
@@ -94,46 +118,6 @@ clean-debug:
 
 clean-release:
 	rm -rf $(BIN_DIR)/build-release
-
-# Reconfigure targets
-reconfig-debug:
-	meson setup --reconfigure $(BIN_DIR)/build-debug --buildtype=debug
-
-reconfig-release:
-	meson setup --reconfigure $(BIN_DIR)/build-release --buildtype=release
-
-# Wipe and rebuild targets (complete clean rebuild)
-rebuild-debug:
-	meson setup --wipe $(BIN_DIR)/build-debug --buildtype=debug
-
-rebuild-release:
-	meson setup --wipe $(BIN_DIR)/build-release --buildtype=release
-
-# Debug info target
-debug-info:
-	@echo "=== Meson Version ==="
-	@meson --version
-	@echo ""
-	@echo "=== Build Directory Status ==="
-	@for build in $(BUILDS); do \
-		echo "--- $(BIN_DIR)/build-$$build ---"; \
-		if [ -d "$(BIN_DIR)/build-$$build" ]; then \
-			echo "Directory exists"; \
-			ls -la $(BIN_DIR)/build-$$build/ | head -10; \
-			if [ -f "$(BIN_DIR)/build-$$build/build.ninja" ]; then \
-				echo "✓ build.ninja exists"; \
-			else \
-				echo "✗ build.ninja missing"; \
-			fi; \
-			if [ -d "$(BIN_DIR)/build-$$build/sandbox" ]; then \
-				echo "Contents of sandbox directory:"; \
-				ls -la $(BIN_DIR)/build-$$build/sandbox/; \
-			fi; \
-		else \
-			echo "Directory does not exist"; \
-		fi; \
-		echo; \
-	done
 
 # Show help
 help:
@@ -146,9 +130,11 @@ help:
 	@echo "  clean                    - Clean all build directories"
 	@echo "  clean-debug, clean-release - Clean specific build"
 	@echo "  setup-all                - Setup all build directories"
-	@echo "  reconfig-debug, reconfig-release - Reconfigure specific build"
-	@echo "  rebuild-debug, rebuild-release - Completely rebuild from scratch"
-	@echo "  debug-info               - Show build directory information"
+ifeq ($(UNAME_S),Darwin)
+	@echo ""
+	@echo "macOS-specific targets:"
+	@echo "  open-xcode               - Open Xcode project"
+endif
 
 .PHONY: all setup-debug setup-release setup-all debug release \
         archimedes-debug archimedes-release \
@@ -156,6 +142,5 @@ help:
         run-debug run-release \
         test-debug test-release \
         install-debug install-release \
-        clean clean-debug clean-release \
-        reconfig-debug reconfig-release \
-        rebuild-debug rebuild-release debug-info help
+        clean clean-debug clean-release clean-xcode \
+        open-xcode help

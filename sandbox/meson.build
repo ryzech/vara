@@ -7,7 +7,7 @@ sandbox_sources = files(
 # Build the executable
 sandbox_exe = executable('sandbox',
                          sandbox_sources,
-                         dependencies : archimedes_dep,
+                         dependencies : core_dep,
                          install : true
 )
 

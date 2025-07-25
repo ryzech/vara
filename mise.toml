@@ -1,3 +1,3 @@
 [tools]
-meson = "latest"
+meson = "1.8.0"
 ninja = "latest"

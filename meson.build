@@ -22,5 +22,5 @@ add_global_arguments('-D_VERSION="' + meson.project_version() + '"', language: '
 
 
 # Add subdirectories
-subdir('archimedes')
+subdir('core')
 subdir('sandbox')
