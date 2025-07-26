@@ -3,14 +3,12 @@
 
 #include <core/core.h>
 #include <core/defines.h>
+#include <core/platform/platform.h>
 #include <core/logger.h>
 
-int main(void) {
-	FATAL("Version: %s", _VERSION);
-	ERROR("Version: %s", _VERSION);
-	WARN("Version: %s", _VERSION);
-	INFO("Version: %s", _VERSION);
+i32 main(void) {
 	DEBUG("Version: %s", _VERSION);
-	TRACE("Version: %s", _VERSION);
+	DEBUG("Absolute time: %f", platform_get_time());
+
 	return EXIT_SUCCESS;
 }

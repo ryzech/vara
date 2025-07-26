@@ -6,7 +6,7 @@ BIN_DIR = bin
 UNAME_S := $(shell uname -s)
 
 # Default target
-all: debug
+all: build-debug
 
 # Setup targets - these check if directory exists before setting up
 setup-debug:
@@ -39,42 +39,28 @@ endif
 
 setup-all: setup-debug setup-release
 
-# Open Xcode project (macOS only)
-open-xcode: setup-debug
-ifeq ($(UNAME_S),Darwin)
-	@PROJECT_FILE=$$(find $(BIN_DIR)/xcode -name "*.xcodeproj" | head -n 1); \
-	if [ -n "$$PROJECT_FILE" ]; then \
-		echo "Opening Xcode project: $$PROJECT_FILE"; \
-		open "$$PROJECT_FILE"; \
-	else \
-		echo "No Xcode project found in $(BIN_DIR)/xcode/"; \
-	fi
-else
-	@echo "Xcode is only available on macOS"
-endif
-
 # Build targets
-debug: setup-debug
+build-debug: setup-debug
 	meson compile -C $(BIN_DIR)/build-debug
 
-release: setup-release
+build-release: setup-release
 	meson compile -C $(BIN_DIR)/build-release
 
 # Build specific targets
-archimedes-debug: setup-debug
+build-archimedes-debug: setup-debug
 	meson compile -C $(BIN_DIR)/build-debug archimedes
 
-archimedes-release: setup-release
+build-archimedes-release: setup-release
 	meson compile -C $(BIN_DIR)/build-release archimedes
 
-sandbox-debug: setup-debug
+build-sandbox-debug: setup-debug
 	meson compile -C $(BIN_DIR)/build-debug sandbox
 
-sandbox-release: setup-release
+build-sandbox-release: setup-release
 	meson compile -C $(BIN_DIR)/build-release sandbox
 
 # Run targets - Fixed paths
-run-debug: debug
+run-debug: build-debug
 	@if [ -f "$(BIN_DIR)/build-debug/sandbox/sandbox" ]; then \
 		./$(BIN_DIR)/build-debug/sandbox/sandbox; \
 	else \
@@ -88,7 +74,7 @@ run-debug: debug
 		exit 1; \
 	fi
 
-run-release: release
+run-release: build-release
 	@if [ -f "$(BIN_DIR)/build-release/sandbox/sandbox" ]; then \
 		./$(BIN_DIR)/build-release/sandbox/sandbox; \
 	else \
@@ -103,44 +89,31 @@ run-release: release
 	fi
 
 # Test targets
-test-debug: debug
+test-debug: build-debug
 	meson test -C $(BIN_DIR)/build-debug
 
-test-release: release
+test-release: build-release
 	meson test -C $(BIN_DIR)/build-release
 
 # Clean targets
 clean:
 	rm -rf $(BIN_DIR)
 
-clean-debug:
-	rm -rf $(BIN_DIR)/build-debug
-
-clean-release:
-	rm -rf $(BIN_DIR)/build-release
-
 # Show help
 help:
 	@echo "Available targets:"
-	@echo "  debug, release           - Build the respective version"
+	@echo "  build-debug, build-release           - Build the respective version"
 	@echo "  run-debug, run-release   - Build and run"
 	@echo "  test-debug, test-release - Build and test"
-	@echo "  archimedes-debug, archimedes-release - Build only the library"
-	@echo "  sandbox-debug, sandbox-release - Build only the executable"
+	@echo "  build-archimedes-debug, build-archimedes-release - Build only the library"
+	@echo "  build-sandbox-debug, build-sandbox-release - Build only the executable"
 	@echo "  clean                    - Clean all build directories"
-	@echo "  clean-debug, clean-release - Clean specific build"
 	@echo "  setup-all                - Setup all build directories"
-ifeq ($(UNAME_S),Darwin)
-	@echo ""
-	@echo "macOS-specific targets:"
-	@echo "  open-xcode               - Open Xcode project"
-endif
 
-.PHONY: all setup-debug setup-release setup-all debug release \
-        archimedes-debug archimedes-release \
-        sandbox-debug sandbox-release \
+.PHONY: all setup-debug setup-release setup-all \
+ 	build-debug build-release \
+        build-archimedes-debug build-archimedes-release \
+        build-sandbox-debug build-sandbox-release \
         run-debug run-release \
         test-debug test-release \
-        install-debug install-release \
-        clean clean-debug clean-release clean-xcode \
-        open-xcode help
+        clean help

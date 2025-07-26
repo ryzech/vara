@@ -105,3 +105,41 @@ typedef struct range32 {
 #define I16_MIN (-I16_MAX - 1)
 #define I32_MIN (-I32_MAX - 1)
 #define I64_MIN (-I64_MAX - 1)
+
+// Platform detection
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
+#define _PLATFORM_WINDOWS 1
+#ifndef _WIN64
+#error "64-bit is required on Windows!"
+#endif
+#elif defined(__linux__) || defined(__gnu_linux__)
+// Linux OS
+#define _PLATFORM_LINUX 1
+#if defined(__ANDROID__)
+#define _PLATFORM_ANDROID 1
+#endif
+#elif defined(__unix__)
+// Catch anything not caught by the above.
+#define _PLATFORM_UNIX 1
+#elif defined(_POSIX_VERSION)
+// Posix
+#define _PLATFORM_POSIX 1
+#elif __APPLE__
+// Apple platforms
+#define _PLATFORM_APPLE 1
+#include <TargetConditionals.h>
+#if TARGET_IPHONE_SIMULATOR
+// iOS Simulator
+#define _PLATFORM_IOS 1
+#define _PLATFORM_IOS_SIMULATOR 1
+#elif TARGET_OS_IPHONE
+#define _PLATFORM_IOS 1
+// iOS device
+#elif TARGET_OS_MAC
+// Other kinds of Mac OS
+#else
+#error "Unknown Apple platform"
+#endif
+#else
+#error "Unknown platform!"
+#endif
