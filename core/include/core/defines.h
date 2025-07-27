@@ -59,81 +59,81 @@ typedef _Bool b8;
 
 /** @brief A range, typically of memory */
 typedef struct range {
-	/** @brief The offset in bytes. */
-	u64 offset;
-	/** @brief The size in bytes. */
-	u64 size;
+    /** @brief The offset in bytes. */
+    u64 offset;
+    /** @brief The size in bytes. */
+    u64 size;
 } range;
 
 /** @brief A range, typically of memory */
 typedef struct range32 {
-	/** @brief The offset in bytes. */
-	i32 offset;
-	/** @brief The size in bytes. */
-	i32 size;
+    /** @brief The offset in bytes. */
+    i32 offset;
+    /** @brief The size in bytes. */
+    i32 size;
 } range32;
 
 /** @brief True.*/
-#define true 1
+#define true           1
 
 /** @brief False. */
-#define false 0
+#define false          0
 
 /**
  * @brief Any id set to this should be considered invalid,
  * and not actually pointing to a real object.
  */
 #define INVALID_ID_U64 18446744073709551615UL
-#define INVALID_ID 4294967295U
+#define INVALID_ID     4294967295U
 #define INVALID_ID_U16 65535U
-#define INVALID_ID_U8 255U
+#define INVALID_ID_U8  255U
 
-#define U64_MAX 18446744073709551615UL
-#define U32_MAX 4294967295U
-#define U16_MAX 65535U
-#define U8_MAX 255U
-#define U64_MIN 0UL
-#define U32_MIN 0U
-#define U16_MIN 0U
-#define U8_MIN 0U
+#define U64_MAX        18446744073709551615UL
+#define U32_MAX        4294967295U
+#define U16_MAX        65535U
+#define U8_MAX         255U
+#define U64_MIN        0UL
+#define U32_MIN        0U
+#define U16_MIN        0U
+#define U8_MIN         0U
 
-#define I8_MAX 127
-#define I16_MAX 32767
-#define I32_MAX 2147483647
-#define I64_MAX 9223372036854775807L
-#define I8_MIN (-I8_MAX - 1)
-#define I16_MIN (-I16_MAX - 1)
-#define I32_MIN (-I32_MAX - 1)
-#define I64_MIN (-I64_MAX - 1)
+#define I8_MAX         127
+#define I16_MAX        32767
+#define I32_MAX        2147483647
+#define I64_MAX        9223372036854775807L
+#define I8_MIN         (-I8_MAX - 1)
+#define I16_MIN        (-I16_MAX - 1)
+#define I32_MIN        (-I32_MAX - 1)
+#define I64_MIN        (-I64_MAX - 1)
 
 // Platform detection
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
-#define _PLATFORM_WINDOWS 1
+#define VARA_PLATFORM_WINDOWS 1
 #ifndef _WIN64
 #error "64-bit is required on Windows!"
 #endif
 #elif defined(__linux__) || defined(__gnu_linux__)
 // Linux OS
-#define _PLATFORM_LINUX 1
+#define VARA_PLATFORM_LINUX 1
 #if defined(__ANDROID__)
-#define _PLATFORM_ANDROID 1
+#define VARA_PLATFORM_ANDROID 1
 #endif
 #elif defined(__unix__)
 // Catch anything not caught by the above.
-#define _PLATFORM_UNIX 1
+#define VARA_PLATFORM_UNIX 1
 #elif defined(_POSIX_VERSION)
 // Posix
-#define _PLATFORM_POSIX 1
+#define VARA_PLATFORM_POSIX 1
 #elif __APPLE__
 // Apple platforms
-#define _PLATFORM_APPLE 1
+#define VARA_PLATFORM_APPLE 1
 #include <TargetConditionals.h>
 #if TARGET_IPHONE_SIMULATOR
 // iOS Simulator
-#define _PLATFORM_IOS 1
-#define _PLATFORM_IOS_SIMULATOR 1
+#define VARA_PLATFORM_IOS           1
+#define VARA_PLATFORM_IOS_SIMULATOR 1
 #elif TARGET_OS_IPHONE
-#define _PLATFORM_IOS 1
+#define VARA_PLATFORM_IOS 1
 // iOS device
 #elif TARGET_OS_MAC
 // Other kinds of Mac OS

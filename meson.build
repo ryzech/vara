@@ -1,4 +1,4 @@
-project('archimedes-project', 'c',
+project('vara-engine', 'c',
         version : '0.1.0',
         license : 'MIT',
         meson_version : '>=1.8.0',
@@ -44,15 +44,15 @@ endif
 
 # Add additional arguments based on buildtype (debug, release, dist, etc.)
 if buildtype == 'debug'
-    add_global_arguments('-D_DEBUG', language : 'c')
+    add_global_arguments('-DVARA_DEBUG', language : 'c')
 endif
 
 if buildtype == 'release'
-    add_global_arguments('-D_RELEASE', language : 'c')
+    add_global_arguments('-DVARA_RELEASE', language : 'c')
 endif
 
 # Add global arguments regardless of buildtype
-add_global_arguments('-D_VERSION="' + meson.project_version() + '"', language : 'c')
+add_global_arguments('-DVARA_VERSION="' + meson.project_version() + '"', language : 'c')
 
 # Dependencies
 

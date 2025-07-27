@@ -1,5 +1,5 @@
 #include "core/platform/platform.h"
 
-#ifdef _PLATFORM_WINDOWS
+#ifdef VARA_PLATFORM_WINDOWS
 
 #endif

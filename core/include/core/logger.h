@@ -8,7 +8,7 @@
 #define LOG_INFO_ENABLED 1
 
 /** Disable LOG_TRACE and LOG_DEBUG if _RELEASE */
-#ifdef _RELEASE
+#ifdef VARA_RELEASE
 #define LOG_DEBUG_ENABLED 0
 #define LOG_TRACE_ENABLED 0
 #else
@@ -20,23 +20,23 @@
 
 /** @brief Represents levels of logging */
 typedef enum log_level {
-	/** @brief Fatal log level, should be used to stop the application when hit.
+    /** @brief Fatal log level, should be used to stop the application when hit.
 	 */
-	LOG_LEVEL_FATAL = 0,
-	/** @brief Error log level, should be used to indicate critical runtime
+    LOG_LEVEL_FATAL = 0,
+    /** @brief Error log level, should be used to indicate critical runtime
 	   problems that cause the application to run improperly or not at all. */
-	LOG_LEVEL_ERROR = 1,
-	/** @brief Warning log level, should be used to indicate non-critial
+    LOG_LEVEL_ERROR = 1,
+    /** @brief Warning log level, should be used to indicate non-critial
 	   problems with the application that cause it to run suboptimally. */
-	LOG_LEVEL_WARN = 2,
-	/** @brief Info log level, should be used for non-erronuous informational
+    LOG_LEVEL_WARN = 2,
+    /** @brief Info log level, should be used for non-erronuous informational
 	   purposes. */
-	LOG_LEVEL_INFO = 3,
-	/** @brief Debug log level, should be used for debugging purposes. */
-	LOG_LEVEL_DEBUG = 4,
-	/** @brief Trace log level, should be used for verbose debugging purposes.
+    LOG_LEVEL_INFO = 3,
+    /** @brief Debug log level, should be used for debugging purposes. */
+    LOG_LEVEL_DEBUG = 4,
+    /** @brief Trace log level, should be used for verbose debugging purposes.
 	 */
-	LOG_LEVEL_TRACE = 5
+    LOG_LEVEL_TRACE = 5,
 } log_level;
 
 b8 initialize_logging(void);
@@ -48,7 +48,7 @@ void shutdown_logging(void);
  * @param message The message to be logged.
  * @param ... Any formatted data that should be included in the log entry.
  */
-void _log_output(log_level level, const char *message, ...);
+void _log_output(log_level level, const char* message, ...);
 
 /**
  * @brief Logs a fatal-level message. Should be used to stop the application

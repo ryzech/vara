@@ -31,5 +31,9 @@ make clean
 
 The output will be under the `bin/` directory, either `bin/build-debug/` or `bin/build-release/` depending on which command you ran.
 
+## TODO
+- [ ] Implement Native MacOS windowing (ObjC, Cocoa.)
+- [ ] Separate windowing into its own struct / file.
+
 ## License
 This project is licensed under the [MIT License](https://mit-license.org/) as specified in [LICENSE](./LICENSE).
