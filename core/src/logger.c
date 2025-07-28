@@ -22,12 +22,12 @@ void _log_output(const log_level level, const char* message, ...) {
     char out_message[32000];
     platform_set_memory(out_message, 0, sizeof(out_message));
 
-    __builtin_va_list arg_ptr;
+    va_list arg_ptr;
     va_start(arg_ptr, message);
     vsnprintf(out_message, sizeof(out_message), message, arg_ptr);
     va_end(arg_ptr);
 
     char final_message[32000];
-    sprintf(final_message, "%s%s\n", level_strings[level], out_message);
+    snprintf(final_message, sizeof(final_message), "%s%s\n", level_strings[level], out_message);
     platform_write(final_message);
 }
