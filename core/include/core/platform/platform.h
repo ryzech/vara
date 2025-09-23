@@ -3,41 +3,6 @@
 #include "core/defines.h"
 
 /** */
-struct window_platform_state;
-
-/** */
-typedef struct window {
-    /** */
-    u32 width;
-    /** */
-    u32 height;
-    /** */
-    const char* title;
-    /** */
-    const char* name;
-    /** Pixel density of the given display the window is on. */
-    f32 pixel_density;
-    /** Platform state for the window. */
-    struct window_platform_state* platform_state;
-} window;
-
-/** */
-typedef struct window_config {
-    /** */
-    i32 position_x;
-    /** */
-    i32 position_y;
-    /** */
-    u32 width;
-    /** */
-    u32 height;
-    /** */
-    const char* title;
-    /** */
-    const char* name;
-} window_config;
-
-/** */
 struct platform_state;
 
 /** */

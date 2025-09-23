@@ -14,6 +14,17 @@ link_args = []
 if platform_osx
     link_args += osx_ldflags
     core_sources += files('src/platform/platform_darwin.m')
+    core_sources += files('src/platform/platform_window_darwin.m')
+endif
+
+if platform_windows
+    core_sources += files('src/platform/platform_win32.c')
+    core_sources += files('src/platform/platform_window_win32.c')
+endif
+
+if platform_linux
+    core_sources += files('src/platform/platform_linux.c')
+    core_sources += files('src/platform/platform_window_linux.c')
 endif
 
 # Build the library
