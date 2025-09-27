@@ -1,5 +1,6 @@
 #include "core/platform/platform.h"
 #include "core/platform/platform_window.h"
+#include "core/logger.h"
 
 #ifdef VARA_PLATFORM_APPLE
 
@@ -50,11 +51,18 @@ b8 platform_window_create(vara_window* window, const vara_window_config* config)
     window->name = config->name;
     window->pixel_density = 1.0f;
 
+    DEBUG("Creating NSApplication.", "")
+    [NSApplication sharedApplication];
+
+    [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+    [NSApp finishLaunching];
+
     NSRect contentRect = NSMakeRect(config->position_x, config->position_y, config->width, config->height);
 
     NSWindowStyleMask styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable
                                   | NSWindowStyleMaskResizable;
 
+    DEBUG("Creating NSWindow.", "")
     window->platform_state->window = [[NSWindow alloc] initWithContentRect:contentRect
                                                                  styleMask:styleMask
                                                                    backing:NSBackingStoreBuffered
@@ -66,9 +74,13 @@ b8 platform_window_create(vara_window* window, const vara_window_config* config)
     }
 
     [window->platform_state->window setTitle:[NSString stringWithUTF8String:config->title]];
+    [window->platform_state->window setFrameAutosaveName:[NSString stringWithUTF8String:config->name]];
     [window->platform_state->window makeKeyAndOrderFront:nil];
     [window->platform_state->window center];
 
+    [NSApp activateIgnoringOtherApps:YES];
+
+    DEBUG("Creating VaraWindowDelegate.", "")
     VaraWindowDelegate* delegate = [[VaraWindowDelegate alloc] init];
     delegate.vara_window_ref = window;
     window->platform_state->delegate = delegate;

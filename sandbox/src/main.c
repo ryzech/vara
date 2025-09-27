@@ -13,7 +13,7 @@ u64 sleep_time = 5;
 i32 main(void) {
     DEBUG("Version: %s", VARA_VERSION);
 
-    vara_window_config window_config = {
+    const vara_window_config window_config = {
         .position_x = 100,
         .position_y = 100,
         .width = 800,

@@ -16,7 +16,7 @@ void shutdown_logging(void) {
 
 void _log_output(const log_level level, const char* message, ...) {
     const char* level_strings[6] = {
-        "[FATAL]: ", "[ERROR]: ", "[WARN]:  ", "[INFO]:  ", "[DEBUG]: ", "[TRACE]: ",
+        "(fatal): ", "(error): ", "(warn): ", "(info): ", "(debug): ", "(trace): ",
     };
 
     char out_message[32000];

@@ -11,6 +11,7 @@ project('vara-engine', 'c',
 cc = meson.get_compiler('c')
 prefix = get_option('prefix')
 buildtype = get_option('buildtype')
+message('Build type: ' + buildtype)
 
 compiler_args = []
 linker_args = []
@@ -44,15 +45,15 @@ endif
 
 # Add additional arguments based on buildtype (debug, release, dist, etc.)
 if buildtype == 'debug'
-    add_global_arguments('-DVARA_DEBUG', language : 'c')
-endif
-
-if buildtype == 'release'
-    add_global_arguments('-DVARA_RELEASE', language : 'c')
+    add_global_arguments('-DVARA_DEBUG', language : ['c', 'objc'])
+    message('>> Debug mode enabled - VARA_DEBUG=1 defined')
+elif buildtype == 'release'
+    add_global_arguments('-DVARA_RELEASE', language : ['c', 'objc'])  
+    message('>> Release mode enabled - VARA_RELEASE=1 defined')
 endif
 
 # Add global arguments regardless of buildtype
-add_global_arguments('-DVARA_VERSION="' + meson.project_version() + '"', language : 'c')
+add_global_arguments('-DVARA_VERSION="' + meson.project_version() + '"', language : ['c', 'objc'])
 
 # Dependencies
 

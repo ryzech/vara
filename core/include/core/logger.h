@@ -8,7 +8,7 @@
 #define LOG_INFO_ENABLED 1
 
 /** Disable LOG_TRACE and LOG_DEBUG if _RELEASE */
-#ifdef VARA_RELEASE
+#if defined(VARA_RELEASE)
 #define LOG_DEBUG_ENABLED 0
 #define LOG_TRACE_ENABLED 0
 #else
