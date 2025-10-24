@@ -19,8 +19,8 @@ i32 application_main(void) {
         .position_y = 100,
         .width = 800,
         .height = 600,
-        .title = "Vara Engine - Sandbox",
-        .name = "vara_sandbox"
+        .title = "Vara Engine - Editor",
+        .name = "vara_editor"
     };
 
     VaraWindow* window = platform_window_create(&window_config);

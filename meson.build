@@ -38,7 +38,12 @@ platform_osx = (
 osx_ldflags = []
 if platform_osx
   add_languages('objc', native: false)
-  osx_ldflags += ['-Wl,-framework,Foundation', '-Wl,-framework,AppKit', '-ObjC']
+  osx_ldflags += [
+    '-Wl,-framework,Foundation',
+    '-Wl,-framework,AppKit',
+    '-Wl,-framework,IOKit',
+    '-ObjC',
+  ]
   add_project_link_arguments(osx_ldflags, language: ['objc', 'c'])
 endif
 
@@ -63,3 +68,4 @@ add_global_arguments('-Wno-gnu-zero-variadic-macro-arguments', language: ['c', '
 # Add subdirectories
 subdir('core')
 subdir('sandbox')
+subdir('editor')

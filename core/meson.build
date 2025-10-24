@@ -3,53 +3,52 @@ core_inc = include_directories('include')
 
 # Library sources
 core_sources = files(
-    'src/main.c',
-    'src/logger.c'
-    # Add more source files here
+  'src/logger.c',
+  'src/main.c',
+  # Add more source files here
 )
 
 link_args = []
 
 # Add platform-specific sources for MacOS.
 if platform_osx
-    link_args += osx_ldflags
-    core_sources += files('src/platform/platform_darwin.m')
-    core_sources += files('src/platform/platform_window_glfw.c')
+  link_args += osx_ldflags
+  core_sources += files('src/platform/platform_darwin.m')
+  core_sources += files('src/platform/platform_window_glfw.c')
 endif
 
 if platform_windows
-    core_sources += files('src/platform/platform_win32.c')
-    core_sources += files('src/platform/platform_window_glfw.c')
+  core_sources += files('src/platform/platform_win32.c')
+  core_sources += files('src/platform/platform_window_glfw.c')
 endif
 
 if platform_linux
-    core_sources += files('src/platform/platform_linux.c')
-    core_sources += files('src/platform/platform_window_glfw.c')
+  core_sources += files('src/platform/platform_linux.c')
+  core_sources += files('src/platform/platform_window_glfw.c')
 endif
 
 # Get GLFW dependency for use in windowing.
-glfw_dep = dependency('glfw3',
-    default_options: [
-        'warning_level=0',
-        'werror=false',
-    ]
+glfw_dep = dependency(
+  'glfw3',
+  default_options: [
+    'warning_level=0',
+    'werror=false',
+    'default_library=static',
+  ],
 )
 
 # Build the library
-core_lib = static_library('core',
-                          core_sources,
-                          dependencies: glfw_dep,
-                          include_directories : core_inc,
-                          install : true,
-                          install_dir : get_option('libdir')
+core_lib = static_library(
+  'core',
+  core_sources,
+  dependencies: glfw_dep,
+  include_directories: core_inc,
+  install: true,
+  install_dir: get_option('libdir'),
 )
 
 # Create a dependency object for other targets to use
-core_dep = declare_dependency(
-    link_with : core_lib,
-    include_directories : core_inc,
-    link_args : link_args
-)
+core_dep = declare_dependency(link_with: core_lib, include_directories: core_inc, link_args: link_args)
 
 # Make the dependency available to parent scope
 # This allows other subdirectories to use it

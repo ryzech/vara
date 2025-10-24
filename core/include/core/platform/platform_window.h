@@ -3,10 +3,10 @@
 #include "core/defines.h"
 
 /** */
-struct platform_window_state;
+struct VaraWindowState;
 
 /** */
-typedef struct platform_window {
+typedef struct VaraWindow {
     /** */
     u32 width;
     /** */
@@ -18,11 +18,11 @@ typedef struct platform_window {
     /** Pixel density of the given display the window is on. */
     f32 pixel_density;
     /** Window state, holds information about the given window. */
-    struct platform_window_state* platform_state;
-} platform_window;
+    struct VaraWindowState* platform_state;
+} VaraWindow;
 
 /** */
-typedef struct platform_window_config {
+typedef struct VaraWindowConfig {
     /** */
     i32 position_x;
     /** */
@@ -35,20 +35,20 @@ typedef struct platform_window_config {
     const char* title;
     /** */
     const char* name;
-} platform_window_config;
+} VaraWindowConfig;
 
-platform_window* platform_window_create(const platform_window_config* config);
+VaraWindow* platform_window_create(const VaraWindowConfig* config);
 
-void platform_window_destroy(platform_window* window);
+void platform_window_destroy(VaraWindow* window);
 
-void platform_window_set_title(platform_window* window, const char* title);
+void platform_window_set_title(VaraWindow* window, const char* title);
 
-void platform_window_set_size(platform_window* window, u32 width, u32 height);
+void platform_window_set_size(VaraWindow* window, u32 width, u32 height);
 
-void platform_window_set_position(platform_window* window, i32 x, i32 y);
+void platform_window_set_position(VaraWindow* window, i32 x, i32 y);
 
-void platform_window_get_size(platform_window* window, u32* width, u32* height);
+void platform_window_get_size(VaraWindow* window, u32* width, u32* height);
 
-void platform_window_get_position(platform_window* window, i32* x, i32* y);
+void platform_window_get_position(VaraWindow* window, i32* x, i32* y);
 
-b8 platform_window_should_close(platform_window* window);
+b8 platform_window_should_close(VaraWindow* window);

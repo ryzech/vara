@@ -3,26 +3,27 @@
 #include "core/platform/platform.h"
 #include "core/platform/platform_window.h"
 
-typedef struct platform_window_state {
+typedef struct VaraWindowState {
     GLFWwindow* window;
-} platform_window_state;
+} VaraWindowState;
 
-platform_window* platform_window_create(const platform_window_config* config) {
+VaraWindow* platform_window_create(const VaraWindowConfig* config) {
     if (!config) {
         ERROR("platform_window_create: config was NULL");
         return NULL;
     }
 
-    platform_window* window = platform_allocate(sizeof(platform_window), false);
+    DEBUG("Creating VaraWindow named('%s')", config->name);
+    VaraWindow* window = platform_allocate(sizeof(VaraWindow), false);
     if (!window) {
-        ERROR("Failed to allocate platform_window");
+        ERROR("Failed to allocate VaraWindow");
         return NULL;
     }
 
     window->platform_state =
-        platform_allocate(sizeof(platform_window_state), false);
+        platform_allocate(sizeof(VaraWindowState), false);
     if (!window->platform_state) {
-        ERROR("Failed to allocate platform_window_state");
+        ERROR("Failed to allocate VaraWindowState");
         platform_free(window, false);
         return NULL;
     }
@@ -48,11 +49,12 @@ platform_window* platform_window_create(const platform_window_config* config) {
     return window;
 }
 
-void platform_window_destroy(platform_window* window) {
+void platform_window_destroy(VaraWindow* window) {
     if (!window || !window->platform_state) {
         return;
     }
 
+    DEBUG("Destroying VaraWindow named('%s')", window->name);
     // Possibly add support for multiple windows later
     if (window->platform_state->window) {
         glfwDestroyWindow(window->platform_state->window);
@@ -63,6 +65,6 @@ void platform_window_destroy(platform_window* window) {
     window->platform_state = NULL;
 }
 
-b8 platform_window_should_close(platform_window* window) {
+b8 platform_window_should_close(VaraWindow* window) {
     return glfwWindowShouldClose(window->platform_state->window);
 }

@@ -1,10 +1,11 @@
-#include "GLFW/glfw3.h"
 #include "core/platform/platform.h"
 
 #ifdef VARA_PLATFORM_APPLE
 
+#include <GLFW/glfw3.h>
 #include <memory.h>
 #include <stdio.h>
+#include "core/logger.h"
 
 #include <mach/mach_time.h>
 
@@ -17,6 +18,18 @@
 @class ContentView;
 
 b8 platform_create(void) {
+    // TODO: should have a method on each platform to get the version, product name, and build rev (if possible.)
+    @autoreleasepool {
+        NSOperatingSystemVersion version =
+            [[NSProcessInfo processInfo] operatingSystemVersion];
+        DEBUG(
+            "Initializing platform - macOS (%d.%d.%d)",
+            version.majorVersion,
+            version.minorVersion,
+            version.patchVersion
+        );
+    }
+    DEBUG("Initializing glfw %s", glfwGetVersionString());
     if (!glfwInit()) {
         return false;
     }
