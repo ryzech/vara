@@ -1,3 +1,4 @@
+#include "GLFW/glfw3.h"
 #include "core/platform/platform.h"
 
 #ifdef VARA_PLATFORM_APPLE
@@ -15,19 +16,50 @@
 @class WindowDelegate;
 @class ContentView;
 
-void* platform_allocate(u64 size, __unused b8 aligned) { return malloc(size); }
+b8 platform_create(void) {
+    if (!glfwInit()) {
+        return false;
+    }
 
-void platform_free(void* block, __unused b8 aligned) { free(block); }
+    return true;
+}
 
-void* platform_zero_memory(void* block, u64 size) { return memset(block, 0, size); }
+void platform_destroy(void) {
+    glfwTerminate();
+}
 
-void* platform_copy_memory(void* dst, const void* src, u64 size) { return memcpy(dst, src, size); }
+b8 platform_poll_events(void) {
+    glfwPollEvents();
+    return true;
+}
 
-void* platform_set_memory(void* dst, i32 value, u64 size) { return memset(dst, value, size); }
+void* platform_allocate(u64 size, __unused b8 aligned) {
+    return malloc(size);
+}
 
-void platform_write(const char* message) { printf("%s", message); }
+void platform_free(void* block, __unused b8 aligned) {
+    free(block);
+}
 
-void platform_error(const char* message) { printf("%s", message); }
+void* platform_zero_memory(void* block, u64 size) {
+    return memset(block, 0, size);
+}
+
+void* platform_copy_memory(void* dst, const void* src, u64 size) {
+    return memcpy(dst, src, size);
+}
+
+void* platform_set_memory(void* dst, i32 value, u64 size) {
+    return memset(dst, value, size);
+}
+
+void platform_write(const char* message) {
+    printf("%s", message);
+}
+
+void platform_error(const char* message) {
+    printf("%s", message);
+}
 
 f64 platform_get_time(void) {
     mach_timebase_info_data_t clock_timebase;
@@ -35,10 +67,13 @@ f64 platform_get_time(void) {
 
     u64 mach_absolute = mach_absolute_time();
 
-    f64 seconds = (f64)mach_absolute * (f64)clock_timebase.numer / ((f64)clock_timebase.denom * 1.0e9);
+    f64 seconds = (f64)mach_absolute * (f64)clock_timebase.numer
+                  / ((f64)clock_timebase.denom * 1.0e9);
     return seconds;
 }
 
-void platform_sleep(u64 milliseconds) { usleep(milliseconds * 1000); }
+void platform_sleep(u64 milliseconds) {
+    usleep(milliseconds * 1000);
+}
 
 #endif

@@ -8,12 +8,14 @@
 #include <core/platform/platform.h>
 #include <core/platform/platform_window.h>
 
-u64 sleep_time = 5;
-
 i32 main(void) {
     DEBUG("Version: %s", VARA_VERSION);
+    if(!platform_create()) {
+      ERROR("Failed to create platform!");
+      return EXIT_FAILURE;
+    }
 
-    const vara_window_config window_config = {
+    const platform_window_config window_config = {
         .position_x = 100,
         .position_y = 100,
         .width = 800,
@@ -22,24 +24,16 @@ i32 main(void) {
         .name = "vara_sandbox"
     };
 
-    vara_window window = {0};
+    platform_window* window = platform_window_create(&window_config);
 
-    if (!platform_window_create(&window, &window_config)) {
-        ERROR("Failed to create window!");
-        return EXIT_FAILURE;
-    }
 
-    INFO("Window created successfully: %dx%d", window.width, window.height);
-
-    b8 running = true;
-    while (running) {
-        running = platform_window_poll_events();
-
-        platform_sleep(16);
+    while (!platform_window_should_close(window)) {
+        platform_poll_events();
     }
 
     INFO("Shutting down...");
-    platform_window_destroy(&window);
+    platform_window_destroy(window);
+    platform_destroy();
 
     return EXIT_SUCCESS;
 }

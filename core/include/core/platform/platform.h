@@ -3,9 +3,6 @@
 #include "core/defines.h"
 
 /** */
-struct platform_state;
-
-/** */
 typedef struct platform_config {
     /** Name of the application, may or may not be used depending on the
 	 * platform. Some platforms may use it as the window title, others may
@@ -15,17 +12,13 @@ typedef struct platform_config {
 } platform_config;
 
 /** */
-b8 platform_init(
-    struct platform_state* state,
-    const char* application_name,
-    i32 x,
-    i32 y,
-    i32 width,
-    i32 height
-);
+b8 platform_create(void);
 
 /** */
-void platform_destroy(struct platform_state* state);
+void platform_destroy(void);
+
+/** */
+b8 platform_poll_events(void);
 
 /** */
 void* platform_allocate(u64 size, b8 aligned);

@@ -11,7 +11,3 @@ wrapdb_version = 3.4-1
 
 [provide]
 glfw3 = glfw_dep
-
-[options]
-warning_level=0
-werror=false
