@@ -3,7 +3,7 @@ core_inc = include_directories('include')
 
 # Library sources
 core_sources = files(
-    'src/core.c',
+    'src/main.c',
     'src/logger.c'
     # Add more source files here
 )

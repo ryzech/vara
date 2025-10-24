@@ -1,18 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <core/core.h>
 #include <core/defines.h>
 #include <core/logger.h>
 #include <core/math/math.h>
 #include <core/platform/platform.h>
 #include <core/platform/platform_window.h>
 
-i32 main(void) {
+i32 application_main(void) {
     DEBUG("Version: %s", VARA_VERSION);
-    if(!platform_create()) {
-      ERROR("Failed to create platform!");
-      return EXIT_FAILURE;
+    if (!platform_create()) {
+        ERROR("Failed to create platform!");
+        return EXIT_FAILURE;
     }
 
     const platform_window_config window_config = {
@@ -25,7 +24,6 @@ i32 main(void) {
     };
 
     platform_window* window = platform_window_create(&window_config);
-
 
     while (!platform_window_should_close(window)) {
         platform_poll_events();
