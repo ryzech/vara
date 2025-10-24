@@ -15,12 +15,17 @@ typedef struct platform_config {
 } platform_config;
 
 /** */
-b8 platform_init(struct platform_state* state, const char* application_name, i32 x, i32 y, i32 width, i32 height);
-/** */
-void platform_destroy(struct platform_state* state);
+b8 platform_init(
+    struct platform_state* state,
+    const char* application_name,
+    i32 x,
+    i32 y,
+    i32 width,
+    i32 height
+);
 
 /** */
-b8 platform_poll_event(struct platform_state* state);
+void platform_destroy(struct platform_state* state);
 
 /** */
 void* platform_allocate(u64 size, b8 aligned);

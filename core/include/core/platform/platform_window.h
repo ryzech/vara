@@ -41,7 +41,7 @@ b8 platform_window_create(vara_window* window, const vara_window_config* config)
 
 void platform_window_destroy(vara_window* window);
 
-b8 platform_window_poll_events(vara_window* window);
+b8 platform_window_poll_events(void);
 
 void platform_window_set_title(vara_window* window, const char* title);
 

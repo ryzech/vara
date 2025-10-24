@@ -6,7 +6,7 @@
 #include "core/platform/platform.h"
 
 b8 initialize_logging(void) {
-    // Do something here.
+    //TODO: add rolling log files.
     return true;
 }
 
@@ -15,11 +15,20 @@ void shutdown_logging(void) {
 }
 
 void _log_output(const log_level level, const char* message, ...) {
+    if (!message) {
+        return;
+    }
+
     const char* level_strings[6] = {
-        "(fatal): ", "(error): ", "(warn): ", "(info): ", "(debug): ", "(trace): ",
+        "(fatal): ",
+        "(error): ",
+        "(warn): ",
+        "(info): ",
+        "(debug): ",
+        "(trace): ",
     };
 
-    char out_message[32000];
+    char out_message[4096];
     platform_set_memory(out_message, 0, sizeof(out_message));
 
     va_list arg_ptr;
@@ -27,7 +36,8 @@ void _log_output(const log_level level, const char* message, ...) {
     vsnprintf(out_message, sizeof(out_message), message, arg_ptr);
     va_end(arg_ptr);
 
-    char final_message[32000];
+    char final_message[4200];
+    platform_set_memory(final_message, 0, sizeof(final_message));
     snprintf(final_message, sizeof(final_message), "%s%s\n", level_strings[level], out_message);
     platform_write(final_message);
 }

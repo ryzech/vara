@@ -1,3 +1,4 @@
 #include "core/core.h"
 
-int main(void) {}
+int main(void) {
+}

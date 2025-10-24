@@ -57,7 +57,7 @@ void _log_output(log_level level, const char* message, ...);
  * additional parameters.
  * @param ... Additional parameters to be logged.
  */
-#define FATAL(message, ...) _log_output(LOG_LEVEL_FATAL, message, __VA_ARGS__);
+#define FATAL(message, ...) _log_output(LOG_LEVEL_FATAL, message, ##__VA_ARGS__);
 
 #ifndef ERROR
 /**
@@ -66,7 +66,7 @@ void _log_output(log_level level, const char* message, ...);
  * @param message The message to be logged.
  * @param ... Any formatted data that should be included in the log entry.
  */
-#define ERROR(message, ...) _log_output(LOG_LEVEL_ERROR, message, __VA_ARGS__);
+#define ERROR(message, ...) _log_output(LOG_LEVEL_ERROR, message, ##__VA_ARGS__);
 #endif
 
 #if LOG_WARN_ENABLED == 1
@@ -76,7 +76,7 @@ void _log_output(log_level level, const char* message, ...);
  * @param message The message to be logged.
  * @param ... Any formatted data that should be included in the log entry.
  */
-#define WARN(message, ...) _log_output(LOG_LEVEL_WARN, message, __VA_ARGS__);
+#define WARN(message, ...) _log_output(LOG_LEVEL_WARN, message, ##__VA_ARGS__);
 #else
 /**
  * @brief Logs a warning-level message. Should be used to indicate non-critial
@@ -95,7 +95,7 @@ void _log_output(log_level level, const char* message, ...);
  * @param message The message to be logged.
  * @param ... Any formatted data that should be included in the log entry.
  */
-#define INFO(message, ...) _log_output(LOG_LEVEL_INFO, message, __VA_ARGS__);
+#define INFO(message, ...) _log_output(LOG_LEVEL_INFO, message, ##__VA_ARGS__);
 #else
 /**
  * @brief Logs an info-level message. Should be used for non-erronuous
@@ -112,7 +112,7 @@ void _log_output(log_level level, const char* message, ...);
  * @param message The message to be logged.
  * @param ... Any formatted data that should be included in the log entry.
  */
-#define DEBUG(message, ...) _log_output(LOG_LEVEL_DEBUG, message, __VA_ARGS__);
+#define DEBUG(message, ...) _log_output(LOG_LEVEL_DEBUG, message, ##__VA_ARGS__);
 #else
 /**
  * @brief Logs a debug-level message. Should be used for debugging purposes.
@@ -130,7 +130,7 @@ void _log_output(log_level level, const char* message, ...);
  * @param message The message to be logged.
  * @param ... Any formatted data that should be included in the log entry.
  */
-#define TRACE(message, ...) _log_output(LOG_LEVEL_TRACE, message, __VA_ARGS__);
+#define TRACE(message, ...) _log_output(LOG_LEVEL_TRACE, message, ##__VA_ARGS__);
 #else
 /**
  * @brief Logs a trace-level message. Should be used for verbose debugging

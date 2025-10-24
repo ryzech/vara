@@ -14,22 +14,31 @@ link_args = []
 if platform_osx
     link_args += osx_ldflags
     core_sources += files('src/platform/platform_darwin.m')
-    core_sources += files('src/platform/platform_window_darwin.m')
+    core_sources += files('src/platform/platform_window_glfw.c')
 endif
 
 if platform_windows
     core_sources += files('src/platform/platform_win32.c')
-    core_sources += files('src/platform/platform_window_win32.c')
+    core_sources += files('src/platform/platform_window_glfw.c')
 endif
 
 if platform_linux
     core_sources += files('src/platform/platform_linux.c')
-    core_sources += files('src/platform/platform_window_linux.c')
+    core_sources += files('src/platform/platform_window_glfw.c')
 endif
+
+# Get GLFW dependency for use in windowing.
+glfw_dep = dependency('glfw3',
+    default_options: [
+        'warning_level=0',
+        'werror=false',
+    ]
+)
 
 # Build the library
 core_lib = static_library('core',
                           core_sources,
+                          dependencies: glfw_dep,
                           include_directories : core_inc,
                           install : true,
                           install_dir : get_option('libdir')

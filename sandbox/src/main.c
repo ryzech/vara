@@ -4,9 +4,9 @@
 #include <core/core.h>
 #include <core/defines.h>
 #include <core/logger.h>
+#include <core/math/math.h>
 #include <core/platform/platform.h>
 #include <core/platform/platform_window.h>
-#include <core/math/math.h>
 
 u64 sleep_time = 5;
 
@@ -23,9 +23,9 @@ i32 main(void) {
     };
 
     vara_window window = {0};
-    
+
     if (!platform_window_create(&window, &window_config)) {
-        ERROR("Failed to create window!", "");
+        ERROR("Failed to create window!");
         return EXIT_FAILURE;
     }
 
@@ -33,12 +33,12 @@ i32 main(void) {
 
     b8 running = true;
     while (running) {
-        running = platform_window_poll_events(&window);
-        
+        running = platform_window_poll_events();
+
         platform_sleep(16);
     }
 
-    INFO("Shutting down...", "");
+    INFO("Shutting down...");
     platform_window_destroy(&window);
 
     return EXIT_SUCCESS;

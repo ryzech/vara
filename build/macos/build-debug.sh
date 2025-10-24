@@ -3,7 +3,7 @@ set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 PROJECT_ROOT="$SCRIPT_DIR/../.."
-BUILD_DIR="$SCRIPT_DIR/debug"
+BUILD_DIR="$SCRIPT_DIR/../debug"
 
 echo "Building for macOS (Debug)..."
 
