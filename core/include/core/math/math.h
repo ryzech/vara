@@ -1,5 +1,7 @@
 #pragma once
 
+#include "core/math/types.h"
+
 #define PI            3.14159265358979323846264338327950288
 #define PI_OVER_TWO   PI / 2
 #define PI_OVER_FOUR  PI / 4

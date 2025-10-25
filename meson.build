@@ -61,6 +61,8 @@ add_global_arguments('-DVARA_VERSION="' + meson.project_version() + '"', languag
 # Ignore gnu extension error, only way to allow optional macro argument.
 # Needs tested to see if this will work on other platforms.
 add_global_arguments('-Wno-gnu-zero-variadic-macro-arguments', language: ['c', 'objc'])
+# Allow anonymous structs and unions.
+add_global_arguments('-Wno-pedantic', language: ['c', 'objc'])
 
 # Dependencies
 

@@ -6,6 +6,7 @@
 #include <core/math/math.h>
 #include <core/platform/platform.h>
 #include <core/platform/platform_window.h>
+#include "core/math/types.h"
 
 i32 application_main(void) {
     DEBUG("Version: %s", VARA_VERSION);
@@ -27,6 +28,20 @@ i32 application_main(void) {
 
     while (!platform_window_should_close(window)) {
         platform_poll_events();
+
+        // Set title to window dimensions.
+        Vector2i dimensions = platform_window_get_size(window);
+        char title_message[4096];
+        platform_zero_memory(title_message, sizeof(title_message));
+        snprintf(
+            title_message,
+            sizeof(title_message),
+            "%s | %dx%d",
+            window_config.title,
+            dimensions.x,
+            dimensions.y
+        );
+        platform_window_set_title(window, title_message);
     }
 
     INFO("Shutting down...");

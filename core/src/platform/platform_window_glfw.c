@@ -1,5 +1,7 @@
 #include "GLFW/glfw3.h"
+
 #include "core/logger.h"
+#include "core/math/types.h"
 #include "core/platform/platform.h"
 #include "core/platform/platform_window.h"
 
@@ -20,8 +22,7 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
         return NULL;
     }
 
-    window->platform_state =
-        platform_allocate(sizeof(VaraWindowState), false);
+    window->platform_state = platform_allocate(sizeof(VaraWindowState), false);
     if (!window->platform_state) {
         ERROR("Failed to allocate VaraWindowState");
         platform_free(window, false);
@@ -63,6 +64,18 @@ void platform_window_destroy(VaraWindow* window) {
 
     platform_free(window->platform_state, false);
     window->platform_state = NULL;
+}
+
+void platform_window_set_title(VaraWindow* window, const char* title) {
+    glfwSetWindowTitle(window->platform_state->window, title);
+}
+
+Vector2i platform_window_get_size(VaraWindow* window) {
+    i32 width, height;
+    glfwGetWindowSize(window->platform_state->window, &width, &height);
+    Vector2i dimensions = {.x = width, .y = height};
+
+    return dimensions;
 }
 
 b8 platform_window_should_close(VaraWindow* window) {
