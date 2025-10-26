@@ -14,18 +14,20 @@ void shutdown_logging(void) {
     // Do something here.
 }
 
-void _log_output(const log_level level, const char* message, ...) {
+void _log_output(
+    const log_level level, const char* func, const char* message, ...
+) {
     if (!message) {
         return;
     }
 
     const char* level_strings[6] = {
-        "(fatal): ",
-        "(error): ",
-        "(warn): ",
-        "(info): ",
-        "(debug): ",
-        "(trace): ",
+        "fatal",
+        "error",
+        "warn",
+        "info",
+        "debug",
+        "trace",
     };
 
     char out_message[4096];
@@ -38,6 +40,13 @@ void _log_output(const log_level level, const char* message, ...) {
 
     char final_message[4200];
     platform_set_memory(final_message, 0, sizeof(final_message));
-    snprintf(final_message, sizeof(final_message), "%s%s\n", level_strings[level], out_message);
+    snprintf(
+        final_message,
+        sizeof(final_message),
+        "%s(%s): %s\n",
+        level_strings[level],
+        func,
+        out_message
+    );
     platform_write(final_message);
 }

@@ -63,6 +63,8 @@ add_global_arguments('-DVARA_VERSION="' + meson.project_version() + '"', languag
 add_global_arguments('-Wno-gnu-zero-variadic-macro-arguments', language: ['c', 'objc'])
 # Allow anonymous structs and unions.
 add_global_arguments('-Wno-pedantic', language: ['c', 'objc'])
+# Ignore unused variables (causes problems with debug logging)
+add_global_arguments('-Wno-unused-variable', language: ['c', 'objc'])
 
 # Dependencies
 
