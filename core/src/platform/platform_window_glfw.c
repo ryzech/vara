@@ -43,6 +43,8 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
     window->platform_state->window = glfw_window;
     window->width = config->width;
     window->height = config->height;
+    window->x = config->position_x;
+    window->y = config->position_y;
     window->title = config->title;
     window->name = config->name;
     window->pixel_density = 1.0f;

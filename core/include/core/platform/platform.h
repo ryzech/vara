@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdlib.h>
+
 #include "core/defines.h"
 
 /** */
@@ -34,6 +36,9 @@ void* platform_copy_memory(void* dst, const void* src, u64 size);
 
 /** */
 void* platform_set_memory(void* block, i32 value, u64 size);
+
+/** */
+b8 platform_get_random_bytes(void* buf, size_t buf_size);
 
 /** */
 void platform_write(const char* message);

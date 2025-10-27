@@ -42,6 +42,7 @@ if platform_osx
     '-Wl,-framework,Foundation',
     '-Wl,-framework,AppKit',
     '-Wl,-framework,IOKit',
+    '-Wl,-framework,Security',
     '-ObjC',
   ]
   add_project_link_arguments(osx_ldflags, language: ['objc', 'c'])

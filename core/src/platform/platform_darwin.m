@@ -1,3 +1,4 @@
+#include <Security/SecRandom.h>
 #include "core/platform/platform.h"
 
 #ifdef VARA_PLATFORM_APPLE
@@ -64,6 +65,11 @@ void* platform_copy_memory(void* dst, const void* src, u64 size) {
 
 void* platform_set_memory(void* dst, i32 value, u64 size) {
     return memset(dst, value, size);
+}
+
+b8 platform_get_random_bytes(void* buf, size_t buf_size) {
+    int result = SecRandomCopyBytes(kSecRandomDefault, buf_size, buf);
+    return result == 0;
 }
 
 void platform_write(const char* message) {

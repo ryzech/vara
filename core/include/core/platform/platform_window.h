@@ -9,9 +9,13 @@ struct VaraWindowState;
 /** */
 typedef struct VaraWindow {
     /** */
-    i32 width;
+    u32 width;
     /** */
-    i32 height;
+    u32 height;
+    /** */
+    i32 x;
+    /** */
+    i32 y;
     /** */
     const char* title;
     /** */
@@ -29,9 +33,9 @@ typedef struct VaraWindowConfig {
     /** */
     i32 position_y;
     /** */
-    i32 width;
+    u32 width;
     /** */
-    i32 height;
+    u32 height;
     /** */
     const char* title;
     /** */
@@ -44,7 +48,7 @@ void platform_window_destroy(VaraWindow* window);
 
 void platform_window_set_title(VaraWindow* window, const char* title);
 
-void platform_window_set_size(VaraWindow* window, i32 width, i32 height);
+void platform_window_set_size(VaraWindow* window, u32 width, u32 height);
 
 void platform_window_set_position(VaraWindow* window, i32 x, i32 y);
 

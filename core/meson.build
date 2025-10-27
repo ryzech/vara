@@ -5,6 +5,7 @@ core_inc = include_directories('include')
 core_sources = files(
   'src/logger.c',
   'src/main.c',
+  'src/util/uuid.c',
   # Add more source files here
 )
 
