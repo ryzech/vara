@@ -1,18 +1,18 @@
-#include <Security/SecRandom.h>
 #include "core/platform/platform.h"
 
 #ifdef VARA_PLATFORM_APPLE
 
-#include <GLFW/glfw3.h>
-#include <memory.h>
-#include <stdio.h>
-#include "core/logger.h"
-
-#include <mach/mach_time.h>
-
 #import <Cocoa/Cocoa.h>
 #import <Foundation/Foundation.h>
 #import <QuartzCore/QuartzCore.h>
+#import <Security/SecRandom.h>
+#import <mach/mach_time.h>
+
+#include <GLFW/glfw3.h>
+#include <memory.h>
+#include <stdio.h>
+
+#include "core/logger.h"
 
 @class ApplicationDelegate;
 @class WindowDelegate;
