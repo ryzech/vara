@@ -56,4 +56,10 @@ Vector2i platform_window_get_size(VaraWindow* window);
 
 Vector2i platform_window_get_position(VaraWindow* window);
 
+void* platform_window_get_native_handle(const VaraWindow* window);
+
+void* platform_window_get_proc_address(const char* name);
+
+b8 platform_window_make_context_current(VaraWindow* window);
+
 b8 platform_window_should_close(VaraWindow* window);

@@ -29,6 +29,18 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
         return NULL;
     }
 
+#ifdef VARA_PLATFORM_APPLE
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+#else
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 0);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+#endif
+
     GLFWwindow* glfw_window = glfwCreateWindow(
         config->width, config->height, config->title, NULL, NULL
     );
@@ -78,6 +90,31 @@ Vector2i platform_window_get_size(VaraWindow* window) {
     Vector2i dimensions = {.x = width, .y = height};
 
     return dimensions;
+}
+
+void* platform_window_get_native_handle(const VaraWindow* window) {
+    if (!window) {
+        return NULL;
+    }
+
+    return window->platform_state->window;
+}
+
+void* platform_window_get_proc_address(const char* name) {
+    if (!name) {
+        return NULL;
+    }
+
+    return glfwGetProcAddress(name);
+}
+
+b8 platform_window_make_context_current(VaraWindow* window) {
+    if (!window) {
+        return false;
+    }
+
+    glfwMakeContextCurrent(window->platform_state->window);
+    return true;
 }
 
 b8 platform_window_should_close(VaraWindow* window) {

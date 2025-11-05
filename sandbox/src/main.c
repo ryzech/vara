@@ -7,6 +7,7 @@
 #include <core/math/types.h>
 #include <core/platform/platform.h>
 #include <core/platform/platform_window.h>
+#include <glad/gl.h>
 
 i32 application_main(void) {
     DEBUG("Version: %s", VARA_VERSION);
@@ -25,6 +26,14 @@ i32 application_main(void) {
     };
 
     VaraWindow* window = platform_window_create(&window_config);
+    platform_window_make_context_current(window);
+
+    i32 version = gladLoadGL((GLADloadfunc)platform_window_get_proc_address);
+    DEBUG(
+        "Loaded OpenGL: %d.%d",
+        GLAD_VERSION_MAJOR(version),
+        GLAD_VERSION_MINOR(version)
+    );
 
     while (!platform_window_should_close(window)) {
         platform_poll_events();
