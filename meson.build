@@ -72,5 +72,7 @@ add_global_arguments('-Wno-unused-variable', language: ['c', 'objc'])
 # ---
 # Add subdirectories
 subdir('core')
+subdir('renderer')
+
 subdir('sandbox')
 subdir('editor')
