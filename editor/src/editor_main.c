@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <core/defines.h>
-#include <core/logger.h>
-#include <core/math/math.h>
-#include <core/platform/platform.h>
-#include <core/platform/platform_window.h>
+#include <vara/core/defines.h>
+#include <vara/core/logger.h>
+#include <vara/core/math/math.h>
+#include <vara/core/platform/platform.h>
+#include <vara/core/platform/platform_window.h>
 
 i32 application_main(void) {
     DEBUG("Version: %s", VARA_VERSION);

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/defines.h"
-#include "core/math/types.h"
+#include "vara/core/defines.h"
+#include "vara/core/math/types.h"
 
 /** */
 struct VaraWindowState;

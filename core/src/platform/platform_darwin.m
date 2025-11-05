@@ -1,4 +1,4 @@
-#include "core/platform/platform.h"
+#include "vara/core/platform/platform.h"
 
 #ifdef VARA_PLATFORM_APPLE
 
@@ -12,7 +12,7 @@
 #include <memory.h>
 #include <stdio.h>
 
-#include "core/logger.h"
+#include "vara/core/logger.h"
 
 @class ApplicationDelegate;
 @class WindowDelegate;

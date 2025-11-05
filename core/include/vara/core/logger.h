@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/defines.h"
+#include "vara/core/defines.h"
 
 /** Indicates if warning log level is enabled. */
 #define LOG_WARN_ENABLED 1

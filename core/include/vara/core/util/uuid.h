@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/defines.h"
+#include "vara/core/defines.h"
 
 #define UUID_STRING_BYTES 37
 

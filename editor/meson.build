@@ -5,7 +5,12 @@ editor_sources = files(
 )
 
 # Build the executable
-editor_exe = executable('vara-editor', editor_sources, dependencies: core_dep, install: true)
+editor_exe = executable(
+  'vara-editor',
+  editor_sources,
+  dependencies: [core_dep, runtime_dep, opengl_dep],
+  install: true,
+)
 
 # Optional: Add an alias target
 alias_target('vara-editor', editor_exe)

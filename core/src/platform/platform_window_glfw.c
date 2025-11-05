@@ -1,9 +1,9 @@
 #include "GLFW/glfw3.h"
 
-#include "core/logger.h"
-#include "core/math/types.h"
-#include "core/platform/platform.h"
-#include "core/platform/platform_window.h"
+#include "vara/core/logger.h"
+#include "vara/core/math/types.h"
+#include "vara/core/platform/platform.h"
+#include "vara/core/platform/platform_window.h"
 
 typedef struct VaraWindowState {
     GLFWwindow* window;

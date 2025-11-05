@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/defines.h"
+#include "vara/core/defines.h"
 
 typedef union vector2_u Vector2;
 typedef union vector3_u Vector3;

@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-#include "core/platform/platform.h"
-#include "core/util/uuid.h"
+#include "vara/core/platform/platform.h"
+#include "vara/core/util/uuid.h"
 
 b8 uuid_generate(UUID* uuid) {
     if (!platform_get_random_bytes(uuid->bytes, sizeof(uuid->bytes))) {

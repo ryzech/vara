@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-#include "core/defines.h"
+#include "vara/core/defines.h"
 
 /** */
 typedef struct platform_config {

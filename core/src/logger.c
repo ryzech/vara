@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "core/logger.h"
-#include "core/platform/platform.h"
+#include "vara/core/logger.h"
+#include "vara/core/platform/platform.h"
 
 b8 initialize_logging(void) {
     //TODO: add rolling log files.
