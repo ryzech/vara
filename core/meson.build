@@ -39,7 +39,7 @@ glfw_dep = dependency(
 
 # Build the library
 core_lib = static_library(
-  'core',
+  'vara-core',
   core_sources,
   dependencies: glfw_dep,
   include_directories: core_inc,

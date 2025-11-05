@@ -6,11 +6,11 @@ sandbox_sources = files(
 
 # Build the executable
 sandbox_exe = executable(
-  'sandbox',
+  'vara-sandbox',
   sandbox_sources,
   dependencies: [core_dep, runtime_dep, opengl_dep],
   install: true,
 )
 
 # Optional: Add an alias target
-alias_target('sandbox', sandbox_exe)
+alias_target('vara-sandbox', sandbox_exe)

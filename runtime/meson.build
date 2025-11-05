@@ -11,7 +11,7 @@ link_args = []
 
 # Build the library
 runtime_lib = static_library(
-  'runtime',
+  'vara-runtime',
   runtime_sources,
   dependencies: core_dep,
   include_directories: runtime_inc,
@@ -25,4 +25,3 @@ runtime_dep = declare_dependency(link_with: runtime_lib, include_directories: ru
 # Make the dependency available to parent scope
 # This allows other subdirectories to use it
 set_variable('runtime_dep', runtime_dep)
-set_variable('runtime_inc_path', runtime_inc)

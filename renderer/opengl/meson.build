@@ -11,10 +11,10 @@ link_args = []
 
 # Build the library
 opengl_lib = static_library(
-  'opengl-renderer',
+  'vara-opengl-renderer',
   opengl_sources,
-  dependencies: core_dep,
-  include_directories: [opengl_inc, runtime_inc_path],
+  dependencies: [core_dep, runtime_dep],
+  include_directories: opengl_inc,
   install: true,
   install_dir: get_option('libdir'),
 )
