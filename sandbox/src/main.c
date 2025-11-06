@@ -26,13 +26,17 @@ i32 application_main(void) {
     };
 
     VaraWindow* window = platform_window_create(&window_config);
+    DEBUG("Making context current.");
     platform_window_make_context_current(window);
 
+    DEBUG("Loading OpenGL");
     i32 version = gladLoadGL((GLADloadfunc)platform_window_get_proc_address);
     DEBUG(
-        "Loaded OpenGL: %d.%d",
+        "Loaded OpenGL: %d.%d | %s | %s",
         GLAD_VERSION_MAJOR(version),
-        GLAD_VERSION_MINOR(version)
+        GLAD_VERSION_MINOR(version),
+        glGetString(GL_VENDOR),
+        glGetString(GL_RENDERER)
     );
 
     while (!platform_window_should_close(window)) {

@@ -23,10 +23,10 @@ void platform_destroy(void);
 b8 platform_poll_events(void);
 
 /** */
-void* platform_allocate(u64 size, b8 aligned);
+void* platform_allocate(u64 size);
 
 /** */
-void platform_free(void* block, b8 aligned);
+void platform_free(void* block);
 
 /** */
 void* platform_zero_memory(void* block, u64 size);

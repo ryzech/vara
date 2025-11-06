@@ -47,11 +47,11 @@ b8 platform_poll_events(void) {
     return true;
 }
 
-void* platform_allocate(u64 size, __unused b8 aligned) {
+void* platform_allocate(u64 size) {
     return malloc(size);
 }
 
-void platform_free(void* block, __unused b8 aligned) {
+void platform_free(void* block) {
     free(block);
 }
 

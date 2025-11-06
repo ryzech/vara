@@ -16,18 +16,23 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
     }
 
     DEBUG("Creating VaraWindow named('%s')", config->name);
-    VaraWindow* window = platform_allocate(sizeof(VaraWindow), false);
+    VaraWindow* window = platform_allocate(sizeof(VaraWindow));
+    DEBUG("Allocated window.");
     if (!window) {
         ERROR("Failed to allocate VaraWindow");
         return NULL;
     }
 
-    window->platform_state = platform_allocate(sizeof(VaraWindowState), false);
+    DEBUG("Allocating window state");
+    window->platform_state = platform_allocate(sizeof(VaraWindowState));
+    DEBUG("Allocated window state");
     if (!window->platform_state) {
         ERROR("Failed to allocate VaraWindowState");
-        platform_free(window, false);
+        platform_free(window);
         return NULL;
     }
+
+    glfwDefaultWindowHints();
 
 #ifdef VARA_PLATFORM_APPLE
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -35,20 +40,21 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 #else
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 0);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 #endif
 
+    DEBUG("Creating glfw window");
     GLFWwindow* glfw_window = glfwCreateWindow(
         config->width, config->height, config->title, NULL, NULL
     );
+    DEBUG("Created glfw window.");
 
     if (!glfw_window) {
         ERROR("Failed to create GLFW window.");
-        platform_free(window->platform_state, false);
-        platform_free(window, false);
+        platform_free(window->platform_state);
+        platform_free(window);
         return NULL;
     }
 
@@ -76,7 +82,7 @@ void platform_window_destroy(VaraWindow* window) {
         window->platform_state->window = NULL;
     }
 
-    platform_free(window->platform_state, false);
+    platform_free(window->platform_state);
     window->platform_state = NULL;
 }
 

@@ -46,6 +46,9 @@ if platform_osx
     '-ObjC',
   ]
   add_project_link_arguments(osx_ldflags, language: ['objc', 'c'])
+elif platform_linux
+  linker_args += '-lm'
+  add_project_link_arguments(linker_args, language: 'c')
 endif
 
 # Add additional arguments based on buildtype (debug, release, dist, etc.)
