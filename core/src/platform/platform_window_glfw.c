@@ -17,15 +17,12 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
 
     DEBUG("Creating VaraWindow named('%s')", config->name);
     VaraWindow* window = platform_allocate(sizeof(VaraWindow));
-    DEBUG("Allocated window.");
     if (!window) {
         ERROR("Failed to allocate VaraWindow");
         return NULL;
     }
 
-    DEBUG("Allocating window state");
     window->platform_state = platform_allocate(sizeof(VaraWindowState));
-    DEBUG("Allocated window state");
     if (!window->platform_state) {
         ERROR("Failed to allocate VaraWindowState");
         platform_free(window);
@@ -48,11 +45,9 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
 
 #endif
 
-    DEBUG("Creating glfw window");
     GLFWwindow* glfw_window = glfwCreateWindow(
         config->width, config->height, config->title, NULL, NULL
     );
-    DEBUG("Created glfw window.");
 
     if (!glfw_window) {
         ERROR("Failed to create GLFW window.");
