@@ -4,6 +4,7 @@ opengl_inc = include_directories('include')
 # Library sources
 opengl_sources = files(
   'src/gl.c',
+  'src/renderer_opengl_backend.c',
   # Add more source files here
 )
 

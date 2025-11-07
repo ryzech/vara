@@ -8,6 +8,7 @@
 #include <vara/core/math/types.h>
 #include <vara/core/platform/platform.h>
 #include <vara/core/platform/platform_window.h>
+#include <vara/renderer/renderer.h>
 
 i32 application_main(void) {
     DEBUG("Version: %s", VARA_VERSION);
@@ -26,14 +27,10 @@ i32 application_main(void) {
     };
 
     VaraWindow* window = platform_window_create(&window_config);
-    platform_window_make_context_current(window);
+    RendererInstance* instance = renderer_opengl_init();
 
-    i32 version = gladLoadGL((GLADloadfunc)platform_window_get_proc_address);
-    DEBUG(
-        "Loaded OpenGL: %s | %s",
-        glGetString(GL_VERSION),
-        glGetString(GL_RENDERER)
-    );
+    platform_window_make_context_current(window);
+    renderer_create(instance);
     platform_window_set_visible(window, true);
 
     while (!platform_window_should_close(window)) {
@@ -46,15 +43,17 @@ i32 application_main(void) {
         snprintf(
             title_message,
             sizeof(title_message),
-            "%s | %dx%d",
+            "%s | %dx%d - %s",
             window_config.title,
             dimensions.x,
-            dimensions.y
+            dimensions.y,
+            instance->name
         );
         platform_window_set_title(window, title_message);
     }
 
     INFO("Shutting down...");
+    renderer_destroy(instance);
     platform_window_destroy(window);
     platform_destroy();
 
