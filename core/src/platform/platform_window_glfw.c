@@ -32,7 +32,9 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
         return NULL;
     }
 
+    // TODO: need to support more than just opengl
     glfwDefaultWindowHints();
+    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
 #ifdef VARA_PLATFORM_APPLE
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -40,9 +42,10 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 #else
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
+
 #endif
 
     DEBUG("Creating glfw window");
@@ -121,6 +124,14 @@ b8 platform_window_make_context_current(VaraWindow* window) {
 
     glfwMakeContextCurrent(window->platform_state->window);
     return true;
+}
+
+void platform_window_set_visible(VaraWindow* window, b8 visible) {
+    if (visible) {
+        glfwShowWindow(window->platform_state->window);
+    } else {
+        glfwHideWindow(window->platform_state->window);
+    }
 }
 
 b8 platform_window_should_close(VaraWindow* window) {

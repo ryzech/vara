@@ -38,6 +38,7 @@ i32 application_main(void) {
         glGetString(GL_VENDOR),
         glGetString(GL_RENDERER)
     );
+    platform_window_set_visible(window, true);
 
     while (!platform_window_should_close(window)) {
         platform_poll_events();

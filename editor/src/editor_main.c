@@ -24,6 +24,7 @@ i32 application_main(void) {
     };
 
     VaraWindow* window = platform_window_create(&window_config);
+    platform_window_set_visible(window, true);
 
     while (!platform_window_should_close(window)) {
         platform_poll_events();
