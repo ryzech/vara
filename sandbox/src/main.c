@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <glad/gl.h>
 #include <vara/core/defines.h>
 #include <vara/core/logger.h>
 #include <vara/core/math/math.h>

@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# Set deployment target to macOS 11.0 (Big Sur) for compatibility.
+export MACOSX_DEPLOYMENT_TARGET=11.0
+
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 PROJECT_ROOT="$SCRIPT_DIR/../.."
 BUILD_DIR="$SCRIPT_DIR/../debug"

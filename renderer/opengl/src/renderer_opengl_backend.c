@@ -6,7 +6,6 @@
 #include <vara/renderer/renderer.h>
 
 static b8 renderer_opengl_create(void) {
-    DEBUG("Creating OpenGL renderer backend.");
     i32 version = gladLoadGL((GLADloadfunc)platform_window_get_proc_address);
     DEBUG(
         "Loaded OpenGL: %s | %s",
@@ -17,7 +16,6 @@ static b8 renderer_opengl_create(void) {
 }
 
 static void renderer_opengl_destroy(void) {
-    DEBUG("Destroying OpenGL renderer backend.");
 }
 
 static RendererInstance opengl_instance = {
@@ -27,5 +25,6 @@ static RendererInstance opengl_instance = {
 };
 
 RendererInstance* renderer_opengl_init(void) {
+    DEBUG("Creating RendererInstance named('%s')", opengl_instance.name);
     return &opengl_instance;
 }
