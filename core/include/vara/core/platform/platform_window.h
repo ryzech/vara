@@ -2,6 +2,7 @@
 
 #include "vara/core/defines.h"
 #include "vara/core/math/types.h"
+#include "vara/core/platform/platform_graphics_types.h"
 
 /** */
 struct VaraWindowState;
@@ -9,19 +10,17 @@ struct VaraWindowState;
 /** */
 typedef struct VaraWindow {
     /** */
-    u32 width;
+    u32 width, height;
     /** */
-    u32 height;
-    /** */
-    i32 x;
-    /** */
-    i32 y;
+    i32 x, y;
     /** */
     const char* title;
     /** */
     const char* name;
     /** Pixel density of the given display the window is on. */
     f32 pixel_density;
+    /** Type of graphics API to use (decides whether or not to create a window context). */
+    PlatformGraphicsType graphics_type;
     /** Window state, holds information about the given window. */
     struct VaraWindowState* platform_state;
 } VaraWindow;
@@ -29,17 +28,15 @@ typedef struct VaraWindow {
 /** */
 typedef struct VaraWindowConfig {
     /** */
-    i32 position_x;
+    i32 position_x, position_y;
     /** */
-    i32 position_y;
-    /** */
-    u32 width;
-    /** */
-    u32 height;
+    u32 width, height;
     /** */
     const char* title;
     /** */
     const char* name;
+    /** Type of graphics API to use (decides whether or not to create a window context). */
+    PlatformGraphicsType graphics_type;
 } VaraWindowConfig;
 
 VaraWindow* platform_window_create(const VaraWindowConfig* config);
@@ -61,6 +58,8 @@ void* platform_window_get_native_handle(const VaraWindow* window);
 void* platform_window_get_proc_address(const char* name);
 
 b8 platform_window_make_context_current(VaraWindow* window);
+
+void platform_window_swap_buffers(VaraWindow* window);
 
 void platform_window_set_visible(VaraWindow* window, b8 visible);
 

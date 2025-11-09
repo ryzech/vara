@@ -3,6 +3,7 @@
 #include "vara/core/logger.h"
 #include "vara/core/math/types.h"
 #include "vara/core/platform/platform.h"
+#include "vara/core/platform/platform_graphics_types.h"
 #include "vara/core/platform/platform_window.h"
 
 typedef struct VaraWindowState {
@@ -29,21 +30,24 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
         return NULL;
     }
 
-    // TODO: need to support more than just opengl
     glfwDefaultWindowHints();
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
+    if (config->graphics_type == GRAPHICS_TYPE_OPENGL) {
 #ifdef VARA_PLATFORM_APPLE
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 #else
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
 
 #endif
+    } else {
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    }
 
     GLFWwindow* glfw_window = glfwCreateWindow(
         config->width, config->height, config->title, NULL, NULL
@@ -64,6 +68,7 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
     window->title = config->title;
     window->name = config->name;
     window->pixel_density = 1.0f;
+    window->graphics_type = config->graphics_type;
 
     return window;
 }
@@ -113,12 +118,20 @@ void* platform_window_get_proc_address(const char* name) {
 }
 
 b8 platform_window_make_context_current(VaraWindow* window) {
-    if (!window) {
+    if (!window || window->graphics_type != GRAPHICS_TYPE_OPENGL) {
         return false;
     }
 
     glfwMakeContextCurrent(window->platform_state->window);
     return true;
+}
+
+void platform_window_swap_buffers(VaraWindow* window) {
+    if (!window || window->graphics_type != GRAPHICS_TYPE_OPENGL) {
+        return;
+    }
+
+    glfwSwapBuffers(window->platform_state->window);
 }
 
 void platform_window_set_visible(VaraWindow* window, b8 visible) {

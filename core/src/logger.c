@@ -6,7 +6,7 @@
 #include "vara/core/platform/platform.h"
 
 b8 initialize_logging(void) {
-    //TODO: add rolling log files.
+    // TODO: add rolling log files.
     return true;
 }
 
