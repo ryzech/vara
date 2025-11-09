@@ -4,6 +4,7 @@ runtime_inc = include_directories('include')
 # Library sources
 runtime_sources = files(
   'src/application.c',
+  'src/renderer_frontend.c',
   # Add more source files here
 )
 

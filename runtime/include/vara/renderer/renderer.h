@@ -23,31 +23,18 @@ typedef struct RendererInstance {
     RendererInstanceVT vt;
 } RendererInstance;
 
-/* Helper function to call the instances function pointer. */
-static inline b8 renderer_create(RendererInstance* instance) {
-    return instance->vt.renderer_create();
-}
+RendererInstance* renderer_create(VaraWindow* window);
+
+void renderer_destroy(RendererInstance* instance);
 
 /* Helper function to call the instances function pointer. */
-static inline void renderer_clear(RendererInstance* instance) {
-    return instance->vt.renderer_clear();
-}
+void renderer_clear(RendererInstance* instance);
 
 /* Helper function to call the instances function pointer. */
-static inline void
-renderer_clear_color(RendererInstance* instance, Vector4 color) {
-    return instance->vt.renderer_clear_color(color);
-}
+void renderer_clear_color(RendererInstance* instance, Vector4 color);
 
 /* Helper function to call the instances function pointer. */
-static inline void renderer_present(RendererInstance* instance) {
-    return instance->vt.renderer_present();
-}
-
-/* Helper function to call the instances function pointer. */
-static inline void renderer_destroy(RendererInstance* instance) {
-    return instance->vt.renderer_destroy();
-}
+void renderer_present(RendererInstance* instance);
 
 /* Exported function to initialize a specific API, returns the instance
  * with the implementated function pointers. */
