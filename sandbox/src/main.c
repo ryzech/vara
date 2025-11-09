@@ -67,6 +67,7 @@ i32 application_main(void) {
     INFO("Shutting down...");
     renderer_destroy(instance);
     platform_window_destroy(window);
+    platform_poll_events();
     platform_destroy();
 
     return EXIT_SUCCESS;

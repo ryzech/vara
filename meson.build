@@ -5,7 +5,7 @@ project(
   license: 'MIT',
   meson_version: '>=1.8.0',
   default_options: [
-    'c_std=c99',
+    'c_std=gnu99',
     'warning_level=3',
     'werror=true',
   ],
@@ -47,7 +47,10 @@ if platform_osx
   ]
   add_project_link_arguments(osx_ldflags, language: ['objc', 'c'])
 elif platform_linux
-  linker_args += '-lm'
+  linker_args += [
+    '-lm',
+    '-lrt',
+  ]
   add_project_link_arguments(linker_args, language: 'c')
 endif
 

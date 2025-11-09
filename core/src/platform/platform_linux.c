@@ -1,10 +1,11 @@
-#include <stdio.h>
 #include "vara/core/platform/platform.h"
 
 #ifdef VARA_PLATFORM_LINUX
 
 #include <GLFW/glfw3.h>
 #include <memory.h>
+#include <stdio.h>
+#include <time.h>
 
 #include "vara/core/defines.h"
 #include "vara/core/logger.h"
@@ -53,6 +54,14 @@ void platform_write(const char* message) {
 
 void platform_error(const char* message) {
     printf("%s", message);
+}
+
+f64 platform_get_time() {
+    struct timespec time;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &time);
+
+    f64 seconds = (f64)time.tv_sec + (f64)time.tv_nsec / 1.0e9;
+    return seconds;
 }
 
 #endif
