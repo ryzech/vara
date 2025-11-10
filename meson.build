@@ -1,11 +1,12 @@
 project(
   'vara-engine',
-  'c',
+  ['c', 'cpp'],
   version: '0.1.0',
   license: 'MIT',
   meson_version: '>=1.8.0',
   default_options: [
     'c_std=gnu99',
+    'cpp_std=gnu++17',
     'warning_level=3',
     'werror=true',
   ],
@@ -71,9 +72,17 @@ add_global_arguments('-Wno-gnu-zero-variadic-macro-arguments', language: ['c', '
 # Allow anonymous structs and unions.
 add_global_arguments('-Wno-pedantic', language: ['c', 'objc'])
 # Ignore unused variables (causes problems with debug logging)
-add_global_arguments('-Wno-unused-variable', language: ['c', 'objc'])
+add_global_arguments('-Wno-unused-variable', language: ['c', 'cpp', 'objc'])
 
 # Dependencies
+default_dep_options = ['werror=false', 'warning_level=0']
+
+glfw_dep = dependency(
+  'glfw3',
+  static: true,
+  required: true,
+  default_options: default_dep_options,
+)
 
 # ---
 # Add subdirectories

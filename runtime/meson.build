@@ -21,7 +21,11 @@ runtime_lib = static_library(
 )
 
 # Create a dependency object for other targets to use
-runtime_dep = declare_dependency(link_with: runtime_lib, include_directories: runtime_inc, link_args: link_args)
+runtime_dep = declare_dependency(
+  link_with: runtime_lib,
+  include_directories: runtime_inc,
+  link_args: link_args,
+)
 
 # Make the dependency available to parent scope
 # This allows other subdirectories to use it

@@ -27,16 +27,6 @@ if platform_linux
   core_sources += files('src/platform/platform_window_glfw.c')
 endif
 
-# Get GLFW dependency for use in windowing.
-glfw_dep = dependency(
-  'glfw3',
-  default_options: [
-    'warning_level=0',
-    'werror=false',
-    'default_library=static',
-  ],
-)
-
 # Build the library
 core_lib = static_library(
   'vara-core',
