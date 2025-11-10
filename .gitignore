@@ -3,6 +3,7 @@
 bin/
 build/**/release/
 build/**/debug/
+build-test/
 buildDir/
 subprojects/*
 !subprojects/*.wrap

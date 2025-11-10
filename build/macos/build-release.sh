@@ -3,6 +3,7 @@ set -e
 
 # Set deployment target to macOS 11.0 (Big Sur) for compatibility.
 export MACOSX_DEPLOYMENT_TARGET=11.0
+export CMAKE_OSX_DEPLOYMENT_TARGET=11.0
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 PROJECT_ROOT="$SCRIPT_DIR/../.."
@@ -17,21 +18,11 @@ if [ "$1" = "clean" ]; then
 fi
 
 # Setup or reconfigure build directory
-if [ -d "$BUILD_DIR" ]; then
-    echo "Build directory exists, reconfiguring..."
-    meson setup "$BUILD_DIR" "$PROJECT_ROOT" --reconfigure \
-        --buildtype=release \
-        --optimization=3 \
-        --strip
-else
-    echo "Setting up new build directory..."
-    meson setup "$BUILD_DIR" "$PROJECT_ROOT" \
-        --buildtype=release \
-        --optimization=3 \
-        --strip
-fi
+echo "Configuring build directory..."
+cmake -S "$PROJECT_ROOT" -B "$BUILD_DIR" -DCMAKE_BUILD_TYPE=Release
 
 # Build
-meson compile -C "$BUILD_DIR" -j $(sysctl -n hw.ncpu)
+echo "Compiling targets..."
+cmake --build "$BUILD_DIR" --parallel $(sysctl -n hw.ncpu)
 
 echo "Release build complete! Binaries in: $BUILD_DIR"

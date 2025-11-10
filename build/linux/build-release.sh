@@ -14,21 +14,11 @@ if [ "$1" = "clean" ]; then
 fi
 
 # Setup or reconfigure build directory
-if [ -d "$BUILD_DIR" ]; then
-    echo "Build directory exists, reconfiguring..."
-    meson setup "$BUILD_DIR" "$PROJECT_ROOT" --reconfigure \
-        --buildtype=release \
-        --optimization=3 \
-        --strip
-else
-    echo "Setting up new build directory..."
-    meson setup "$BUILD_DIR" "$PROJECT_ROOT" \
-        --buildtype=release \
-        --optimization=3 \
-        --strip
-fi
+echo "Configuring build directory..."
+cmake -S "$PROJECT_ROOT" -B "$BUILD_DIR" -DCMAKE_BUILD_TYPE=Release
 
 # Build
-meson compile -C "$BUILD_DIR" -j $(nproc)
+echo "Compiling targets..."
+cmake --build "$BUILD_DIR" --parallel $(nproc)
 
 echo "Release build complete! Binaries in: $BUILD_DIR"

@@ -1,4 +1,0 @@
-# Dependencies
-
-subdir('opengl')
-
