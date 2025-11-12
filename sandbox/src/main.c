@@ -10,6 +10,20 @@
 #include <vara/core/platform/platform_graphics_types.h>
 #include <vara/core/platform/platform_window.h>
 #include <vara/renderer/renderer.h>
+#include <vara/renderer/shader.h>
+
+const char* vertex_src = "#version 330 core\n"
+                         "layout (location = 0) in vec3 aPos;\n"
+                         "void main() {\n"
+                         "    gl_Position = vec4(aPos, 1.0);\n"
+                         "}\n";
+
+const char* fragment_src = "#version 330 core\n"
+                           "out vec4 FragColor;\n"
+                           "uniform vec4 uColor;\n"
+                           "void main() {\n"
+                           "    FragColor = uColor;\n"
+                           "}\n";
 
 i32 application_main(void) {
     DEBUG("Version: %s", VARA_VERSION);
@@ -19,7 +33,8 @@ i32 application_main(void) {
     }
 
     const VaraConfig config = {
-        .graphics_type = GRAPHICS_TYPE_OPENGL, .application_name = "vara_sandbox"
+        .graphics_type = GRAPHICS_TYPE_OPENGL,
+        .application_name = "vara_sandbox"
     };
 
     const VaraWindowConfig window_config = {
@@ -42,6 +57,19 @@ i32 application_main(void) {
         return EXIT_FAILURE;
     }
 
+    ShaderSource sources[] = {
+        {.stage = SHADER_STAGE_VERTEX, .source = vertex_src},
+        {.stage = SHADER_STAGE_FRAGMENT, .source = fragment_src},
+    };
+
+    ShaderConfig shader_config = {
+        .name = "basic_shader",
+        .stages = sources,
+        .stage_count = 2,
+    };
+
+    Shader* shader = shader_create(instance, &shader_config);
+
     platform_window_set_visible(window, true);
 
     Vector4 clear_color = {.x = 0.0, .y = 0.5, .z = 0.5, .w = 1.0};
@@ -58,6 +86,7 @@ i32 application_main(void) {
     }
 
     INFO("Shutting down...");
+    shader_destroy(shader);
     renderer_destroy(instance);
     platform_window_destroy(window);
     platform_poll_events();

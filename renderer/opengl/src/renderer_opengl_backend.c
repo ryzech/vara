@@ -15,6 +15,7 @@ static OpenGLRendererState renderer_state;
 
 static b8 renderer_opengl_create(void) {
     i32 version = gladLoadGL((GLADloadfunc)platform_window_get_proc_address);
+    glEnable(GL_DEBUG_OUTPUT);
     DEBUG(
         "Loaded OpenGL: %s | %s",
         glGetString(GL_VERSION),

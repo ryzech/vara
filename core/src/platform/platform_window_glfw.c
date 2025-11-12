@@ -1,4 +1,4 @@
-#include "GLFW/glfw3.h"
+#include <GLFW/glfw3.h>
 
 #include "vara/core/logger.h"
 #include "vara/core/math/types.h"

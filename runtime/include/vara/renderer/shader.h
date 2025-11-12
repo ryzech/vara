@@ -16,14 +16,14 @@ typedef struct ShaderSource {
     const char* source;
 } ShaderSource;
 
-typedef struct ShaderInfo {
+typedef struct ShaderConfig {
     const char* name;
     ShaderSource* stages;
     u16 stage_count;
-} ShaderInfo;
+} ShaderConfig;
 
 typedef struct ShaderVT {
-    b8 (*shadet_create)(void);
+    b8 (*shader_create)(ShaderConfig* config);
     void (*shader_destroy)(void);
     void (*shader_bind)(void);
     void (*shader_unbind)(void);
@@ -34,7 +34,7 @@ typedef struct Shader {
     ShaderVT vt;
 } Shader;
 
-Shader* shader_create(RendererInstance instance, char* shader);
+Shader* shader_create(RendererInstance* instance, ShaderConfig* config);
 
 void shader_destroy(Shader* shader);
 
