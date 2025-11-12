@@ -5,6 +5,7 @@
 #include <vara/core/math/types.h>
 #include <vara/core/platform/platform_window.h>
 #include <vara/renderer/renderer.h>
+#include "vara/core/platform/platform.h"
 
 typedef struct OpenGLRendererState {
     VaraWindow* window;
@@ -39,21 +40,20 @@ static void renderer_opengl_present(void) {
 static void renderer_opengl_destroy(void) {
 }
 
-static RendererInstance opengl_instance = {
-    .name = "OpenGL",
-    .vt = {
-        .renderer_create = renderer_opengl_create,
-        .renderer_clear = renderer_opengl_clear,
-        .renderer_clear_color = renderer_opengl_clear_color,
-        .renderer_present = renderer_opengl_present,
-        .renderer_destroy = renderer_opengl_destroy
-    }
-};
-
 RendererInstance* renderer_opengl_init(VaraWindow* window) {
-    DEBUG("Creating RendererInstance named('%s')", opengl_instance.name);
-
     renderer_state.window = window;
 
-    return &opengl_instance;
+    RendererInstance* opengl_instance =
+        platform_allocate(sizeof(RendererInstance));
+    opengl_instance->name = "OpenGL";
+    opengl_instance->renderer_type = renderer_state.window->graphics_type;
+    opengl_instance->vt.renderer_create = renderer_opengl_create;
+    opengl_instance->vt.renderer_clear = renderer_opengl_clear;
+    opengl_instance->vt.renderer_clear_color = renderer_opengl_clear_color;
+    opengl_instance->vt.renderer_present = renderer_opengl_present;
+    opengl_instance->vt.renderer_destroy = renderer_opengl_destroy;
+
+    DEBUG("Creating RendererInstance named('%s')", opengl_instance->name);
+
+    return opengl_instance;
 }
