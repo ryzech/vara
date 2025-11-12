@@ -25,7 +25,7 @@ Shader* shader_create(RendererInstance* instance, ShaderConfig* config) {
         }
     }
 
-    if (!shader->vt.shader_create(config)) {
+    if (!shader->vt.shader_create(shader, config)) {
         ERROR("Failed to create shader: %s", config->name);
         platform_free(shader);
         return NULL;
@@ -36,19 +36,19 @@ Shader* shader_create(RendererInstance* instance, ShaderConfig* config) {
 
 void shader_destroy(Shader* shader) {
     if (shader && shader->vt.shader_destroy) {
-        shader->vt.shader_destroy();
+        shader->vt.shader_destroy(shader);
         platform_free(shader);
     }
 }
 
 void shader_bind(Shader* shader) {
     if (shader && shader->vt.shader_bind) {
-        shader->vt.shader_bind();
+        shader->vt.shader_bind(shader);
     }
 }
 
 void shader_unbind(Shader* shader) {
     if (shader && shader->vt.shader_unbind) {
-        shader->vt.shader_unbind();
+        shader->vt.shader_unbind(shader);
     }
 }

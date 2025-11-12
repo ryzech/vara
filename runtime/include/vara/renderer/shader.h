@@ -23,15 +23,16 @@ typedef struct ShaderConfig {
 } ShaderConfig;
 
 typedef struct ShaderVT {
-    b8 (*shader_create)(ShaderConfig* config);
-    void (*shader_destroy)(void);
-    void (*shader_bind)(void);
-    void (*shader_unbind)(void);
+    b8 (*shader_create)(struct Shader* shader, ShaderConfig* config);
+    void (*shader_destroy)(struct Shader* shader);
+    void (*shader_bind)(struct Shader* shader);
+    void (*shader_unbind)(struct Shader* shader);
 } ShaderVT;
 
 typedef struct Shader {
     const char* name;
     ShaderVT vt;
+    void* backend_data;
 } Shader;
 
 Shader* shader_create(RendererInstance* instance, ShaderConfig* config);
