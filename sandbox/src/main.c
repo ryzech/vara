@@ -20,9 +20,8 @@ const char* vertex_src = "#version 330 core\n"
 
 const char* fragment_src = "#version 330 core\n"
                            "out vec4 FragColor;\n"
-                           "uniform vec4 uColor;\n"
                            "void main() {\n"
-                           "    FragColor = uColor;\n"
+                           "    FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
                            "}\n";
 
 i32 application_main(void) {
@@ -72,15 +71,13 @@ i32 application_main(void) {
 
     platform_window_set_visible(window, true);
 
-    Vector4 clear_color = {.x = 0.0, .y = 0.5, .z = 0.5, .w = 1.0};
-
     while (!platform_window_should_close(window)) {
         platform_poll_events();
-        renderer_clear_color(instance, clear_color);
         renderer_clear(instance);
 
-        // TODO: add sin to internal math header.
-        clear_color.x = 0.5 + 0.5 * (sinf(platform_get_time()));
+        shader_bind(shader);
+
+        shader_unbind(shader);
 
         renderer_present(instance);
     }

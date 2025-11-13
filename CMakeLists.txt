@@ -28,8 +28,6 @@ add_compile_options(
     -Wno-missing-field-initializers
     -Wno-sign-compare
     -Wno-visibility
-    -Wno-incompatible-function-pointer-types
-    -Wno-incompatible-pointer-types
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

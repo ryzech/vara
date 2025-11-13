@@ -22,6 +22,8 @@ typedef struct ShaderConfig {
     u16 stage_count;
 } ShaderConfig;
 
+struct Shader;
+
 typedef struct ShaderVT {
     b8 (*shader_create)(struct Shader* shader, ShaderConfig* config);
     void (*shader_destroy)(struct Shader* shader);

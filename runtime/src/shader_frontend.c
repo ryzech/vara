@@ -26,7 +26,7 @@ Shader* shader_create(RendererInstance* instance, ShaderConfig* config) {
     }
 
     if (!shader->vt.shader_create(shader, config)) {
-        ERROR("Failed to create shader: %s", config->name);
+        ERROR("Failed to create shader named('%s')", config->name);
         platform_free(shader);
         return NULL;
     }

@@ -36,7 +36,7 @@ static void shader_opengl_destroy(Shader* shader) {
 
     OpenGLShaderState* shader_state = (OpenGLShaderState*)shader->backend_data;
     if (shader_state->shader_program) {
-        glDeleteProgram(shader_state->shader_program);
+        shader_compiler_opengl_delete(shader_state->shader_program);
         shader_state->shader_program = 0;
     }
 
@@ -68,6 +68,5 @@ Shader* shader_opengl_init(ShaderConfig* config) {
     opengl_shader->vt.shader_bind = shader_opengl_bind;
     opengl_shader->vt.shader_unbind = shader_opengl_unbind;
 
-    DEBUG("Creating Shader named('%s')", opengl_shader->name);
     return opengl_shader;
 }
