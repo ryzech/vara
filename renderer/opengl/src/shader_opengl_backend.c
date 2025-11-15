@@ -34,7 +34,7 @@ static void shader_opengl_destroy(Shader* shader) {
         return;
     }
 
-    OpenGLShaderState* shader_state = (OpenGLShaderState*)shader->backend_data;
+    OpenGLShaderState* shader_state = shader->backend_data;
     if (shader_state->shader_program) {
         shader_compiler_opengl_delete(shader_state->shader_program);
         shader_state->shader_program = 0;
@@ -49,7 +49,7 @@ static void shader_opengl_bind(Shader* shader) {
         return;
     }
 
-    OpenGLShaderState* shader_state = (OpenGLShaderState*)shader->backend_data;
+    OpenGLShaderState* shader_state = shader->backend_data;
     glUseProgram(shader_state->shader_program);
 }
 

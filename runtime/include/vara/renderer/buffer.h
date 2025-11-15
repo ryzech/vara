@@ -38,7 +38,7 @@ typedef struct VertexAttribute {
 typedef struct VertexLayout {
     VertexAttribute* attributes;
     u32 attribute_count;
-    u32 stride;
+    i32 stride;
 } VertexLayout;
 
 typedef struct BufferConfig {
@@ -46,7 +46,7 @@ typedef struct BufferConfig {
     BufferUsage usage;
     VertexLayout* layout;
     const void* data;
-    u64 size;
+    i64 size;
 } BufferConfig;
 
 struct Buffer;
@@ -63,7 +63,7 @@ typedef struct Buffer {
     BufferUsage usage;
     u64 size;
     VertexLayout* layout;
-    u32 element_count;
+    i32 element_count;
     BufferVT vt;
     void* backend_data;
 } Buffer;

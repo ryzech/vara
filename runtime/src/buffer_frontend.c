@@ -7,14 +7,14 @@
 #include <vara/core/platform/platform.h>
 #include <vara/core/platform/platform_graphics_types.h>
 
-extern Buffer* buffer_opengl_init(const BufferConfig* config);
+extern Buffer* buffer_opengl_init(void);
 
 Buffer* buffer_create(RendererInstance* instance, const BufferConfig* config) {
     Buffer* buffer = NULL;
     if (instance) {
         switch (instance->renderer_type) {
             case GRAPHICS_TYPE_OPENGL:
-                buffer = buffer_opengl_init(config);
+                buffer = buffer_opengl_init();
                 break;
             default:
                 ERROR(

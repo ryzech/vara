@@ -39,8 +39,7 @@ static void render_pass_opengl_begin(RenderPass* pass) {
         return;
     }
 
-    OpenGLRenderPassState* render_pass_state =
-        (OpenGLRenderPassState*)pass->backend_data;
+    OpenGLRenderPassState* render_pass_state = pass->backend_data;
 
     if (render_pass_state->active) {
         WARN("Render pass named('%s') is already active!", pass->name);
@@ -51,14 +50,13 @@ static void render_pass_opengl_begin(RenderPass* pass) {
 }
 
 static void render_pass_opengl_draw_indexed(
-    RenderPass* pass, struct Buffer* index_buffer
+    RenderPass* pass, Buffer* index_buffer
 ) {
     if (!pass || !pass->backend_data) {
         return;
     }
 
-    OpenGLRenderPassState* render_pass_state =
-        (OpenGLRenderPassState*)pass->backend_data;
+    OpenGLRenderPassState* render_pass_state = pass->backend_data;
 
     if (!render_pass_state->active) {
         WARN(
@@ -83,8 +81,7 @@ static void render_pass_opengl_end(RenderPass* pass) {
         return;
     }
 
-    OpenGLRenderPassState* render_pass_state =
-        (OpenGLRenderPassState*)pass->backend_data;
+    OpenGLRenderPassState* render_pass_state = pass->backend_data;
 
     if (!render_pass_state->active) {
         WARN("Render pass named('%s') is not active!", pass->name);

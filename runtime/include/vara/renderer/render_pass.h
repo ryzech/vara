@@ -17,14 +17,14 @@ typedef struct RenderPassVT {
     void (*render_pass_destroy)(struct RenderPass* pass);
     void (*render_pass_begin)(struct RenderPass* pass);
     void (*render_pass_draw_indexed)(
-        struct RenderPass* pass, struct Buffer* index_buffer
+        struct RenderPass* pass, Buffer* index_buffer
     );
     void (*render_pass_end)(struct RenderPass* pass);
 } RenderPassVT;
 
 typedef struct RenderPass {
     const char* name;
-    struct RendererInstance* renderer;
+    RendererInstance* renderer;
     RenderPassConfig* config;
     RenderPassVT vt;
     void* backend_data;
@@ -32,13 +32,13 @@ typedef struct RenderPass {
 } RenderPass;
 
 RenderPass* render_pass_create(
-    struct RendererInstance* instance, const RenderPassConfig* config
+    RendererInstance* instance, const RenderPassConfig* config
 );
 
 void render_pass_destroy(RenderPass* pass);
 
 void render_pass_begin(RenderPass* pass);
 
-void render_pass_draw_indexed(RenderPass* pass, struct Buffer* vertex_buffer, struct Buffer* index_buffer);
+void render_pass_draw_indexed(RenderPass* pass, Buffer* vertex_buffer, Buffer* index_buffer);
 
 void render_pass_end(RenderPass* pass);

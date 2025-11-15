@@ -16,14 +16,17 @@
 
 const char* vertex_src = "#version 330 core\n"
                          "layout (location = 0) in vec3 aPos;\n"
+                         "out vec3 vPosition;\n"
                          "void main() {\n"
+                         "    vPosition = aPos;\n"
                          "    gl_Position = vec4(aPos, 1.0);\n"
                          "}\n";
 
 const char* fragment_src = "#version 330 core\n"
-                           "out vec4 FragColor;\n"
+                           "layout(location = 0) out vec4 color;\n"
+                           "in vec3 vPosition;\n"
                            "void main() {\n"
-                           "    FragColor = vec4(1.0, 1.0, 0.0, 1.0);\n"
+                           "    color = vec4(vPosition * 0.5 + 0.5, 1.0);\n"
                            "}\n";
 
 i32 application_main(void) {
@@ -140,9 +143,7 @@ i32 application_main(void) {
         render_pass_begin(pass);
 
         shader_bind(shader);
-
         render_pass_draw_indexed(pass, vertex_buffer, index_buffer);
-
         shader_unbind(shader);
 
         render_pass_end(pass);

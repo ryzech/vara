@@ -35,7 +35,7 @@ static u32 usage_to_gl_usage(BufferUsage usage) {
 }
 
 static void attribute_to_gl_attribute(
-    VertexAttributeType type, u32* out_gl_type, u32* out_count
+    VertexAttributeType type, i32* out_gl_type, i32* out_count
 ) {
     switch (type) {
         case VERTEX_ATTRIBUTE_FLOAT:
@@ -114,7 +114,7 @@ static b8 buffer_opengl_create(Buffer* buffer, const BufferConfig* config) {
         for (u32 i = 0; i < layout->attribute_count; i++) {
             const VertexAttribute* attribute = &layout->attributes[i];
 
-            u32 gl_type, component_count;
+            i32 gl_type, component_count;
             attribute_to_gl_attribute(
                 attribute->type, &gl_type, &component_count
             );
@@ -144,7 +144,7 @@ static void buffer_opengl_destroy(Buffer* buffer) {
         return;
     }
 
-    OpenGLBufferState* buffer_state = (OpenGLBufferState*)buffer->backend_data;
+    OpenGLBufferState* buffer_state = buffer->backend_data;
 
     if (buffer_state->vao != 0) {
         glDeleteVertexArrays(1, &buffer_state->vao);
@@ -165,7 +165,7 @@ static void buffer_opengl_bind(Buffer* buffer) {
         return;
     }
 
-    OpenGLBufferState* buffer_state = (OpenGLBufferState*)buffer->backend_data;
+    OpenGLBufferState* buffer_state = buffer->backend_data;
 
     if (buffer->type == BUFFER_TYPE_VERTEX && buffer_state->vao != 0) {
         glBindVertexArray(buffer_state->vao);
@@ -179,7 +179,7 @@ static void buffer_opengl_unbind(Buffer* buffer) {
         return;
     }
 
-    OpenGLBufferState* buffer_state = (OpenGLBufferState*)buffer->backend_data;
+    OpenGLBufferState* buffer_state = buffer->backend_data;
 
     if (buffer->type == BUFFER_TYPE_VERTEX && buffer_state->vao != 0) {
         glBindVertexArray(0);
@@ -188,9 +188,7 @@ static void buffer_opengl_unbind(Buffer* buffer) {
     }
 }
 
-Buffer* buffer_opengl_init(
-    RendererInstance* renderer, const BufferConfig* config
-) {
+Buffer* buffer_opengl_init(void) {
     Buffer* buffer = platform_allocate(sizeof(Buffer));
     if (!buffer) {
         return NULL;
