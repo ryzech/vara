@@ -7,9 +7,9 @@
 #include <vara/core/platform/platform.h>
 #include <vara/core/platform/platform_graphics_types.h>
 
-extern Shader* shader_opengl_init(ShaderConfig* config);
+extern Shader* shader_opengl_init(const ShaderConfig* config);
 
-Shader* shader_create(RendererInstance* instance, ShaderConfig* config) {
+Shader* shader_create(RendererInstance* instance, const ShaderConfig* config) {
     Shader* shader = NULL;
     if (instance) {
         switch (instance->renderer_type) {

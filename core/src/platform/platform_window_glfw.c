@@ -43,7 +43,6 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
-
 #endif
     } else {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -117,17 +116,27 @@ void* platform_window_get_proc_address(const char* name) {
     return glfwGetProcAddress(name);
 }
 
-b8 platform_window_make_context_current(VaraWindow* window) {
+void platform_window_make_context_current(VaraWindow* window) {
     if (!window || window->graphics_type != GRAPHICS_TYPE_OPENGL) {
-        return false;
+        WARN(
+            "Tried to make context current in window. Renderer named('%s') "
+            "does not support this. OpenGL only!",
+            graphics_type_to_string(window->graphics_type)
+        );
+        return;
     }
 
     glfwMakeContextCurrent(window->platform_state->window);
-    return true;
 }
 
 void platform_window_swap_buffers(VaraWindow* window) {
     if (!window || window->graphics_type != GRAPHICS_TYPE_OPENGL) {
+        WARN(
+            "Tried to swap buffers in window. Renderer named('%s') "
+            "does not support this. OpenGL only!",
+            graphics_type_to_string(window->graphics_type)
+        );
+
         return;
     }
 

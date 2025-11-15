@@ -25,7 +25,7 @@ typedef struct ShaderConfig {
 struct Shader;
 
 typedef struct ShaderVT {
-    b8 (*shader_create)(struct Shader* shader, ShaderConfig* config);
+    b8 (*shader_create)(struct Shader* shader, const ShaderConfig* config);
     void (*shader_destroy)(struct Shader* shader);
     void (*shader_bind)(struct Shader* shader);
     void (*shader_unbind)(struct Shader* shader);
@@ -37,7 +37,7 @@ typedef struct Shader {
     void* backend_data;
 } Shader;
 
-Shader* shader_create(RendererInstance* instance, ShaderConfig* config);
+Shader* shader_create(RendererInstance* instance, const ShaderConfig* config);
 
 void shader_destroy(Shader* shader);
 

@@ -1,4 +1,4 @@
-set(RUNTIME_SOURCES src/application.c src/renderer_frontend.c src/shader_frontend.c)
+set(RUNTIME_SOURCES src/application.c src/renderer_frontend.c src/shader_frontend.c src/render_pass_frontend.c src/buffer_frontend.c)
 
 add_library(vara-runtime STATIC ${RUNTIME_SOURCES})
 

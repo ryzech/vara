@@ -57,7 +57,7 @@ void* platform_window_get_native_handle(const VaraWindow* window);
 
 void* platform_window_get_proc_address(const char* name);
 
-b8 platform_window_make_context_current(VaraWindow* window);
+void platform_window_make_context_current(VaraWindow* window);
 
 void platform_window_swap_buffers(VaraWindow* window);
 

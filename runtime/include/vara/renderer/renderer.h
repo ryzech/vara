@@ -2,8 +2,8 @@
 
 #include <vara/core/defines.h>
 #include <vara/core/math/types.h>
+#include <vara/core/platform/platform_graphics_types.h>
 #include <vara/core/platform/platform_window.h>
-#include "vara/core/platform/platform_graphics_types.h"
 
 typedef struct RendererInstanceVT {
     b8 (*renderer_create)(void);
@@ -35,5 +35,7 @@ void renderer_clear(RendererInstance* instance);
 /* Helper function to call the instances function pointer. */
 void renderer_clear_color(RendererInstance* instance, Vector4 color);
 
-/* Helper function to call the instances function pointer. */
+/* Helper function to call the instances function pointer.
+ * This submits all the commands in the pass queue.
+ * */
 void renderer_present(RendererInstance* instance);

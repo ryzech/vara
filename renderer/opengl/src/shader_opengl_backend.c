@@ -11,7 +11,7 @@ typedef struct OpenGLShaderState {
     u32 shader_program;
 } OpenGLShaderState;
 
-static b8 shader_opengl_create(Shader* shader, ShaderConfig* config) {
+static b8 shader_opengl_create(Shader* shader, const ShaderConfig* config) {
     DEBUG("Creating shader program named('%s')", config->name);
     OpenGLShaderState* shader_state =
         platform_allocate(sizeof(OpenGLShaderState));
@@ -57,7 +57,7 @@ static void shader_opengl_unbind(Shader* shader) {
     glUseProgram(0);
 }
 
-Shader* shader_opengl_init(ShaderConfig* config) {
+Shader* shader_opengl_init(const ShaderConfig* config) {
     Shader* opengl_shader = platform_allocate(sizeof(Shader));
 
     platform_zero_memory(opengl_shader, sizeof(Shader));
