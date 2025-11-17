@@ -1,20 +1,8 @@
 #pragma once
 
-#include <stdlib.h>
-
 #include "vara/core/defines.h"
-#include "vara/core/platform/platform_graphics_types.h"
 
-/** */
-typedef struct VaraConfig {
-    /** Name of the application, may or may not be used depending on the
-	 * platform. Some platforms may use it as the window title, others may
-	 * ignore it.
-	 */
-    const char* application_name;
-    /** Graphics API (if any) the application will use. */
-    PlatformGraphicsType graphics_type;
-} VaraConfig;
+#include <stdlib.h>
 
 /** */
 b8 platform_create(void);

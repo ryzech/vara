@@ -4,11 +4,12 @@
 #include "vara/core/math/types.h"
 #include "vara/core/platform/platform_graphics_types.h"
 
-/** */
-struct VaraWindowState;
+typedef struct VaraWindowState VaraWindowState;
+typedef struct VaraWindow VaraWindow;
+typedef struct VaraWindowConfig VaraWindowConfig;
 
 /** */
-typedef struct VaraWindow {
+struct VaraWindow {
     /** */
     u32 width, height;
     /** */
@@ -19,14 +20,14 @@ typedef struct VaraWindow {
     const char* name;
     /** Pixel density of the given display the window is on. */
     f32 pixel_density;
-    /** Type of graphics API to use (decides whether or not to create a window context). */
+    /** Type of graphics API to use (decides whether to create a window context). */
     PlatformGraphicsType graphics_type;
     /** Window state, holds information about the given window. */
-    struct VaraWindowState* platform_state;
-} VaraWindow;
+    VaraWindowState* platform_state;
+};
 
 /** */
-typedef struct VaraWindowConfig {
+struct VaraWindowConfig {
     /** */
     i32 position_x, position_y;
     /** */
@@ -37,7 +38,7 @@ typedef struct VaraWindowConfig {
     const char* name;
     /** Type of graphics API to use (decides whether or not to create a window context). */
     PlatformGraphicsType graphics_type;
-} VaraWindowConfig;
+};
 
 VaraWindow* platform_window_create(const VaraWindowConfig* config);
 

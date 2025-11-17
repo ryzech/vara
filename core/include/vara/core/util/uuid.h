@@ -4,9 +4,11 @@
 
 #define UUID_STRING_BYTES 37
 
-typedef struct UUID {
+typedef struct UUID UUID;
+
+struct UUID {
     u8 bytes[16];
-} UUID;
+};
 
 b8 uuid_generate(UUID* uuid);
 

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(vara-engine LANGUAGES C CXX OBJC VERSION 0.1.0)
+project(vara-engine LANGUAGES C CXX VERSION 0.1.0)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -21,39 +21,40 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 add_compile_definitions(VARA_VERSION="${PROJECT_VERSION}")
 
 add_compile_options(
-    -Wno-gnu-zero-variadic-macro-arguments 
-    -Wno-pedantic
-    -Wno-unused-variable  
-    -Wno-unused-parameter
-    -Wno-missing-field-initializers
-    -Wno-sign-compare
-    -Wno-visibility
+        -Wno-gnu-zero-variadic-macro-arguments
+        -Wno-pedantic
+        -Wno-unused-variable
+        -Wno-unused-parameter
+        -Wno-missing-field-initializers
+        -Wno-sign-compare
+        -Wno-visibility
 )
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(VARA_DEBUG)
-elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
     add_compile_definitions(VARA_RELEASE)
-endif()
+endif ()
 
 set(EXTRA_LIBS "")
 
-if(APPLE)
+if (APPLE)
+    enable_language(OBJC)
     find_library(FOUNDATION_FRAMEWORK Foundation REQUIRED)
     find_library(APPKIT_FRAMEWORK AppKit REQUIRED)
     find_library(IOKIT_FRAMEWORK IOKit REQUIRED)
     find_library(SECURITY_FRAMEWORK Security REQUIRED)
     list(APPEND EXTRA_LIBS
-      ${FOUNDATION_FRAMEWORK}
-      ${APPKIT_FRAMEWORK}
-      ${IOKIT_FRAMEWORK}
-      ${SECURITY_FRAMEWORK}
+            ${FOUNDATION_FRAMEWORK}
+            ${APPKIT_FRAMEWORK}
+            ${IOKIT_FRAMEWORK}
+            ${SECURITY_FRAMEWORK}
     )
-elseif(UNIX AND NOT APPLE)
-  list(APPEND EXTRA_LIBS m rt)
-elseif(WIN32)
-  
-endif()
+elseif (UNIX AND NOT APPLE)
+    list(APPEND EXTRA_LIBS m rt)
+elseif (WIN32)
+
+endif ()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 

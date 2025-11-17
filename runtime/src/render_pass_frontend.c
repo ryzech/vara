@@ -11,7 +11,7 @@
 extern RenderPass* render_pass_opengl_init(const RenderPassConfig* config);
 
 RenderPass* render_pass_create(
-    RendererInstance* instance, const RenderPassConfig* config
+    const RendererInstance* instance, const RenderPassConfig* config
 ) {
     RenderPass* render_pass = NULL;
     if (instance) {

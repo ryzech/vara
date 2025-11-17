@@ -6,9 +6,9 @@
 #include "vara/core/platform/platform_graphics_types.h"
 #include "vara/core/platform/platform_window.h"
 
-typedef struct VaraWindowState {
+struct VaraWindowState {
     GLFWwindow* window;
-} VaraWindowState;
+};
 
 VaraWindow* platform_window_create(const VaraWindowConfig* config) {
     if (!config) {

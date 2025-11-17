@@ -1,38 +1,36 @@
-#include <stdio.h>
-#include <stdlib.h>
-
+#include <vara/application/application.h>
 #include <vara/core/defines.h>
 #include <vara/core/logger.h>
-#include <vara/core/math/math.h>
-#include <vara/core/platform/platform.h>
 #include <vara/core/platform/platform_window.h>
 
-i32 application_main(void) {
+void editor_init(void) {
     DEBUG("Version: %s", VARA_VERSION);
-    if (!platform_create()) {
-        ERROR("Failed to create platform!");
-        return EXIT_FAILURE;
-    }
+}
 
-    const VaraWindowConfig window_config = {
+void editor_update(f64 delta_time) {
+
+}
+
+void editor_shutdown(void) {
+    INFO("Shutting down...");
+}
+
+void application_init(ApplicationConfig* config) {
+    static VaraWindowConfig window_config = {
         .position_x = 100,
         .position_y = 100,
         .width = 800,
         .height = 600,
+        .graphics_type = GRAPHICS_TYPE_OPENGL,
         .title = "Vara Engine - Editor",
         .name = "vara_editor"
     };
 
-    VaraWindow* window = platform_window_create(&window_config);
-    platform_window_set_visible(window, true);
+    config->name = window_config.name;
+    config->window_config = &window_config;
+    config->graphics_type = window_config.graphics_type;
 
-    while (!platform_window_should_close(window)) {
-        platform_poll_events();
-    }
-
-    INFO("Shutting down...");
-    platform_window_destroy(window);
-    platform_destroy();
-
-    return EXIT_SUCCESS;
+    config->app.on_init = editor_init;
+    config->app.on_update = editor_update;
+    config->app.on_shutdown = editor_shutdown;
 }

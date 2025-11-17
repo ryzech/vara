@@ -1,11 +1,9 @@
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <vara/application/application.h>
 #include <vara/core/defines.h>
 #include <vara/core/logger.h>
-#include <vara/core/math/math.h>
-#include <vara/core/math/types.h>
 #include <vara/core/platform/platform.h>
 #include <vara/core/platform/platform_graphics_types.h>
 #include <vara/core/platform/platform_window.h>
@@ -29,53 +27,16 @@ const char* fragment_src = "#version 330 core\n"
                            "    color = vec4(vPosition * 0.5 + 0.5, 1.0);\n"
                            "}\n";
 
-i32 application_main(void) {
+static Buffer* index_buffer;
+static Buffer* vertex_buffer;
+static Shader* shader;
+static RenderPass* render_pass;
+
+void sandbox_init(void) {
     DEBUG("Version: %s", VARA_VERSION);
-    if (!platform_create()) {
-        ERROR("Failed to create platform!");
-        return EXIT_FAILURE;
-    }
+    f32 vertices[] = {0.0f, 0.5f, 0.0f, -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f};
 
-    const VaraConfig config = {
-        .graphics_type = GRAPHICS_TYPE_OPENGL,
-        .application_name = "vara_sandbox"
-    };
-
-    const VaraWindowConfig window_config = {
-        .position_x = 100,
-        .position_y = 100,
-        .width = 800,
-        .height = 600,
-        .graphics_type = config.graphics_type,
-        .title = "Vara Engine - Sandbox",
-        .name = config.application_name
-    };
-
-    VaraWindow* window = platform_window_create(&window_config);
-    if (!window) {
-        return EXIT_FAILURE;
-    }
-
-    RendererInstance* instance = renderer_create(window);
-    if (!instance) {
-        return EXIT_FAILURE;
-    }
-
-    f32 vertices[] = {
-        0.0f,
-        0.5f,
-        0.0f,
-        -0.5f,
-        -0.5f,
-        0.0f,
-        0.5f,
-        -0.5f,
-        0.0f
-    };
-
-    u32 indices[] = {
-        0, 1, 2
-    };
+    u32 indices[] = {0, 1, 2};
 
     VertexAttribute attributes[] = {
         {.location = 0,
@@ -98,7 +59,8 @@ i32 application_main(void) {
         .size = sizeof(vertices)
     };
 
-    Buffer* vertex_buffer = buffer_create(instance, &vertex_buffer_config);
+    vertex_buffer =
+        buffer_create(application_get_renderer(), &vertex_buffer_config);
 
     const BufferConfig index_buffer_config = {
         .type = BUFFER_TYPE_INDEX,
@@ -107,7 +69,8 @@ i32 application_main(void) {
         .size = sizeof(indices)
     };
 
-    Buffer* index_buffer = buffer_create(instance, &index_buffer_config);
+    index_buffer =
+        buffer_create(application_get_renderer(), &index_buffer_config);
 
     ShaderSource sources[] = {
         {
@@ -126,37 +89,51 @@ i32 application_main(void) {
         .stage_count = 2,
     };
 
-    Shader* shader = shader_create(instance, &shader_config);
+    shader = shader_create(application_get_renderer(), &shader_config);
 
     const RenderPassConfig pass_config = {
         .name = "main_pass",
     };
 
-    RenderPass* pass = render_pass_create(instance, &pass_config);
+    render_pass = render_pass_create(application_get_renderer(), &pass_config);
+}
 
-    platform_window_set_visible(window, true);
+void sandbox_update(f64 delta_time) {
+    renderer_clear(application_get_renderer());
 
-    while (!platform_window_should_close(window)) {
-        platform_poll_events();
-        renderer_clear(instance);
+    render_pass_begin(render_pass);
 
-        render_pass_begin(pass);
+    shader_bind(shader);
+    render_pass_draw_indexed(render_pass, vertex_buffer, index_buffer);
+    shader_unbind(shader);
 
-        shader_bind(shader);
-        render_pass_draw_indexed(pass, vertex_buffer, index_buffer);
-        shader_unbind(shader);
+    render_pass_end(render_pass);
 
-        render_pass_end(pass);
+    renderer_present(application_get_renderer());
+}
 
-        renderer_present(instance);
-    }
-
-    INFO("Shutting down...");
+void sandbox_shutdown() {
     shader_destroy(shader);
-    renderer_destroy(instance);
-    platform_window_destroy(window);
-    platform_poll_events();
-    platform_destroy();
+    buffer_destroy(vertex_buffer);
+    buffer_destroy(index_buffer);
+}
 
-    return EXIT_SUCCESS;
+void application_init(ApplicationConfig* config) {
+    static VaraWindowConfig window_config = {
+        .position_x = 100,
+        .position_y = 100,
+        .width = 800,
+        .height = 600,
+        .graphics_type = GRAPHICS_TYPE_OPENGL,
+        .title = "Vara Engine - Sandbox",
+        .name = "vara_sandbox"
+    };
+
+    config->name = window_config.name;
+    config->window_config = &window_config;
+    config->graphics_type = window_config.graphics_type;
+
+    config->app.on_init = sandbox_init;
+    config->app.on_update = sandbox_update;
+    config->app.on_shutdown = sandbox_shutdown;
 }

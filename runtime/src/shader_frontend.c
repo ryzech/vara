@@ -9,7 +9,9 @@
 
 extern Shader* shader_opengl_init(const ShaderConfig* config);
 
-Shader* shader_create(RendererInstance* instance, const ShaderConfig* config) {
+Shader* shader_create(
+    const RendererInstance* instance, const ShaderConfig* config
+) {
     Shader* shader = NULL;
     if (instance) {
         switch (instance->renderer_type) {

@@ -2,94 +2,86 @@
 
 #include "vara/core/defines.h"
 
-typedef union vector2_u Vector2;
-typedef union vector3_u Vector3;
-typedef union vector4_u Vector4;
-
-typedef union vector2i_u Vector2i;
-typedef union vector3i_u Vector3i;
-typedef union vector4i_u Vector4i;
-
-union vector2_u {
-    /* An array of x, y */
+typedef union vector2_u {
+    /** An array of x, y */
     f32 elements[2];
 
     struct {
-        /* The first element */
+        /** The first element */
         f32 x;
-        /* The second element */
+        /** The second element */
         f32 y;
     };
-};
+} Vector2;
 
-union vector3_u {
-    /* An array of x, y, z */
+typedef union vector3_u {
+    /** An array of x, y, z */
     f32 elements[3];
 
     struct {
-        /* The first element */
+        /** The first element */
         f32 x;
-        /* The second element */
+        /** The second element */
         f32 y;
-        /* The second element */
+        /** The third element */
         f32 z;
     };
-};
+} Vector3;
 
-union vector4_u {
-    /* An array of x, y, z, w */
+typedef union vector4_u {
+    /** An array of x, y, z, w */
     f32 elements[4];
 
     struct {
-        /* The first element */
+        /** The first element */
         f32 x;
-        /* The second element */
+        /** The second element */
         f32 y;
-        /* The second element */
+        /** The third element */
         f32 z;
-        /* The second element */
+        /** The fourth element */
         f32 w;
     };
-};
+} Vector4;
 
-union vector2i_u {
-    /* An array of x, y */
+typedef union vector2i_u {
+    /** An array of x, y */
     i32 elements[2];
 
     struct {
-        /* The first element */
+        /** The first element */
         i32 x;
-        /* The second element */
+        /** The second element */
         i32 y;
     };
-};
+} Vector2i;
 
-union vector3i_u {
-    /* An array of x, y, z */
+typedef union vector3i_u {
+    /** An array of x, y, z */
     i32 elements[3];
 
     struct {
-        /* The first element */
+        /** The first element */
         i32 x;
-        /* The second element */
+        /** The second element */
         i32 y;
-        /* The second element */
+        /** The third element */
         i32 z;
     };
-};
+} Vector3i;
 
-union vector4i_u {
-    /* An array of x, y, z, w */
+typedef union vector4i_u {
+    /** An array of x, y, z, w */
     i32 elements[4];
 
     struct {
-        /* The first element */
+        /** The first element */
         i32 x;
-        /* The second element */
+        /** The second element */
         i32 y;
-        /* The second element */
+        /** The third element */
         i32 z;
-        /* The second element */
+        /** The fourth element */
         i32 w;
     };
-};
+} Vector4i;

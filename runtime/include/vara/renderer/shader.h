@@ -4,40 +4,46 @@
 
 #include "vara/renderer/renderer.h"
 
-typedef enum ShaderStage {
+typedef enum ShaderStage ShaderStage;
+typedef struct ShaderSource ShaderSource;
+typedef struct ShaderConfig ShaderConfig;
+typedef struct ShaderVT ShaderVT;
+typedef struct Shader Shader;
+
+enum ShaderStage {
     SHADER_STAGE_VERTEX,
     SHADER_STAGE_FRAGMENT,
     SHADER_STAGE_COMPUTE
-} ShaderStage;
+};
 
 // TODO: this needs re-wrote so one file can have frag and vert
-typedef struct ShaderSource {
+struct ShaderSource {
     ShaderStage stage;
     const char* source;
-} ShaderSource;
+};
 
-typedef struct ShaderConfig {
+struct ShaderConfig {
     const char* name;
     ShaderSource* stages;
     u16 stage_count;
-} ShaderConfig;
+};
 
-struct Shader;
+struct ShaderVT {
+    b8 (*shader_create)(Shader* shader, const ShaderConfig* config);
+    void (*shader_destroy)(Shader* shader);
+    void (*shader_bind)(Shader* shader);
+    void (*shader_unbind)(Shader* shader);
+};
 
-typedef struct ShaderVT {
-    b8 (*shader_create)(struct Shader* shader, const ShaderConfig* config);
-    void (*shader_destroy)(struct Shader* shader);
-    void (*shader_bind)(struct Shader* shader);
-    void (*shader_unbind)(struct Shader* shader);
-} ShaderVT;
-
-typedef struct Shader {
+struct Shader {
     const char* name;
     ShaderVT vt;
     void* backend_data;
-} Shader;
+};
 
-Shader* shader_create(RendererInstance* instance, const ShaderConfig* config);
+Shader* shader_create(
+    const RendererInstance* instance, const ShaderConfig* config
+);
 
 void shader_destroy(Shader* shader);
 
