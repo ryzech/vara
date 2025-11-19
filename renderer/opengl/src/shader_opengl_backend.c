@@ -50,11 +50,47 @@ static void shader_opengl_bind(Shader* shader) {
     }
 
     OpenGLShaderState* shader_state = shader->backend_data;
+    TRACE(
+        "Binding shader named('%s') in program(%d)",
+        shader->name,
+        shader_state->shader_program
+    );
     glUseProgram(shader_state->shader_program);
 }
 
 static void shader_opengl_unbind(Shader* shader) {
+    if (!shader || !shader->backend_data) {
+        return;
+    }
+
+    OpenGLShaderState* shader_state = shader->backend_data;
+
+    TRACE(
+        "Unbinding shader named('%s') in program(%d)",
+        shader->name,
+        shader_state->shader_program
+    );
     glUseProgram(0);
+}
+
+static void shader_opengl_dispatch(Shader* shader, i16 x, i16 y, i16 z) {
+    if (!shader || !shader->backend_data) {
+        return;
+    }
+
+    OpenGLShaderState* shader_state = shader->backend_data;
+
+    TRACE(
+        "Dispatching compute shader named('%s') with workgroup(%d, %d, %d) in "
+        "program(%d)",
+        shader->name,
+        x,
+        y,
+        z,
+        shader_state->shader_program
+    );
+    glDispatchCompute(x, y, z);
+    glMemoryBarrier(GL_ALL_BARRIER_BITS);
 }
 
 Shader* shader_opengl_init(const ShaderConfig* config) {
@@ -67,6 +103,7 @@ Shader* shader_opengl_init(const ShaderConfig* config) {
     opengl_shader->vt.shader_destroy = shader_opengl_destroy;
     opengl_shader->vt.shader_bind = shader_opengl_bind;
     opengl_shader->vt.shader_unbind = shader_opengl_unbind;
+    opengl_shader->vt.shader_dispatch = shader_opengl_dispatch;
 
     return opengl_shader;
 }

@@ -27,6 +27,7 @@ void application_init(ApplicationConfig* config) {
     };
 
     config->name = window_config.name;
+    config->level = LOG_LEVEL_DEBUG;
     config->window_config = &window_config;
     config->graphics_type = window_config.graphics_type;
 

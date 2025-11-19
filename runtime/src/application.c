@@ -17,6 +17,7 @@ static ApplicationState application_state;
 
 int application_main(int argc, char** argv) {
     application_init(&application_state.config);
+    initialize_logging(application_state.config.level);
 
     if (!platform_create()) {
         ERROR("Failed to create platform!");
@@ -85,6 +86,7 @@ int application_main(int argc, char** argv) {
     }
 
     platform_destroy();
+    shutdown_logging();
 
     return EXIT_SUCCESS;
 }

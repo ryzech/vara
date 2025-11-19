@@ -99,14 +99,17 @@ void sandbox_init(void) {
 }
 
 void sandbox_update(f64 delta_time) {
+    renderer_clear_color(
+        application_get_renderer(), (Vector4){{0.1f, 0.1f, 0.1f, 1.0f}}
+    );
     renderer_clear(application_get_renderer());
 
     render_pass_begin(render_pass);
-
-    shader_bind(shader);
-    render_pass_draw_indexed(render_pass, vertex_buffer, index_buffer);
-    shader_unbind(shader);
-
+    {
+        shader_bind(shader);
+        render_pass_draw_indexed(render_pass, vertex_buffer, index_buffer);
+        shader_unbind(shader);
+    }
     render_pass_end(render_pass);
 
     renderer_present(application_get_renderer());
@@ -130,6 +133,7 @@ void application_init(ApplicationConfig* config) {
     };
 
     config->name = window_config.name;
+    config->level = LOG_LEVEL_DEBUG;
     config->window_config = &window_config;
     config->graphics_type = window_config.graphics_type;
 

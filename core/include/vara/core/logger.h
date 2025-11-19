@@ -19,7 +19,7 @@
 #endif
 
 /** @brief Represents levels of logging */
-typedef enum log_level {
+typedef enum LogLevel {
     /** @brief Fatal log level, should be used to stop the application when hit.
 	 */
     LOG_LEVEL_FATAL = 0,
@@ -37,9 +37,9 @@ typedef enum log_level {
     /** @brief Trace log level, should be used for verbose debugging purposes.
 	 */
     LOG_LEVEL_TRACE = 5,
-} log_level;
+} LogLevel;
 
-b8 initialize_logging(void);
+b8 initialize_logging(LogLevel level);
 void shutdown_logging(void);
 
 /**
@@ -48,7 +48,7 @@ void shutdown_logging(void);
  * @param message The message to be logged.
  * @param ... Any formatted data that should be included in the log entry.
  */
-void _log_output(log_level level, const char* func, const char* message, ...);
+void _log_output(LogLevel level, const char* func, const char* message, ...);
 
 /**
  * @brief Logs a fatal-level message. Should be used to stop the application

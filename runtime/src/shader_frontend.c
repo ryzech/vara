@@ -54,3 +54,9 @@ void shader_unbind(Shader* shader) {
         shader->vt.shader_unbind(shader);
     }
 }
+
+void shader_dispatch(Shader* shader, i16 x, i16 y, i16 z) {
+    if (shader && shader->vt.shader_dispatch) {
+        shader->vt.shader_dispatch(shader, x, y, z);
+    }
+}

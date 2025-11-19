@@ -33,6 +33,7 @@ struct ShaderVT {
     void (*shader_destroy)(Shader* shader);
     void (*shader_bind)(Shader* shader);
     void (*shader_unbind)(Shader* shader);
+    void (*shader_dispatch)(Shader* shader, i16 x, i16 y, i16 z);
 };
 
 struct Shader {
@@ -50,3 +51,5 @@ void shader_destroy(Shader* shader);
 void shader_bind(Shader* shader);
 
 void shader_unbind(Shader* shader);
+
+void shader_dispatch(Shader* shader, i16 x, i16 y, i16 z);

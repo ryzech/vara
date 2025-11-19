@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vara/core/defines.h>
+#include <vara/core/logger.h>
 #include <vara/core/platform/platform_window.h>
 
 #include "vara/renderer/renderer.h"
@@ -17,6 +18,7 @@ struct Application {
 
 struct ApplicationConfig {
     const char* name;
+    LogLevel level;
     VaraWindowConfig* window_config;
     PlatformGraphicsType graphics_type;
     Application app;

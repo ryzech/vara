@@ -5,8 +5,11 @@
 #include "vara/core/logger.h"
 #include "vara/core/platform/platform.h"
 
-b8 initialize_logging(void) {
+static LogLevel global_level;
+
+b8 initialize_logging(LogLevel level) {
     // TODO: add rolling log files.
+    global_level = level;
     return true;
 }
 
@@ -15,9 +18,13 @@ void shutdown_logging(void) {
 }
 
 void _log_output(
-    const log_level level, const char* func, const char* message, ...
+    const LogLevel level, const char* func, const char* message, ...
 ) {
     if (!message) {
+        return;
+    }
+
+    if (level > global_level) {
         return;
     }
 
