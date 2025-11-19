@@ -3,6 +3,8 @@
 #include <vara/core/logger.h>
 #include <vara/core/platform/platform.h>
 
+#include "vara/core/input/input.h"
+
 typedef struct ApplicationState ApplicationState;
 
 struct ApplicationState {
@@ -18,6 +20,7 @@ static ApplicationState application_state;
 int application_main(int argc, char** argv) {
     application_init(&application_state.config);
     initialize_logging(application_state.config.level);
+    input_system_create();
 
     if (!platform_create()) {
         ERROR("Failed to create platform!");
@@ -87,6 +90,7 @@ int application_main(int argc, char** argv) {
 
     platform_destroy();
     shutdown_logging();
+    input_system_destroy();
 
     return EXIT_SUCCESS;
 }

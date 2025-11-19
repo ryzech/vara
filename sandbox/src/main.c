@@ -12,6 +12,8 @@
 #include <vara/renderer/renderer.h>
 #include <vara/renderer/shader.h>
 
+#include "vara/core/input/input.h"
+
 const char* vertex_src = "#version 330 core\n"
                          "layout (location = 0) in vec3 aPos;\n"
                          "out vec3 vPosition;\n"
