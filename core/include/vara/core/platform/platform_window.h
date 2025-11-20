@@ -11,7 +11,7 @@ typedef struct VaraWindowConfig VaraWindowConfig;
 /** */
 struct VaraWindow {
     /** */
-    u32 width, height;
+    i32 width, height;
     /** */
     i32 x, y;
     /** */
@@ -31,7 +31,7 @@ struct VaraWindowConfig {
     /** */
     i32 position_x, position_y;
     /** */
-    u32 width, height;
+    i32 width, height;
     /** */
     const char* title;
     /** */

@@ -39,8 +39,8 @@ typedef enum LogLevel {
     LOG_LEVEL_TRACE = 5,
 } LogLevel;
 
-b8 initialize_logging(LogLevel level);
-void shutdown_logging(void);
+b8 logging_system_create(LogLevel level);
+void logging_system_destroy(void);
 
 /**
  * @brief Outputs logging at the given level.

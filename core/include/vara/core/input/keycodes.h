@@ -4,7 +4,7 @@ typedef enum Key Key;
 typedef enum MouseButton MouseButton;
 
 enum Key {
-    KEY_UNKNOWN = 0, // A good practice to start at 0 for unknown/unmapped keys
+    KEY_UNKNOWN = 0,
 
     KEY_A,
     KEY_B,
@@ -79,13 +79,13 @@ enum Key {
     KEY_MENU,
 
     KEY_LSHIFT,
-    KEY_LCONTROL,
-    KEY_LALT,
-    KEY_LSUPER,
-    KEY_RSHIFT,
-    KEY_RCONTROL,
-    KEY_RALT,
-    KEY_RSUPER,
+    KEY_LEFT_CONTROL,
+    KEY_LEFT_ALT,
+    KEY_LEFT_SUPER,
+    KEY_RIGHT_SHIFT,
+    KEY_RIGHT_CONTROL,
+    KEY_RIGHT_ALT,
+    KEY_RIGHT_SUPER,
 
     KEY_SPACE,
     KEY_APOSTROPHE,

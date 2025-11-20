@@ -30,8 +30,8 @@ void input_system_destroy(void) {
 
 void input_system_update(void) {
     platform_copy_memory(
-        &input_state.current_key_state,
         &input_state.previous_key_state,
+        &input_state.current_key_state,
         sizeof(KeyState)
     );
 }

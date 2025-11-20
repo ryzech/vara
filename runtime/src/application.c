@@ -18,14 +18,14 @@ struct ApplicationState {
 static ApplicationState application_state;
 
 int application_main(int argc, char** argv) {
-    application_init(&application_state.config);
-    initialize_logging(application_state.config.level);
-    input_system_create();
-
     if (!platform_create()) {
         ERROR("Failed to create platform!");
         return EXIT_FAILURE;
     }
+
+    application_init(&application_state.config);
+    logging_system_create(application_state.config.level);
+    input_system_create();
 
     if (application_state.config.window_config) {
         application_state.window =
@@ -66,10 +66,11 @@ int application_main(int argc, char** argv) {
             platform_poll_events();
         }
 
-        f64 current_time = platform_get_time();
-        f64 delta_time = current_time - application_state.last_time;
+        const f64 current_time = platform_get_time();
+        const f64 delta_time = current_time - application_state.last_time;
         application_state.last_time = current_time;
 
+        input_system_update();
         if (application_state.config.app.on_update) {
             application_state.config.app.on_update(delta_time);
         }
@@ -88,9 +89,9 @@ int application_main(int argc, char** argv) {
         renderer_destroy(application_state.renderer);
     }
 
-    platform_destroy();
-    shutdown_logging();
     input_system_destroy();
+    logging_system_destroy();
+    platform_destroy();
 
     return EXIT_SUCCESS;
 }

@@ -185,19 +185,19 @@ static Key glfw_to_keycode(const i32 keycode) {
         case GLFW_KEY_LEFT_SHIFT:
             return KEY_LSHIFT;
         case GLFW_KEY_LEFT_CONTROL:
-            return KEY_LCONTROL;
+            return KEY_LEFT_CONTROL;
         case GLFW_KEY_LEFT_ALT:
-            return KEY_LALT;
+            return KEY_LEFT_ALT;
         case GLFW_KEY_LEFT_SUPER:
-            return KEY_LSUPER;
+            return KEY_LEFT_SUPER;
         case GLFW_KEY_RIGHT_SHIFT:
-            return KEY_RSHIFT;
+            return KEY_RIGHT_SHIFT;
         case GLFW_KEY_RIGHT_CONTROL:
-            return KEY_RCONTROL;
+            return KEY_RIGHT_CONTROL;
         case GLFW_KEY_RIGHT_ALT:
-            return KEY_RALT;
+            return KEY_RIGHT_ALT;
         case GLFW_KEY_RIGHT_SUPER:
-            return KEY_RSUPER;
+            return KEY_RIGHT_SUPER;
         case GLFW_KEY_APOSTROPHE:
             return KEY_APOSTROPHE;
         case GLFW_KEY_COMMA:

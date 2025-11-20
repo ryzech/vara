@@ -7,13 +7,13 @@
 
 static LogLevel global_level;
 
-b8 initialize_logging(LogLevel level) {
+b8 logging_system_create(LogLevel level) {
     // TODO: add rolling log files.
     global_level = level;
     return true;
 }
 
-void shutdown_logging(void) {
+void logging_system_destroy(void) {
     // Do something here.
 }
 

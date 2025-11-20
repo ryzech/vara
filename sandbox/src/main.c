@@ -3,7 +3,9 @@
 
 #include <vara/application/application.h>
 #include <vara/core/defines.h>
+#include <vara/core/input/input.h>
 #include <vara/core/logger.h>
+#include <vara/core/math/math.h>
 #include <vara/core/platform/platform.h>
 #include <vara/core/platform/platform_graphics_types.h>
 #include <vara/core/platform/platform_window.h>
@@ -11,8 +13,6 @@
 #include <vara/renderer/render_pass.h>
 #include <vara/renderer/renderer.h>
 #include <vara/renderer/shader.h>
-
-#include "vara/core/input/input.h"
 
 const char* vertex_src = "#version 330 core\n"
                          "layout (location = 0) in vec3 aPos;\n"
@@ -101,8 +101,12 @@ void sandbox_init(void) {
 }
 
 void sandbox_update(f64 delta_time) {
+    if (input_is_key_down(KEY_ESCAPE)) {
+        application_exit();
+    }
+
     renderer_clear_color(
-        application_get_renderer(), (Vector4){{0.1f, 0.1f, 0.1f, 1.0f}}
+        application_get_renderer(), (Vector4){0.1f, 0.1f, 0.1f, 1.0f}
     );
     renderer_clear(application_get_renderer());
 
