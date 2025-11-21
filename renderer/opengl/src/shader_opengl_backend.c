@@ -1,5 +1,4 @@
 #include <glad/gl.h>
-
 #include <vara/core/logger.h>
 #include <vara/core/platform/platform.h>
 #include <vara/renderer/renderer.h>
@@ -73,6 +72,19 @@ static void shader_opengl_unbind(Shader* shader) {
     glUseProgram(0);
 }
 
+static void shader_opengl_set_mat4(
+    Shader* shader, const char* name, const Matrix4* matrix
+) {
+    if (!shader || !shader->backend_data) {
+        return;
+    }
+
+    OpenGLShaderState* shader_state = shader->backend_data;
+
+    i32 location = glGetUniformLocation(shader_state->shader_program, name);
+    glUniformMatrix4fv(location, 1, GL_FALSE, matrix->elements);
+}
+
 static void shader_opengl_dispatch(Shader* shader, i16 x, i16 y, i16 z) {
     if (!shader || !shader->backend_data) {
         return;
@@ -103,6 +115,7 @@ Shader* shader_opengl_init(const ShaderConfig* config) {
     opengl_shader->vt.shader_destroy = shader_opengl_destroy;
     opengl_shader->vt.shader_bind = shader_opengl_bind;
     opengl_shader->vt.shader_unbind = shader_opengl_unbind;
+    opengl_shader->vt.shader_set_mat4 = shader_opengl_set_mat4;
     opengl_shader->vt.shader_dispatch = shader_opengl_dispatch;
 
     return opengl_shader;

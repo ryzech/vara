@@ -1,9 +1,8 @@
-#include "vara/renderer/shader_compiler_opengl.h"
-
 #include <glad/gl.h>
-
 #include <vara/core/logger.h>
 #include <vara/renderer/shader.h>
+
+#include "vara/renderer/shader_compiler_opengl.h"
 
 static u32 stage_to_gl_type(ShaderStage stage, const char** out_name) {
     switch (stage) {
@@ -22,8 +21,9 @@ static u32 stage_to_gl_type(ShaderStage stage, const char** out_name) {
     }
 }
 
-static u32
-compile_shader_stage(u32 type, const char* source, const char* stage_name) {
+static u32 compile_shader_stage(
+    u32 type, const char* source, const char* stage_name
+) {
     u32 shader = glCreateShader(type);
     if (!shader) {
         ERROR(

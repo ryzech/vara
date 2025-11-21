@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <vara/application/application.h>
 #include <vara/core/defines.h>
 #include <vara/core/input/input.h>
@@ -9,17 +8,15 @@
 #include <vara/core/platform/platform.h>
 #include <vara/core/platform/platform_graphics_types.h>
 #include <vara/core/platform/platform_window.h>
-#include <vara/renderer/buffer.h>
-#include <vara/renderer/render_pass.h>
 #include <vara/renderer/renderer.h>
-#include <vara/renderer/shader.h>
 
 const char* vertex_src = "#version 330 core\n"
                          "layout (location = 0) in vec3 aPos;\n"
+                         "uniform mat4 uTransform;\n"
                          "out vec3 vPosition;\n"
                          "void main() {\n"
                          "    vPosition = aPos;\n"
-                         "    gl_Position = vec4(aPos, 1.0);\n"
+                         "    gl_Position = uTransform * vec4(aPos, 1.0);\n"
                          "}\n";
 
 const char* fragment_src = "#version 330 core\n"
@@ -33,6 +30,8 @@ static Buffer* index_buffer;
 static Buffer* vertex_buffer;
 static Shader* shader;
 static RenderPass* render_pass;
+
+static f32 x = 0;
 
 void sandbox_init(void) {
     DEBUG("Version: %s", VARA_VERSION);
@@ -95,6 +94,7 @@ void sandbox_init(void) {
 
     const RenderPassConfig pass_config = {
         .name = "main_pass",
+        .target = NULL,
     };
 
     render_pass = render_pass_create(application_get_renderer(), &pass_config);
@@ -105,6 +105,14 @@ void sandbox_update(f64 delta_time) {
         application_exit();
     }
 
+    const Matrix4 mat = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, 0, 0, 1};
+    if (input_is_key_down(KEY_LEFT)) {
+        x -= 0.5f * (f32)delta_time;
+    }
+    if (input_is_key_down(KEY_RIGHT)) {
+        x += 0.5f * (f32)delta_time;
+    }
+
     renderer_clear_color(
         application_get_renderer(), (Vector4){0.1f, 0.1f, 0.1f, 1.0f}
     );
@@ -112,9 +120,10 @@ void sandbox_update(f64 delta_time) {
 
     render_pass_begin(render_pass);
     {
-        shader_bind(shader);
-        render_pass_draw_indexed(render_pass, vertex_buffer, index_buffer);
-        shader_unbind(shader);
+        shader_set_mat4(shader, "uTransform", &mat);
+        render_pass_draw_indexed(
+            render_pass, shader, vertex_buffer, index_buffer
+        );
     }
     render_pass_end(render_pass);
 
@@ -125,6 +134,8 @@ void sandbox_shutdown() {
     shader_destroy(shader);
     buffer_destroy(vertex_buffer);
     buffer_destroy(index_buffer);
+
+    render_pass_destroy(render_pass);
 }
 
 void application_init(ApplicationConfig* config) {

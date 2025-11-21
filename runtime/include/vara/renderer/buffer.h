@@ -2,8 +2,7 @@
 
 #include <vara/core/defines.h>
 
-#include "vara/renderer/renderer.h"
-
+// Forward declarations, in case they need access to each other.
 typedef enum BufferType BufferType;
 typedef enum BufferUsage BufferUsage;
 typedef enum VertexAttributeType VertexAttributeType;
@@ -12,6 +11,9 @@ typedef struct VertexLayout VertexLayout;
 typedef struct BufferConfig BufferConfig;
 typedef struct BufferVT BufferVT;
 typedef struct Buffer Buffer;
+
+// Redeclaration's so we don't have to include header.
+struct RendererInstance;
 
 enum BufferType {
     BUFFER_TYPE_VERTEX,
@@ -76,7 +78,7 @@ struct Buffer {
 };
 
 Buffer* buffer_create(
-    const RendererInstance* instance, const BufferConfig* config
+    const struct RendererInstance* instance, const BufferConfig* config
 );
 
 void buffer_destroy(Buffer* buffer);

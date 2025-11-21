@@ -1,11 +1,10 @@
-#include "vara/renderer/renderer.h"
-#include "vara/renderer/shader.h"
-
 #include <stdlib.h>
-
 #include <vara/core/logger.h>
 #include <vara/core/platform/platform.h>
 #include <vara/core/platform/platform_graphics_types.h>
+
+#include "vara/renderer/renderer.h"
+#include "vara/renderer/shader.h"
 
 extern Shader* shader_opengl_init(const ShaderConfig* config);
 
@@ -52,6 +51,12 @@ void shader_bind(Shader* shader) {
 void shader_unbind(Shader* shader) {
     if (shader && shader->vt.shader_unbind) {
         shader->vt.shader_unbind(shader);
+    }
+}
+
+void shader_set_mat4(Shader* shader, const char* name, const Matrix4* matrix) {
+    if (shader && shader->vt.shader_set_mat4) {
+        shader->vt.shader_set_mat4(shader, name, matrix);
     }
 }
 

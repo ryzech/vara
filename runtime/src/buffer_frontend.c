@@ -1,11 +1,10 @@
-#include "vara/renderer/buffer.h"
-#include "vara/renderer/renderer.h"
-
 #include <stdlib.h>
-
 #include <vara/core/logger.h>
 #include <vara/core/platform/platform.h>
 #include <vara/core/platform/platform_graphics_types.h>
+
+#include "vara/renderer/buffer.h"
+#include "vara/renderer/renderer.h"
 
 extern Buffer* buffer_opengl_init(void);
 
@@ -25,6 +24,10 @@ Buffer* buffer_create(
                 );
                 return NULL;
         }
+    }
+
+    if (!buffer) {
+        return NULL;
     }
 
     buffer->type = config->type;
@@ -48,10 +51,10 @@ Buffer* buffer_create(
     switch (buffer->type) {
         case BUFFER_TYPE_VERTEX:
             buffer->element_count =
-                (u32)(config->size / buffer->layout->stride);
+                (i32)(config->size / buffer->layout->stride);
             break;
         case BUFFER_TYPE_INDEX:
-            buffer->element_count = (u32)(config->size / sizeof(u32));
+            buffer->element_count = (i32)(config->size / sizeof(u32));
             break;
         default:
             buffer->element_count = 0;

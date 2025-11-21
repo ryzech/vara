@@ -1,12 +1,11 @@
-#include "vara/renderer/buffer.h"
-#include "vara/renderer/render_pass.h"
-#include "vara/renderer/renderer.h"
-
 #include <stdlib.h>
-
 #include <vara/core/logger.h>
 #include <vara/core/platform/platform.h>
 #include <vara/core/platform/platform_graphics_types.h>
+
+#include "vara/renderer/render_pass.h"
+#include "vara/renderer/renderer.h"
+#include "vara/renderer/buffer.h"
 
 extern RenderPass* render_pass_opengl_init(const RenderPassConfig* config);
 
@@ -51,9 +50,13 @@ void render_pass_begin(RenderPass* render_pass) {
 }
 
 void render_pass_draw_indexed(
-    RenderPass* pass, struct Buffer* vertex_buffer, struct Buffer* index_buffer
+    RenderPass* pass,
+    Shader* shader,
+    Buffer* vertex_buffer,
+    Buffer* index_buffer
 ) {
     if (pass && pass->vt.render_pass_draw_indexed) {
+        shader_bind(shader);
         buffer_bind(vertex_buffer);
         buffer_bind(index_buffer);
         pass->vt.render_pass_draw_indexed(pass, index_buffer);

@@ -88,6 +88,7 @@ static void render_pass_opengl_end(RenderPass* pass) {
         return;
     }
 
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     render_pass_state->active = false;
 }
 

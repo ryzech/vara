@@ -1,11 +1,10 @@
-#include "vara/renderer/renderer.h"
-
 #include <stdlib.h>
-
 #include <vara/core/logger.h>
 #include <vara/core/platform/platform.h>
 #include <vara/core/platform/platform_graphics_types.h>
 #include <vara/core/platform/platform_window.h>
+
+#include "vara/renderer/renderer.h"
 
 extern RendererInstance* renderer_opengl_init(VaraWindow* window);
 

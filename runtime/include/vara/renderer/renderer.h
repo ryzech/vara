@@ -5,6 +5,13 @@
 #include <vara/core/platform/platform_graphics_types.h>
 #include <vara/core/platform/platform_window.h>
 
+#include "vara/renderer/buffer.h"
+#include "vara/renderer/framebuffer.h"
+#include "vara/renderer/render_command.h"
+#include "vara/renderer/render_pass.h"
+#include "vara/renderer/shader.h"
+
+// Forward declarations, in case they need access to each other.
 typedef struct RendererInstanceVT RendererInstanceVT;
 typedef struct RendererInstance RendererInstance;
 

@@ -1,10 +1,10 @@
 #include <glad/gl.h>
-
 #include <vara/core/defines.h>
 #include <vara/core/logger.h>
 #include <vara/core/math/types.h>
 #include <vara/core/platform/platform_window.h>
 #include <vara/renderer/renderer.h>
+
 #include "vara/core/platform/platform.h"
 
 typedef struct OpenGLRendererState {

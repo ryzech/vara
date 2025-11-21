@@ -85,3 +85,9 @@ typedef union vector4i_u {
         i32 w;
     };
 } Vector4i;
+
+typedef Vector4 Quaternion;
+
+typedef union matrix4_u {
+    f32 elements[16];
+} Matrix4;
