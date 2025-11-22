@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vara/application/application.h>
+#include <vara/camera/camera.h>
 #include <vara/core/defines.h>
 #include <vara/core/input/input.h>
 #include <vara/core/logger.h>
@@ -31,7 +32,7 @@ static Buffer* vertex_buffer;
 static Shader* shader;
 static RenderPass* render_pass;
 
-static f32 x = 0;
+static Camera* camera;
 
 void sandbox_init(void) {
     DEBUG("Version: %s", VARA_VERSION);
@@ -98,29 +99,68 @@ void sandbox_init(void) {
     };
 
     render_pass = render_pass_create(application_get_renderer(), &pass_config);
+
+    camera = camera_create();
+    camera_set_position(
+        camera,
+        (Vector3){
+            0.0f,
+            0.0f,
+            0.5f,
+        }
+    );
+    camera->projection = mat4_perspective(
+        degrees_to_radians(60.0f),
+        (f32)application_get_window()->width
+            / (f32)application_get_window()->height,
+        0.01f,
+        100.0f
+    );
+    camera_move(camera, vec3_zero());
 }
 
-void sandbox_update(f64 delta_time) {
+void sandbox_update(f32 delta_time) {
     if (input_is_key_down(KEY_ESCAPE)) {
         application_exit();
     }
 
-    const Matrix4 mat = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, 0, 0, 1};
-    if (input_is_key_down(KEY_LEFT)) {
-        x -= 0.5f * (f32)delta_time;
+    Vector3 delta = vec3_zero();
+    const f32 speed = 5.0f * delta_time;
+
+    if (input_is_key_down(KEY_W)) {
+        delta.z -= speed;
     }
-    if (input_is_key_down(KEY_RIGHT)) {
-        x += 0.5f * (f32)delta_time;
+    if (input_is_key_down(KEY_S)) {
+        delta.z += speed;
+    }
+    if (input_is_key_down(KEY_A)) {
+        delta.x -= speed;
+    }
+    if (input_is_key_down(KEY_D)) {
+        delta.x += speed;
     }
 
+    if (delta.x != 0.0f || delta.z != 0.0f) {
+        camera_move(camera, delta);
+    }
+
+    const Matrix4 transform_matrix =
+        mat4_mul(camera_get_projection(camera), camera_get_view(camera));
+
     renderer_clear_color(
-        application_get_renderer(), (Vector4){0.1f, 0.1f, 0.1f, 1.0f}
+        application_get_renderer(),
+        (Vector4){
+            0.1f,
+            0.1f,
+            0.1f,
+            1.0f,
+        }
     );
     renderer_clear(application_get_renderer());
 
     render_pass_begin(render_pass);
     {
-        shader_set_mat4(shader, "uTransform", &mat);
+        shader_set_mat4(shader, "uTransform", &transform_matrix);
         render_pass_draw_indexed(
             render_pass, shader, vertex_buffer, index_buffer
         );
@@ -135,6 +175,7 @@ void sandbox_shutdown() {
     buffer_destroy(vertex_buffer);
     buffer_destroy(index_buffer);
 
+    camera_destroy(camera);
     render_pass_destroy(render_pass);
 }
 

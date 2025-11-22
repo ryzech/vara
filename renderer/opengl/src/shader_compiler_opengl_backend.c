@@ -53,11 +53,7 @@ static u32 compile_shader_stage(
 }
 
 u32 shader_compiler_opengl_compile(const ShaderConfig* config) {
-    if (!config) {
-        return 0;
-    }
-
-    if (!config->stage_count || !config->stages) {
+    if (!config || !config->stage_count || !config->stages) {
         return 0;
     }
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "vara/core/math/mat4.h"
 #include "vara/core/math/types.h"
 #include "vara/core/math/vec3.h"
 
@@ -14,3 +15,12 @@
 #define TAU_OVER_FOUR TAU / 4
 #define ONE_OVER_TAU  1 / TAU
 #define TWO_OVER_TAU  2 / TAU
+
+/**
+ * Converts a given degree value to radians.
+ * @param degrees Degree value to convert.
+ * @return Value of input in radians.
+ */
+static f32 degrees_to_radians(f32 degrees) {
+    return degrees * (PI / 180.0f);
+}

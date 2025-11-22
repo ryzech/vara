@@ -72,7 +72,7 @@ int application_main(int argc, char** argv) {
 
         input_system_update();
         if (application_state.config.app.on_update) {
-            application_state.config.app.on_update(delta_time);
+            application_state.config.app.on_update((f32)delta_time);
         }
     }
 

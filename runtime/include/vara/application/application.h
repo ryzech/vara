@@ -11,7 +11,7 @@ typedef struct ApplicationConfig ApplicationConfig;
 
 struct Application {
     void (*on_init)(void);
-    void (*on_update)(f64 delta_time);
+    void (*on_update)(f32 delta_time);
     void (*on_shutdown)(void);
     void (*on_resize)(void);
 };
