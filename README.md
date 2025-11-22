@@ -1,39 +1,42 @@
-# Archimedes
-> Custom game engine written in pure C99.
+# Vara
+> Custom game engine written in (mostly) pure C99.
 
 >[!WARNING]  
->Do not use this. Currently, not production ready.
+>Do not use this. Nowhere near production ready!
+
+## Inspirations
+Definitely an engine inspired by Travis Vroman and the [Kohi Engine](https://kohiengine.com), I originally followed his series but went on a different path early on.
+
+Also inspired by the [Hazel Engine](https://hazelengine.com) and some of the series was referenced for renderer architecture.
 
 ## Building
 Prerequisites
-- [Meson >1.8.0](https://mesonbuild.com)
-- [Ninja >1.13.0](https://ninja-build.org/)
-- (Optional) [Mise](https://mise.jdx.dev/)
+- [CMake >3.20](https://cmake.org)
+- (Optional) [Ninja >1.13.0](https://ninja-build.org/)
 
-For convenience, a [Makefile](./Makefile) is provided.
+Scripts are provided under [build](./build), for example macOS has a `build/macos` folder, while Linux has a `build/linux` folder.
+
+In the below example the scripts used are for macOS but all platforms are provided.
+Windows uses a `.bat` file though.
 
 ```shell
-# Build Debug
-make build-debug
+# Build Debug (macOS)
+./build/macos/build-debug.sh
 
 # Build Release
-make build-release
+./build/macos/build-release.sh
 
-# Run Debug
-make run-debug
+# Run Sandbox Executable (replace Debug with build type.
+./build/debug/sandbox/vara-sandbox
 
-# Run Release
-make run-release
+# Run Editor Executable (replace Debug with build type.
+./build/debug/editor/vara-editor
 
-# Clean Build Files
-make clean
+# Clean Debug (works for Release too)
+./build/macos/build-debug.sh clean
 ```
 
-The output will be under the `bin/` directory, either `bin/build-debug/` or `bin/build-release/` depending on which command you ran.
-
-## TODO
-- [ ] Implement Native MacOS windowing (ObjC, Cocoa.)
-- [ ] Separate windowing into its own struct / file.
+The output will be under the `build/` directory, either `build/debug` or `build/release` depending on which command you run.
 
 ## License
 This project is licensed under the [MIT License](https://mit-license.org/) as specified in [LICENSE](./LICENSE).

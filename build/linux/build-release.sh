@@ -19,6 +19,6 @@ cmake -S "$PROJECT_ROOT" -B "$BUILD_DIR" -DCMAKE_BUILD_TYPE=Release
 
 # Build
 echo "Compiling targets..."
-cmake --build "$BUILD_DIR" --parallel $(nproc)
+cmake --build "$BUILD_DIR" --parallel "$(nproc)"
 
 echo "Release build complete! Binaries in: $BUILD_DIR"

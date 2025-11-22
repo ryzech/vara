@@ -23,6 +23,6 @@ cmake -S "$PROJECT_ROOT" -B "$BUILD_DIR" -DCMAKE_BUILD_TYPE=Debug
 
 # Build
 echo "Compiling targets..."
-cmake --build "$BUILD_DIR" --parallel $(sysctl -n hw.ncpu)
+cmake --build "$BUILD_DIR" --parallel "$(sysctl -n hw.ncpu)"
 
 echo "Debug build complete! Binaries in: $BUILD_DIR"
