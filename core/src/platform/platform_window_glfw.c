@@ -335,6 +335,14 @@ Vector2i platform_window_get_size(VaraWindow* window) {
     return dimensions;
 }
 
+Vector2i platform_window_get_framebuffer_size(VaraWindow* window) {
+    i32 width, height;
+    glfwGetFramebufferSize(window->platform_state->window, &width, &height);
+    Vector2i dimensions = {.x = width, .y = height};
+
+    return dimensions;
+}
+
 void* platform_window_get_native_handle(const VaraWindow* window) {
     if (!window) {
         return NULL;

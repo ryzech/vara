@@ -7,7 +7,7 @@ void editor_init(void) {
     DEBUG("Version: %s", VARA_VERSION);
 }
 
-void editor_update(f64 delta_time) {
+void editor_update(f32 delta_time) {
 
 }
 

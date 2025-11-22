@@ -127,7 +127,8 @@ void sandbox_update(f32 delta_time) {
     }
 
     // Temporary perspective update on resize - will move to resize event when done.
-    Vector2i size = platform_window_get_size(application_get_window());
+    Vector2i size =
+        platform_window_get_framebuffer_size(application_get_window());
     camera->projection = mat4_perspective(
         degrees_to_radians(60.0f), (f32)size.x / (f32)size.y, 0.01f, 100.0f
     );
@@ -138,9 +139,10 @@ void sandbox_update(f32 delta_time) {
     timer += delta_time;
     // Otherwise title goes brrrr
     if (timer >= 0.5f) {
+        // Temporary FPS debug title.
         f32 fps = 1.0f / delta_time;
         char fps_str[32];
-        sprintf(fps_str, "Sandbox - %.2f fps", fps);
+        snprintf(fps_str, sizeof(fps_str), "Sandbox - %.2f fps", fps);
         platform_window_set_title(application_get_window(), fps_str);
         timer = 0.0f;
     }

@@ -2,7 +2,7 @@
 # Not an issue, just an artifact of being explicit in the links.
 cmake_policy(SET CMP0156 NEW)
 
-add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+add_compile_options(-Wall -Wextra -Werror)
 
 add_compile_options(
         -Wno-gnu-zero-variadic-macro-arguments
