@@ -19,11 +19,11 @@ void camera_destroy(Camera* camera) {
     platform_free(camera);
 }
 
-Vector3 camera_get_position(Camera* camera) {
+Vector3 camera_get_position(const Camera* camera) {
     return camera->position;
 }
 
-Matrix4 camera_get_view(Camera* camera) {
+Matrix4 camera_get_view(const Camera* camera) {
     return camera->view;
 }
 
@@ -37,6 +37,7 @@ void camera_set_position(Camera* camera, const Vector3 position) {
 
 void camera_move(Camera* camera, Vector3 delta) {
     camera->position = vec3_add(camera->position, delta);
+
     const Vector3 forward = (Vector3){
         0.0f,
         0.0f,
@@ -48,5 +49,6 @@ void camera_move(Camera* camera, Vector3 delta) {
         1.0f,
         0.0f,
     };
+
     camera->view = mat4_look_at(camera->position, target, up);
 }

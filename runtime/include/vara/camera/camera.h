@@ -30,13 +30,13 @@ void camera_destroy(Camera* camera);
  * @param camera Camera to get position of.
  * @return A Vector3 of the Camera's current position.
  */
-Vector3 camera_get_position(Camera* camera);
+Vector3 camera_get_position(const Camera* camera);
 /**
  * Returns and identity matrix if not set.
  * @param camera Camera to get view matrix of.
  * @return Current view matrix of the Camera.
  */
-Matrix4 camera_get_view(Camera* camera);
+Matrix4 camera_get_view(const Camera* camera);
 /**
  * Returns an identity matrix if not set.
  * @param camera Camera to get projection matrix of.

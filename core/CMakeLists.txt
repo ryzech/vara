@@ -1,5 +1,6 @@
 set(CORE_SOURCES src/logger.c src/util/uuid.c
-        src/input/input.c)
+        src/input/input.c
+        src/event/event.c)
 
 if(APPLE)
     list(APPEND CORE_SOURCES

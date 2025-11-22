@@ -34,6 +34,8 @@ static RenderPass* render_pass;
 
 static Camera* camera;
 
+static f32 timer;
+
 void sandbox_init(void) {
     DEBUG("Version: %s", VARA_VERSION);
     f32 vertices[] = {0.0f, 0.5f, 0.0f, -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f};
@@ -122,6 +124,22 @@ void sandbox_init(void) {
 void sandbox_update(f32 delta_time) {
     if (input_is_key_down(KEY_ESCAPE)) {
         application_exit();
+    }
+
+    // Temporary perspective update on resize - will move to resize event when done.
+    Vector2i size = platform_window_get_size(application_get_window());
+    camera->projection = mat4_perspective(
+        degrees_to_radians(60.0f), (f32)size.x / (f32)size.y, 0.01f, 100.0f
+    );
+
+    timer += delta_time;
+    // Otherwise title goes brrrr
+    if (timer >= 0.5f) {
+        f32 fps = 1.0f / delta_time;
+        char fps_str[32];
+        sprintf(fps_str, "Sandbox - %.2f fps", fps);
+        platform_window_set_title(application_get_window(), fps_str);
+        timer = 0.0f;
     }
 
     Vector3 delta = vec3_zero();
