@@ -21,11 +21,7 @@ REM Configure build directory
 echo Configuring build directory...
 cmake -S "%PROJECT_ROOT%" -B "%BUILD_DIR%" -DCMAKE_BUILD_TYPE=Release
 
-REM Detect number of CPU cores
-for /f "tokens=2 delims==" %%a in ('wmic cpu get NumberOfLogicalProcessors /value ^| find "="') do set CORES=%%a
-if "%CORES%"=="" set CORES=1
-
-echo Compiling targets with %CORES% threads...
-cmake --build "%BUILD_DIR%" --parallel %CORES%
+echo Compiling targets with %NUMBER_OF_PROCESSORS%threads...
+cmake --build "%BUILD_DIR%" --parallel %NUMBER_OF_PROCESSORS%
 
 echo Release build complete! Binaries in: %BUILD_DIR%

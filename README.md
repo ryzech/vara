@@ -19,6 +19,8 @@ Scripts are provided under [build](./build), for example macOS has a `build/maco
 In the below example the scripts used are for macOS but all platforms are provided.
 Windows uses a `.bat` file though.
 
+Or... just use an IDE (CLion, Visual Studio, all should have CMake support.)
+
 ```shell
 # Build Debug (macOS)
 ./build/macos/build-debug.sh
