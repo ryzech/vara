@@ -3,16 +3,15 @@
 #include <vara/core/platform/platform.h>
 #include <vara/core/platform/platform_graphics_types.h>
 
+#include "vara/renderer/buffer.h"
 #include "vara/renderer/render_pass.h"
 #include "vara/renderer/renderer.h"
-#include "vara/renderer/buffer.h"
 
 extern RenderPass* render_pass_opengl_init(const RenderPassConfig* config);
 
-RenderPass* render_pass_create(
-    const RendererInstance* instance, const RenderPassConfig* config
-) {
+RenderPass* render_pass_create(const RenderPassConfig* config) {
     RenderPass* render_pass = NULL;
+    RendererInstance* instance = renderer_get_instance();
     if (instance) {
         switch (instance->renderer_type) {
             case GRAPHICS_TYPE_OPENGL:

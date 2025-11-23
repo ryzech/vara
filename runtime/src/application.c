@@ -10,7 +10,6 @@ typedef struct ApplicationState ApplicationState;
 struct ApplicationState {
     ApplicationConfig config;
     VaraWindow* window;
-    RendererInstance* renderer;
     b8 is_running;
     f64 last_time;
 };
@@ -38,8 +37,7 @@ int application_main(int argc, char** argv) {
     }
 
     if (application_state.config.graphics_type != GRAPHICS_TYPE_NONE) {
-        application_state.renderer = renderer_create(application_state.window);
-        if (!application_state.renderer) {
+        if (!renderer_create(application_state.window)) {
             ERROR("Failed to create renderer!");
             platform_window_destroy(application_state.window);
             platform_destroy();
@@ -85,8 +83,8 @@ int application_main(int argc, char** argv) {
         platform_window_destroy(application_state.window);
     }
 
-    if (application_state.renderer) {
-        renderer_destroy(application_state.renderer);
+    if (renderer_get_instance()) {
+        renderer_destroy();
     }
 
     input_system_destroy();
@@ -98,10 +96,6 @@ int application_main(int argc, char** argv) {
 
 VaraWindow* application_get_window(void) {
     return application_state.window;
-}
-
-RendererInstance* application_get_renderer(void) {
-    return application_state.renderer;
 }
 
 void application_exit(void) {

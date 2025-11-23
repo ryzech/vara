@@ -18,5 +18,4 @@ struct FramebufferConfig {
 
 struct Framebuffer {
     const char* name;
-    struct RendererInstance* instance;
 };

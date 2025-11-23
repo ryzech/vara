@@ -8,10 +8,9 @@
 
 extern Buffer* buffer_opengl_init(void);
 
-Buffer* buffer_create(
-    const RendererInstance* instance, const BufferConfig* config
-) {
+Buffer* buffer_create(const BufferConfig* config) {
     Buffer* buffer = NULL;
+    RendererInstance* instance = renderer_get_instance();
     if (instance) {
         switch (instance->renderer_type) {
             case GRAPHICS_TYPE_OPENGL:

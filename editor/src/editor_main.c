@@ -8,7 +8,6 @@ void editor_init(void) {
 }
 
 void editor_update(f32 delta_time) {
-
 }
 
 void editor_shutdown(void) {

@@ -10,9 +10,6 @@ typedef struct ShaderConfig ShaderConfig;
 typedef struct ShaderVT ShaderVT;
 typedef struct Shader Shader;
 
-// Redeclaration's so we don't have to include header.
-struct RendererInstance;
-
 enum ShaderStage {
     SHADER_STAGE_VERTEX,
     SHADER_STAGE_FRAGMENT,
@@ -49,9 +46,7 @@ struct Shader {
     void* backend_data;
 };
 
-Shader* shader_create(
-    const struct RendererInstance* instance, const ShaderConfig* config
-);
+Shader* shader_create(const ShaderConfig* config);
 
 void shader_destroy(Shader* shader);
 

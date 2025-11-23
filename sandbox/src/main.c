@@ -62,9 +62,7 @@ void sandbox_init(void) {
         .data = vertices,
         .size = sizeof(vertices)
     };
-
-    vertex_buffer =
-        buffer_create(application_get_renderer(), &vertex_buffer_config);
+    vertex_buffer = buffer_create(&vertex_buffer_config);
 
     const BufferConfig index_buffer_config = {
         .type = BUFFER_TYPE_INDEX,
@@ -72,9 +70,7 @@ void sandbox_init(void) {
         .data = indices,
         .size = sizeof(indices)
     };
-
-    index_buffer =
-        buffer_create(application_get_renderer(), &index_buffer_config);
+    index_buffer = buffer_create(&index_buffer_config);
 
     ShaderSource sources[] = {
         {
@@ -92,15 +88,13 @@ void sandbox_init(void) {
         .stages = sources,
         .stage_count = 2,
     };
-
-    shader = shader_create(application_get_renderer(), &shader_config);
+    shader = shader_create(&shader_config);
 
     const RenderPassConfig pass_config = {
         .name = "main_pass",
         .target = NULL,
     };
-
-    render_pass = render_pass_create(application_get_renderer(), &pass_config);
+    render_pass = render_pass_create(&pass_config);
 
     camera = camera_create();
     camera_set_position(
@@ -134,7 +128,7 @@ void sandbox_update(f32 delta_time) {
     );
     // Also temporary viewport update, this function likely won't
     // Even exist later, and will be handled internally.
-    renderer_set_viewport(application_get_renderer(), vec2i_zero(), size);
+    renderer_set_viewport(vec2i_zero(), size);
 
     timer += delta_time;
     // Otherwise title goes brrrr
@@ -149,7 +143,6 @@ void sandbox_update(f32 delta_time) {
 
     Vector3 delta = vec3_zero();
     const f32 speed = 5.0f * delta_time;
-
 
     // Lateral movements
     if (input_is_key_down(KEY_W) || input_is_key_down(KEY_UP)) {
@@ -169,7 +162,8 @@ void sandbox_update(f32 delta_time) {
     if (input_is_key_down(KEY_SPACE)) {
         delta.y += speed;
     }
-    if (input_is_key_down(KEY_RIGHT_SHIFT) || input_is_key_down(KEY_LEFT_SHIFT)) {
+    if (input_is_key_down(KEY_RIGHT_SHIFT)
+        || input_is_key_down(KEY_LEFT_SHIFT)) {
         delta.y -= speed;
     }
 
@@ -181,16 +175,13 @@ void sandbox_update(f32 delta_time) {
     const Matrix4 transform_matrix =
         mat4_mul(camera_get_projection(camera), camera_get_view(camera));
 
-    renderer_clear_color(
-        application_get_renderer(),
-        (Vector4){
-            0.1f,
-            0.1f,
-            0.1f,
-            1.0f,
-        }
-    );
-    renderer_clear(application_get_renderer());
+    renderer_clear_color((Vector4){
+        0.1f,
+        0.1f,
+        0.1f,
+        1.0f,
+    });
+    renderer_clear();
 
     render_pass_begin(render_pass);
     {
@@ -201,7 +192,7 @@ void sandbox_update(f32 delta_time) {
     }
     render_pass_end(render_pass);
 
-    renderer_present(application_get_renderer());
+    renderer_present();
 }
 
 void sandbox_shutdown() {

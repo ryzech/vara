@@ -12,9 +12,6 @@ typedef struct BufferConfig BufferConfig;
 typedef struct BufferVT BufferVT;
 typedef struct Buffer Buffer;
 
-// Redeclaration's so we don't have to include header.
-struct RendererInstance;
-
 enum BufferType {
     BUFFER_TYPE_VERTEX,
     BUFFER_TYPE_INDEX,
@@ -77,9 +74,7 @@ struct Buffer {
     void* backend_data;
 };
 
-Buffer* buffer_create(
-    const struct RendererInstance* instance, const BufferConfig* config
-);
+Buffer* buffer_create(const BufferConfig* config);
 
 void buffer_destroy(Buffer* buffer);
 

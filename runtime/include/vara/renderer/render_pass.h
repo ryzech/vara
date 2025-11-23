@@ -8,7 +8,6 @@ typedef struct RenderPass RenderPass;
 typedef struct RenderPassConfig RenderPassConfig;
 
 // Redeclaration's so we don't have to include header.
-struct RendererInstance;
 struct Framebuffer;
 struct Buffer;
 struct Shader;
@@ -30,16 +29,13 @@ struct RenderPassVT {
 
 struct RenderPass {
     const char* name;
-    struct RendererInstance* renderer;
     RenderPassConfig* config;
     RenderPassVT vt;
     void* backend_data;
     b8 is_recording;
 };
 
-RenderPass* render_pass_create(
-    const struct RendererInstance* instance, const RenderPassConfig* config
-);
+RenderPass* render_pass_create(const RenderPassConfig* config);
 
 void render_pass_destroy(RenderPass* pass);
 

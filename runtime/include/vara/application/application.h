@@ -27,7 +27,6 @@ struct ApplicationConfig {
 int application_main(int argc, char** argv);
 
 VaraWindow* application_get_window(void);
-RendererInstance* application_get_renderer(void);
 void application_exit(void);
 
 void application_init(ApplicationConfig* config);
