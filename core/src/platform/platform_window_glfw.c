@@ -183,7 +183,7 @@ static Key glfw_to_keycode(const i32 keycode) {
         case GLFW_KEY_PAUSE:
             return KEY_PAUSE;
         case GLFW_KEY_LEFT_SHIFT:
-            return KEY_LSHIFT;
+            return KEY_LEFT_SHIFT;
         case GLFW_KEY_LEFT_CONTROL:
             return KEY_LEFT_CONTROL;
         case GLFW_KEY_LEFT_ALT:

@@ -7,7 +7,7 @@
 #include "vara/renderer/shader_compiler_opengl.h"
 
 typedef struct OpenGLShaderState {
-    u32 shader_program;
+    GLuint shader_program;
 } OpenGLShaderState;
 
 static b8 shader_opengl_create(Shader* shader, const ShaderConfig* config) {
@@ -81,7 +81,7 @@ static void shader_opengl_set_mat4(
 
     OpenGLShaderState* shader_state = shader->backend_data;
 
-    i32 location = glGetUniformLocation(shader_state->shader_program, name);
+    GLint location = glGetUniformLocation(shader_state->shader_program, name);
     glUniformMatrix4fv(location, 1, GL_FALSE, matrix->elements);
 }
 

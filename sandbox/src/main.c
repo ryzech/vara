@@ -150,20 +150,31 @@ void sandbox_update(f32 delta_time) {
     Vector3 delta = vec3_zero();
     const f32 speed = 5.0f * delta_time;
 
-    if (input_is_key_down(KEY_W)) {
+
+    // Lateral movements
+    if (input_is_key_down(KEY_W) || input_is_key_down(KEY_UP)) {
         delta.z -= speed;
     }
-    if (input_is_key_down(KEY_S)) {
+    if (input_is_key_down(KEY_S) || input_is_key_down(KEY_DOWN)) {
         delta.z += speed;
     }
-    if (input_is_key_down(KEY_A)) {
+    if (input_is_key_down(KEY_A) || input_is_key_down(KEY_LEFT)) {
         delta.x -= speed;
     }
-    if (input_is_key_down(KEY_D)) {
+    if (input_is_key_down(KEY_D) || input_is_key_down(KEY_RIGHT)) {
         delta.x += speed;
     }
 
-    if (delta.x != 0.0f || delta.z != 0.0f) {
+    // Vertical movements
+    if (input_is_key_down(KEY_SPACE)) {
+        delta.y += speed;
+    }
+    if (input_is_key_down(KEY_RIGHT_SHIFT) || input_is_key_down(KEY_LEFT_SHIFT)) {
+        delta.y -= speed;
+    }
+
+    // Only move if delta isn't zero
+    if (delta.x != 0.0f || delta.z != 0.0f || delta.y != 0.0f) {
         camera_move(camera, delta);
     }
 

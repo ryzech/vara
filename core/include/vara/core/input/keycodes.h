@@ -78,7 +78,7 @@ enum Key {
     KEY_PAUSE,
     KEY_MENU,
 
-    KEY_LSHIFT,
+    KEY_LEFT_SHIFT,
     KEY_LEFT_CONTROL,
     KEY_LEFT_ALT,
     KEY_LEFT_SUPER,

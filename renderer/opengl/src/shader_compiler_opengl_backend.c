@@ -4,7 +4,7 @@
 
 #include "vara/renderer/shader_compiler_opengl.h"
 
-static u32 stage_to_gl_type(ShaderStage stage, const char** out_name) {
+static GLenum stage_to_gl_type(ShaderStage stage, const char** out_name) {
     switch (stage) {
         case SHADER_STAGE_VERTEX:
             *out_name = "vertex_shader";
@@ -21,10 +21,10 @@ static u32 stage_to_gl_type(ShaderStage stage, const char** out_name) {
     }
 }
 
-static u32 compile_shader_stage(
-    u32 type, const char* source, const char* stage_name
+static GLuint compile_shader_stage(
+    GLenum type, const char* source, const char* stage_name
 ) {
-    u32 shader = glCreateShader(type);
+    GLuint shader = glCreateShader(type);
     if (!shader) {
         ERROR(
             "Failed to create shader object for stage named('%s')", stage_name
@@ -35,7 +35,7 @@ static u32 compile_shader_stage(
     glShaderSource(shader, 1, &source, 0);
     glCompileShader(shader);
 
-    i32 success;
+    GLint success;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (!success) {
         char info_log[512];
@@ -52,20 +52,20 @@ static u32 compile_shader_stage(
     return shader;
 }
 
-u32 shader_compiler_opengl_compile(const ShaderConfig* config) {
+GLuint shader_compiler_opengl_compile(const ShaderConfig* config) {
     if (!config || !config->stage_count || !config->stages) {
         return 0;
     }
 
     DEBUG("Compiling shader program named('%s')", config->name);
 
-    u32 program = glCreateProgram();
+    GLuint program = glCreateProgram();
     if (!program) {
         ERROR("Failed to create OpenGL program");
         return 0;
     }
 
-    u32 compiled_shaders[16];
+    GLuint compiled_shaders[16];
     u32 shader_count = 0;
 
     for (u16 i = 0; i < config->stage_count; i++) {
@@ -75,12 +75,12 @@ u32 shader_compiler_opengl_compile(const ShaderConfig* config) {
         }
 
         const char* stage_name;
-        u32 gl_type = stage_to_gl_type(src->stage, &stage_name);
+        GLenum gl_type = stage_to_gl_type(src->stage, &stage_name);
         if (!gl_type) {
             return 0;
         }
 
-        u32 shader = compile_shader_stage(gl_type, src->source, stage_name);
+        GLuint shader = compile_shader_stage(gl_type, src->source, stage_name);
         if (!shader) {
             return 0;
         }
@@ -91,7 +91,7 @@ u32 shader_compiler_opengl_compile(const ShaderConfig* config) {
 
     glLinkProgram(program);
 
-    i32 success;
+    GLint success;
     glGetProgramiv(program, GL_LINK_STATUS, &success);
     if (!success) {
         char info_log[1024];
@@ -112,7 +112,7 @@ u32 shader_compiler_opengl_compile(const ShaderConfig* config) {
     return program;
 }
 
-void shader_compiler_opengl_delete(u32 program) {
+void shader_compiler_opengl_delete(GLuint program) {
     if (program) {
         glDeleteProgram(program);
     }

@@ -3,12 +3,12 @@
 #include <vara/renderer/buffer.h>
 
 typedef struct OpenGLBufferState {
-    u32 id;
-    u32 target;
-    u32 vao;
+    GLuint id;
+    GLenum target;
+    GLuint vao;
 } OpenGLBufferState;
 
-static u32 type_to_gl_type(BufferType type) {
+static GLenum type_to_gl_type(BufferType type) {
     switch (type) {
         case BUFFER_TYPE_VERTEX:
             return GL_ARRAY_BUFFER;
@@ -21,7 +21,7 @@ static u32 type_to_gl_type(BufferType type) {
     }
 }
 
-static u32 usage_to_gl_usage(BufferUsage usage) {
+static GLenum usage_to_gl_usage(BufferUsage usage) {
     switch (usage) {
         case BUFFER_USAGE_STATIC:
             return GL_STATIC_DRAW;
@@ -35,7 +35,7 @@ static u32 usage_to_gl_usage(BufferUsage usage) {
 }
 
 static void attribute_to_gl_attribute(
-    VertexAttributeType type, i32* out_gl_type, i32* out_count
+    VertexAttributeType type, GLenum* out_gl_type, GLint* out_count
 ) {
     switch (type) {
         case VERTEX_ATTRIBUTE_FLOAT:
@@ -114,7 +114,8 @@ static b8 buffer_opengl_create(Buffer* buffer, const BufferConfig* config) {
         for (u32 i = 0; i < layout->attribute_count; i++) {
             const VertexAttribute* attribute = &layout->attributes[i];
 
-            i32 gl_type, component_count;
+            GLenum gl_type;
+            GLint component_count;
             attribute_to_gl_attribute(
                 attribute->type, &gl_type, &component_count
             );

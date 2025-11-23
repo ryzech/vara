@@ -1,8 +1,9 @@
 #pragma once
 
+#include <glad/gl.h>
 #include <vara/core/defines.h>
 #include <vara/renderer/shader.h>
 
-u32 shader_compiler_opengl_compile(const ShaderConfig* config);
+GLuint shader_compiler_opengl_compile(const ShaderConfig* config);
 
-void shader_compiler_opengl_delete(u32 program);
+void shader_compiler_opengl_delete(GLuint program);

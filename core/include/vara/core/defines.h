@@ -36,7 +36,7 @@ typedef double f64;
 typedef int32_t b32;
 
 /** @brief 8-bit boolean type */
-typedef uint8_t b8;
+typedef _Bool b8;
 
 /** @brief A range, typically of memory */
 typedef struct range {
