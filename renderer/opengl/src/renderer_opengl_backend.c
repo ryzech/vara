@@ -34,6 +34,10 @@ static void renderer_opengl_clear_color(Vector4 color) {
     glClearColor(color.x, color.y, color.z, color.w);
 }
 
+static void renderer_opengl_set_viewport(Vector2i position, Vector2i size) {
+    glViewport(position.x, position.y, size.x, size.y);
+}
+
 static void renderer_opengl_present(void) {
     platform_window_swap_buffers(renderer_state.window);
 }
@@ -51,6 +55,7 @@ RendererInstance* renderer_opengl_init(VaraWindow* window) {
     opengl_instance->vt.renderer_create = renderer_opengl_create;
     opengl_instance->vt.renderer_clear = renderer_opengl_clear;
     opengl_instance->vt.renderer_clear_color = renderer_opengl_clear_color;
+    opengl_instance->vt.renderer_set_viewport = renderer_opengl_set_viewport;
     opengl_instance->vt.renderer_present = renderer_opengl_present;
     opengl_instance->vt.renderer_destroy = renderer_opengl_destroy;
 

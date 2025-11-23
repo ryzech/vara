@@ -52,6 +52,12 @@ void renderer_clear_color(RendererInstance* instance, Vector4 color) {
     }
 }
 
+void renderer_set_viewport(RendererInstance* instance, Vector2i position, Vector2i size) {
+    if (instance && instance->vt.renderer_set_viewport) {
+        instance->vt.renderer_set_viewport(position, size);
+    }
+}
+
 void renderer_present(RendererInstance* instance) {
     if (instance && instance->vt.renderer_present) {
         instance->vt.renderer_present();

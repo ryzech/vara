@@ -131,6 +131,9 @@ void sandbox_update(f32 delta_time) {
     camera->projection = mat4_perspective(
         degrees_to_radians(60.0f), (f32)size.x / (f32)size.y, 0.01f, 100.0f
     );
+    // Also temporary viewport update, this function likely won't
+    // Even exist later, and will be handled internally.
+    renderer_set_viewport(application_get_renderer(), vec2i_zero(), size);
 
     timer += delta_time;
     // Otherwise title goes brrrr

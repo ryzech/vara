@@ -20,6 +20,7 @@ struct RendererInstanceVT {
     void (*renderer_destroy)(void);
     void (*renderer_clear)(void);
     void (*renderer_clear_color)(Vector4 color);
+    void (*renderer_set_viewport)(Vector2i position, Vector2i size);
     void (*renderer_present)(void);
 };
 
@@ -63,6 +64,18 @@ void renderer_clear(RendererInstance* instance);
  * @param color Color to use when clearing the screen.
  */
 void renderer_clear_color(RendererInstance* instance, Vector4 color);
+
+/**
+ * Update the viewport for the given Renderer.
+ * @param instance RendererInstance to change the viewport of.
+ * @param position Position of the viewport.
+ * @param size Size of the viewport.
+ */
+// This will need moved out of here and likely into the framebuffer.
+// For now in order to get this working, it will be here.
+void renderer_set_viewport(
+    RendererInstance* instance, Vector2i position, Vector2i size
+);
 
 /**
  * This submits all the commands in the pass queue.\n
