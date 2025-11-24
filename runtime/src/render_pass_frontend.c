@@ -26,6 +26,12 @@ RenderPass* render_pass_create(const RenderPassConfig* config) {
         }
     }
 
+    if (!render_pass) {
+        return NULL;
+    }
+
+    render_pass->name = config->name;
+
     if (!render_pass->vt.render_pass_create(render_pass, config)) {
         ERROR("Failed to create render pass named('%s')", config->name);
         platform_free(render_pass);
@@ -44,6 +50,9 @@ void render_pass_destroy(RenderPass* render_pass) {
 
 void render_pass_begin(RenderPass* render_pass) {
     if (render_pass && render_pass->vt.render_pass_begin) {
+        if (render_pass->config->target) {
+            framebuffer_bind(render_pass->config->target);
+        }
         render_pass->vt.render_pass_begin(render_pass);
     }
 }
@@ -64,6 +73,9 @@ void render_pass_draw_indexed(
 
 void render_pass_end(RenderPass* render_pass) {
     if (render_pass && render_pass->vt.render_pass_end) {
+        if (render_pass->config->target) {
+            framebuffer_unbind(render_pass->config->target);
+        }
         render_pass->vt.render_pass_end(render_pass);
     }
 }

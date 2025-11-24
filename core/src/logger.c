@@ -5,7 +5,10 @@
 #include "vara/core/logger.h"
 #include "vara/core/platform/platform.h"
 
-static LogLevel global_level;
+// How should we handle this?
+// Platform DEBUG logs before level is set.
+// Should we default this to DEBUG or handle it earlier?
+static LogLevel global_level = LOG_LEVEL_DEBUG;
 
 b8 logging_system_create(LogLevel level) {
     // TODO: add rolling log files.

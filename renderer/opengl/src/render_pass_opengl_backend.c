@@ -95,8 +95,15 @@ static void render_pass_opengl_end(RenderPass* pass) {
 RenderPass* render_pass_opengl_init(const RenderPassConfig* config) {
     RenderPass* opengl_render_pass = platform_allocate(sizeof(RenderPass));
     platform_zero_memory(opengl_render_pass, sizeof(RenderPass));
+    if (!opengl_render_pass) {
+        return NULL;
+    }
 
-    opengl_render_pass->name = config->name;
+    opengl_render_pass->config = platform_allocate(sizeof(RenderPassConfig));
+    platform_copy_memory(
+        opengl_render_pass->config, config, sizeof(RenderPassConfig)
+    );
+
     opengl_render_pass->vt.render_pass_create = render_pass_opengl_create;
     opengl_render_pass->vt.render_pass_destroy = render_pass_opengl_destroy;
     opengl_render_pass->vt.render_pass_begin = render_pass_opengl_begin;

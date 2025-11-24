@@ -17,13 +17,6 @@ b8 renderer_create(VaraWindow* window) {
         switch (window->graphics_type) {
             case GRAPHICS_TYPE_OPENGL:
                 instance = renderer_opengl_init(window);
-                if (instance) {
-                    platform_window_make_context_current(window);
-                    if (!instance->vt.renderer_create()) {
-                        platform_free(instance);
-                        return false;
-                    }
-                }
                 break;
             default:
                 ERROR(
@@ -32,6 +25,16 @@ b8 renderer_create(VaraWindow* window) {
                 );
                 return false;
         }
+    }
+
+    if (!instance) {
+        return false;
+    }
+
+    platform_window_make_context_current(window);
+    if (!instance->vt.renderer_create()) {
+        platform_free(instance);
+        return false;
     }
 
     return true;

@@ -37,24 +37,25 @@ enum VertexAttributeType {
 };
 
 struct VertexAttribute {
-    u32 location;
     VertexAttributeType type;
+    // Should this be a size_t?
     u32 offset;
+    u32 location;
     b8 normalized;
 };
 
 struct VertexLayout {
     VertexAttribute* attributes;
-    u32 attribute_count;
-    i32 stride;
+    size_t attribute_count;
+    size_t stride;
 };
 
 struct BufferConfig {
     BufferType type;
     BufferUsage usage;
     VertexLayout* layout;
+    size_t size;
     const void* data;
-    i64 size;
 };
 
 struct BufferVT {
@@ -67,17 +68,15 @@ struct BufferVT {
 struct Buffer {
     BufferType type;
     BufferUsage usage;
-    u64 size;
     VertexLayout* layout;
-    i32 element_count;
     BufferVT vt;
+    size_t size;
+    size_t element_count;
     void* backend_data;
 };
 
 Buffer* buffer_create(const BufferConfig* config);
-
 void buffer_destroy(Buffer* buffer);
 
 void buffer_bind(Buffer* buffer);
-
 void buffer_unbind(Buffer* buffer);

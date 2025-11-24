@@ -25,6 +25,12 @@ Shader* shader_create(const ShaderConfig* config) {
         }
     }
 
+    if (!shader) {
+        return NULL;
+    }
+
+    shader->name = config->name;
+
     if (!shader->vt.shader_create(shader, config)) {
         ERROR("Failed to create shader named('%s')", config->name);
         platform_free(shader);

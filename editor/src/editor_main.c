@@ -4,7 +4,6 @@
 #include <vara/core/platform/platform_window.h>
 
 void editor_init(void) {
-    DEBUG("Version: %s", VARA_VERSION);
 }
 
 void editor_update(f32 delta_time) {

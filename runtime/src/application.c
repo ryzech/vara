@@ -26,6 +26,8 @@ int application_main(int argc, char** argv) {
     logging_system_create(application_state.config.level);
     input_system_create();
 
+    INFO("Running Vara Engine (%s)", VARA_VERSION);
+
     if (application_state.config.window_config) {
         application_state.window =
             platform_window_create(application_state.config.window_config);

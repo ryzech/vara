@@ -99,7 +99,7 @@ static b8 buffer_opengl_create(Buffer* buffer, const BufferConfig* config) {
     glBindBuffer(buffer_state->target, buffer_state->id);
     glBufferData(
         buffer_state->target,
-        config->size,
+        (GLsizeiptr)config->size,
         config->data,
         usage_to_gl_usage(config->usage)
     );
@@ -191,11 +191,12 @@ static void buffer_opengl_unbind(Buffer* buffer) {
 
 Buffer* buffer_opengl_init(void) {
     Buffer* buffer = platform_allocate(sizeof(Buffer));
+    platform_zero_memory(buffer, sizeof(Buffer));
     if (!buffer) {
         return NULL;
     }
 
-    platform_zero_memory(buffer, sizeof(Buffer));
+
 
     buffer->vt.buffer_create = buffer_opengl_create;
     buffer->vt.buffer_destroy = buffer_opengl_destroy;

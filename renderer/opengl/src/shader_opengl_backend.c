@@ -107,10 +107,11 @@ static void shader_opengl_dispatch(Shader* shader, i16 x, i16 y, i16 z) {
 
 Shader* shader_opengl_init(const ShaderConfig* config) {
     Shader* opengl_shader = platform_allocate(sizeof(Shader));
-
     platform_zero_memory(opengl_shader, sizeof(Shader));
+    if (!opengl_shader) {
+        return NULL;
+    }
 
-    opengl_shader->name = config->name;
     opengl_shader->vt.shader_create = shader_opengl_create;
     opengl_shader->vt.shader_destroy = shader_opengl_destroy;
     opengl_shader->vt.shader_bind = shader_opengl_bind;

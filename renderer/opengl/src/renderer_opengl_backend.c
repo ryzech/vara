@@ -16,6 +16,8 @@ static OpenGLRendererState renderer_state;
 static b8 renderer_opengl_create(void) {
     gladLoadGL((GLADloadfunc)platform_window_get_proc_address);
     glEnable(GL_DEBUG_OUTPUT);
+    // Should likely move this into config somewhere, or be pass specific?
+    glEnable(GL_DEPTH_TEST);
     DEBUG(
         "Loaded OpenGL: %s | %s",
         glGetString(GL_VERSION),

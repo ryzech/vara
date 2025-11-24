@@ -33,6 +33,7 @@ Buffer* buffer_create(const BufferConfig* config) {
     buffer->usage = config->usage;
     buffer->size = config->size;
 
+    // Probably should move this to the backend?
     if (config->layout) {
         buffer->layout = platform_allocate(sizeof(VertexLayout));
         buffer->layout->attribute_count = config->layout->attribute_count;

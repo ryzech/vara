@@ -36,16 +36,13 @@ struct RenderPass {
 };
 
 RenderPass* render_pass_create(const RenderPassConfig* config);
-
 void render_pass_destroy(RenderPass* pass);
 
 void render_pass_begin(RenderPass* pass);
-
 void render_pass_draw_indexed(
     RenderPass* pass,
     struct Shader* shader,
     struct Buffer* vertex_buffer,
     struct Buffer* index_buffer
 );
-
 void render_pass_end(RenderPass* pass);

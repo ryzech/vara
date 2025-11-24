@@ -37,9 +37,7 @@ static Camera* camera;
 static f32 timer;
 
 void sandbox_init(void) {
-    DEBUG("Version: %s", VARA_VERSION);
     f32 vertices[] = {0.0f, 0.5f, 0.0f, -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f};
-
     u32 indices[] = {0, 1, 2};
 
     VertexAttribute attributes[] = {
