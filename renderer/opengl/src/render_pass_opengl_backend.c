@@ -67,12 +67,15 @@ static void render_pass_opengl_draw_indexed(
         return;
     }
 
-    if (index_buffer->type != BUFFER_TYPE_INDEX) {
+    if (index_buffer->config->type != BUFFER_TYPE_INDEX) {
         return;
     }
 
     glDrawElements(
-        GL_TRIANGLES, index_buffer->element_count, GL_UNSIGNED_INT, NULL
+        GL_TRIANGLES,
+        (GLsizei)index_buffer->element_count,
+        GL_UNSIGNED_INT,
+        NULL
     );
 }
 

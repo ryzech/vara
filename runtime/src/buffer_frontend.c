@@ -6,7 +6,7 @@
 #include "vara/renderer/buffer.h"
 #include "vara/renderer/renderer.h"
 
-extern Buffer* buffer_opengl_init(void);
+extern Buffer* buffer_opengl_init(const BufferConfig* config);
 
 Buffer* buffer_create(const BufferConfig* config) {
     Buffer* buffer = NULL;
@@ -14,7 +14,7 @@ Buffer* buffer_create(const BufferConfig* config) {
     if (instance) {
         switch (instance->renderer_type) {
             case GRAPHICS_TYPE_OPENGL:
-                buffer = buffer_opengl_init();
+                buffer = buffer_opengl_init(config);
                 break;
             default:
                 ERROR(
@@ -29,29 +29,12 @@ Buffer* buffer_create(const BufferConfig* config) {
         return NULL;
     }
 
-    buffer->type = config->type;
-    buffer->usage = config->usage;
-    buffer->size = config->size;
-
-    // Probably should move this to the backend?
-    if (config->layout) {
-        buffer->layout = platform_allocate(sizeof(VertexLayout));
-        buffer->layout->attribute_count = config->layout->attribute_count;
-        buffer->layout->stride = config->layout->stride;
-        u64 attribute_size =
-            sizeof(VertexAttribute) * config->layout->attribute_count;
-        buffer->layout->attributes = platform_allocate(attribute_size);
-        platform_copy_memory(
-            buffer->layout->attributes,
-            config->layout->attributes,
-            attribute_size
-        );
-    }
-
-    switch (buffer->type) {
+    // Calculate element count
+    // Can stay in here, since there's no allocation happening.
+    switch (buffer->config->type) {
         case BUFFER_TYPE_VERTEX:
             buffer->element_count =
-                (i32)(config->size / buffer->layout->stride);
+                (i32)(config->size / buffer->config->layout->stride);
             break;
         case BUFFER_TYPE_INDEX:
             buffer->element_count = (i32)(config->size / sizeof(u32));
@@ -62,13 +45,14 @@ Buffer* buffer_create(const BufferConfig* config) {
     }
 
     if (!buffer->vt.buffer_create(buffer, config)) {
-        platform_free(buffer);
-        if (buffer->layout) {
-            if (buffer->layout->attributes) {
-                platform_free(buffer->layout->attributes);
+        if (buffer->config->layout) {
+            if (buffer->config->layout->attributes) {
+                platform_free(buffer->config->layout->attributes);
             }
-            platform_free(buffer->layout);
+            platform_free(buffer->config->layout);
         }
+        platform_free(buffer->config);
+        platform_free(buffer);
         return NULL;
     }
 
@@ -79,13 +63,13 @@ void buffer_destroy(Buffer* buffer) {
     if (buffer && buffer->vt.buffer_destroy) {
         buffer->vt.buffer_destroy(buffer);
 
-        if (buffer->layout) {
-            if (buffer->layout->attributes) {
-                platform_free(buffer->layout->attributes);
+        if (buffer->config->layout) {
+            if (buffer->config->layout->attributes) {
+                platform_free(buffer->config->layout->attributes);
             }
-            platform_free(buffer->layout);
+            platform_free(buffer->config->layout);
         }
-
+        platform_free(buffer->config);
         platform_free(buffer);
     }
 }

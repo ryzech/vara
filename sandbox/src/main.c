@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <vara/application/application.h>
 #include <vara/camera/camera.h>
 #include <vara/core/defines.h>
@@ -91,6 +90,7 @@ void sandbox_init(void) {
     const RenderPassConfig pass_config = {
         .name = "main_pass",
         .target = NULL,
+        .clear = true,
     };
     render_pass = render_pass_create(&pass_config);
 
@@ -172,14 +172,6 @@ void sandbox_update(f32 delta_time) {
 
     const Matrix4 transform_matrix =
         mat4_mul(camera_get_projection(camera), camera_get_view(camera));
-
-    renderer_clear_color((Vector4){
-        0.1f,
-        0.1f,
-        0.1f,
-        1.0f,
-    });
-    renderer_clear();
 
     render_pass_begin(render_pass);
     {

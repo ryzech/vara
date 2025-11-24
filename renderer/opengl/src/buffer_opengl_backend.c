@@ -168,7 +168,7 @@ static void buffer_opengl_bind(Buffer* buffer) {
 
     OpenGLBufferState* buffer_state = buffer->backend_data;
 
-    if (buffer->type == BUFFER_TYPE_VERTEX && buffer_state->vao != 0) {
+    if (buffer->config->type == BUFFER_TYPE_VERTEX && buffer_state->vao != 0) {
         glBindVertexArray(buffer_state->vao);
     } else {
         glBindBuffer(buffer_state->target, buffer_state->id);
@@ -182,21 +182,37 @@ static void buffer_opengl_unbind(Buffer* buffer) {
 
     OpenGLBufferState* buffer_state = buffer->backend_data;
 
-    if (buffer->type == BUFFER_TYPE_VERTEX && buffer_state->vao != 0) {
+    if (buffer->config->type == BUFFER_TYPE_VERTEX && buffer_state->vao != 0) {
         glBindVertexArray(0);
     } else {
         glBindBuffer(buffer_state->target, 0);
     }
 }
 
-Buffer* buffer_opengl_init(void) {
+Buffer* buffer_opengl_init(const BufferConfig* config) {
     Buffer* buffer = platform_allocate(sizeof(Buffer));
     platform_zero_memory(buffer, sizeof(Buffer));
     if (!buffer) {
         return NULL;
     }
 
+    buffer->config = platform_allocate(sizeof(BufferConfig));
+    platform_copy_memory(buffer->config, config, sizeof(BufferConfig));
 
+    if (config->layout) {
+        buffer->config->layout = platform_allocate(sizeof(VertexLayout));
+        platform_copy_memory(
+            buffer->config->layout, config->layout, sizeof(VertexLayout)
+        );
+        const u64 attribute_size =
+            sizeof(VertexAttribute) * config->layout->attribute_count;
+        buffer->config->layout->attributes = platform_allocate(attribute_size);
+        platform_copy_memory(
+            buffer->config->layout->attributes,
+            config->layout->attributes,
+            attribute_size
+        );
+    }
 
     buffer->vt.buffer_create = buffer_opengl_create;
     buffer->vt.buffer_destroy = buffer_opengl_destroy;

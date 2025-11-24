@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vara/core/math/math.h>
 #include <vara/core/defines.h>
 
 // Forward declarations, in case they need access to each other.
@@ -15,6 +16,9 @@ struct Shader;
 struct RenderPassConfig {
     const char* name;
     struct Framebuffer* target;
+    // TODO: LOAD/STORE ops rather than just clear.
+    b8 clear;
+    Vector4 clear_color;
 };
 
 struct RenderPassVT {

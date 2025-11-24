@@ -66,11 +66,8 @@ struct BufferVT {
 };
 
 struct Buffer {
-    BufferType type;
-    BufferUsage usage;
-    VertexLayout* layout;
+    BufferConfig* config;
     BufferVT vt;
-    size_t size;
     size_t element_count;
     void* backend_data;
 };

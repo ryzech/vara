@@ -53,6 +53,10 @@ void render_pass_begin(RenderPass* render_pass) {
         if (render_pass->config->target) {
             framebuffer_bind(render_pass->config->target);
         }
+        if (render_pass->config->clear) {
+            renderer_clear_color(render_pass->config->clear_color);
+            renderer_clear();
+        }
         render_pass->vt.render_pass_begin(render_pass);
     }
 }
@@ -73,6 +77,8 @@ void render_pass_draw_indexed(
 
 void render_pass_end(RenderPass* render_pass) {
     if (render_pass && render_pass->vt.render_pass_end) {
+        render_pass->is_recording = false;
+
         if (render_pass->config->target) {
             framebuffer_unbind(render_pass->config->target);
         }
