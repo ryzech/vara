@@ -84,6 +84,7 @@ static b8 buffer_opengl_create(Buffer* buffer, const BufferConfig* config) {
 
     OpenGLBufferState* buffer_state =
         platform_allocate(sizeof(OpenGLBufferState));
+    platform_zero_memory(buffer_state, sizeof(OpenGLBufferState));
     if (!buffer_state) {
         return false;
     }

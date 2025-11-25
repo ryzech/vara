@@ -3,7 +3,6 @@
 cmake_policy(SET CMP0156 NEW)
 
 add_compile_options(-Wall -Wextra -Werror)
-
 add_compile_options(
         -Wno-gnu-zero-variadic-macro-arguments
         -Wno-pedantic
@@ -15,6 +14,12 @@ add_compile_options(
         -Wno-missing-braces
         -Wno-unused-function
 )
+
+# Add debug symbols if in debug mode. (CMake should already, but to be explicit.)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_options(-g)
+    add_link_options(-g)
+endif ()
 
 set(EXTRA_LIBS "")
 

@@ -34,6 +34,7 @@ RenderPass* render_pass_create(const RenderPassConfig* config) {
 
     if (!render_pass->vt.render_pass_create(render_pass, config)) {
         ERROR("Failed to create render pass named('%s')", config->name);
+        platform_free(render_pass->config);
         platform_free(render_pass);
         return NULL;
     }
@@ -44,6 +45,7 @@ RenderPass* render_pass_create(const RenderPassConfig* config) {
 void render_pass_destroy(RenderPass* render_pass) {
     if (render_pass && render_pass->vt.render_pass_destroy) {
         render_pass->vt.render_pass_destroy(render_pass);
+        platform_free(render_pass->config);
         platform_free(render_pass);
     }
 }
