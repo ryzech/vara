@@ -12,36 +12,37 @@ Buffer* buffer_create(const BufferConfig* config) {
     Buffer* buffer = platform_allocate(sizeof(Buffer));
     platform_zero_memory(buffer, sizeof(Buffer));
 
-    buffer->config = platform_allocate(sizeof(BufferConfig));
-    platform_copy_memory(buffer->config, config, sizeof(BufferConfig));
+    buffer->type = config->type;
+    buffer->usage = config->usage;
+    buffer->size = config->size;
 
-    if (config->layout) {
-        buffer->config->layout = platform_allocate(sizeof(VertexLayout));
-        platform_copy_memory(
-            buffer->config->layout, config->layout, sizeof(VertexLayout)
-        );
-        const u64 attribute_size =
-            sizeof(VertexAttribute) * config->layout->attribute_count;
-        buffer->config->layout->attributes = platform_allocate(attribute_size);
-        platform_copy_memory(
-            buffer->config->layout->attributes,
-            config->layout->attributes,
-            attribute_size
-        );
-    }
-
-    // Calculate element count
-    switch (buffer->config->type) {
+    // Calculate element count.
+    switch (config->type) {
         case BUFFER_TYPE_VERTEX:
-            buffer->element_count =
-                (i32)(config->size / buffer->config->layout->stride);
+            buffer->element_count = config->size / config->layout->stride;
             break;
         case BUFFER_TYPE_INDEX:
-            buffer->element_count = (i32)(config->size / sizeof(u32));
+            buffer->element_count = config->size / sizeof(u32);
             break;
         default:
-            buffer->element_count = 0;
+            buffer->element_count = config->size;
             break;
+    }
+
+    if (config->layout) {
+        buffer->layout.stride = config->layout->stride;
+        buffer->layout.attribute_count = config->layout->attribute_count;
+
+        if (config->layout->attributes > 0) {
+            buffer->layout.attributes = platform_allocate(
+                sizeof(VertexAttribute) * config->layout->attribute_count
+            );
+            platform_copy_memory(
+                buffer->layout.attributes,
+                config->layout->attributes,
+                sizeof(VertexAttribute) * config->layout->attribute_count
+            );
+        }
     }
 
     const RendererInstance* instance = renderer_get_instance();
@@ -71,13 +72,9 @@ void buffer_destroy(Buffer* buffer) {
     if (buffer && buffer->vt.buffer_destroy) {
         buffer->vt.buffer_destroy(buffer);
 
-        if (buffer->config->layout) {
-            if (buffer->config->layout->attributes) {
-                platform_free(buffer->config->layout->attributes);
-            }
-            platform_free(buffer->config->layout);
+        if (buffer->layout.attributes) {
+            platform_free(buffer->layout.attributes);
         }
-        platform_free(buffer->config);
         platform_free(buffer);
     }
 }

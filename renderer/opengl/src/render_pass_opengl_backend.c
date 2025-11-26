@@ -67,7 +67,7 @@ static void render_pass_opengl_draw_indexed(
         return;
     }
 
-    if (index_buffer->config->type != BUFFER_TYPE_INDEX) {
+    if (index_buffer->type != BUFFER_TYPE_INDEX) {
         return;
     }
 

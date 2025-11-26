@@ -13,10 +13,12 @@ RenderPass* render_pass_create(const RenderPassConfig* config) {
     RenderPass* pass = platform_allocate(sizeof(RenderPass));
     platform_zero_memory(pass, sizeof(RenderPass));
 
-    pass->config = platform_allocate(sizeof(RenderPassConfig));
-    platform_copy_memory(pass->config, config, sizeof(RenderPassConfig));
-
     pass->name = config->name;
+    pass->target = config->target;
+    pass->clear = config->clear;
+    pass->clear_color = config->clear_color;
+    // Set false on creation, only true when pass begins.
+    pass->is_recording = false;
 
     const RendererInstance* instance = renderer_get_instance();
     if (instance) {
@@ -45,19 +47,17 @@ RenderPass* render_pass_create(const RenderPassConfig* config) {
 void render_pass_destroy(RenderPass* pass) {
     if (pass && pass->vt.render_pass_destroy) {
         pass->vt.render_pass_destroy(pass);
-
-        platform_free(pass->config);
         platform_free(pass);
     }
 }
 
 void render_pass_begin(RenderPass* pass) {
     if (pass && pass->vt.render_pass_begin) {
-        if (pass->config->target) {
-            framebuffer_bind(pass->config->target);
+        if (pass->target) {
+            framebuffer_bind(pass->target);
         }
-        if (pass->config->clear) {
-            renderer_clear_color(pass->config->clear_color);
+        if (pass->clear) {
+            renderer_clear_color(pass->clear_color);
             renderer_clear();
         }
         pass->vt.render_pass_begin(pass);
@@ -82,8 +82,8 @@ void render_pass_end(RenderPass* pass) {
     if (pass && pass->vt.render_pass_end) {
         pass->is_recording = false;
 
-        if (pass->config->target) {
-            framebuffer_unbind(pass->config->target);
+        if (pass->target) {
+            framebuffer_unbind(pass->target);
         }
         pass->vt.render_pass_end(pass);
     }

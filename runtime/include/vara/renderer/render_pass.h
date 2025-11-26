@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vara/core/math/math.h>
 #include <vara/core/defines.h>
+#include <vara/core/math/math.h>
 
 // Forward declarations, in case they need access to each other.
 typedef struct RenderPassVT RenderPassVT;
@@ -33,10 +33,12 @@ struct RenderPassVT {
 
 struct RenderPass {
     const char* name;
-    RenderPassConfig* config;
+    struct Framebuffer* target;
+    b8 clear;
+    Vector4 clear_color;
     RenderPassVT vt;
-    void* backend_data;
     b8 is_recording;
+    void* backend_data;
 };
 
 RenderPass* render_pass_create(const RenderPassConfig* config);

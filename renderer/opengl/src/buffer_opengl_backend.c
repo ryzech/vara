@@ -127,7 +127,7 @@ static b8 buffer_opengl_create(Buffer* buffer, const BufferConfig* config) {
                 component_count,
                 gl_type,
                 attribute->normalized ? GL_TRUE : GL_FALSE,
-                layout->stride,
+                (GLsizei)layout->stride,
                 (void*)(u64)attribute->offset
             );
         }
@@ -169,7 +169,7 @@ static void buffer_opengl_bind(Buffer* buffer) {
 
     OpenGLBufferState* buffer_state = buffer->backend_data;
 
-    if (buffer->config->type == BUFFER_TYPE_VERTEX && buffer_state->vao != 0) {
+    if (buffer->type == BUFFER_TYPE_VERTEX && buffer_state->vao != 0) {
         glBindVertexArray(buffer_state->vao);
     } else {
         glBindBuffer(buffer_state->target, buffer_state->id);
@@ -183,7 +183,7 @@ static void buffer_opengl_unbind(Buffer* buffer) {
 
     OpenGLBufferState* buffer_state = buffer->backend_data;
 
-    if (buffer->config->type == BUFFER_TYPE_VERTEX && buffer_state->vao != 0) {
+    if (buffer->type == BUFFER_TYPE_VERTEX && buffer_state->vao != 0) {
         glBindVertexArray(0);
     } else {
         glBindBuffer(buffer_state->target, 0);

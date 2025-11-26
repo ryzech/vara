@@ -258,10 +258,19 @@ static void framebuffer_opengl_resize(
 
     framebuffer_opengl_destroy(buffer);
 
-    buffer->config->width = width;
-    buffer->config->height = height;
+    buffer->width = width;
+    buffer->height = height;
 
-    framebuffer_opengl_create(buffer, buffer->config);
+    const FramebufferConfig config = {
+        .name = buffer->name,
+        .width = width,
+        .height = height,
+        .attachments = buffer->attachments,
+        .attachment_count = buffer->attachment_count,
+        .samples = buffer->samples
+    };
+
+    framebuffer_opengl_create(buffer, &config);
 }
 
 void framebuffer_opengl_init(Framebuffer* buffer) {

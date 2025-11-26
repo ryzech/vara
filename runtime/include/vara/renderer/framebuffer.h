@@ -49,11 +49,11 @@ struct FramebufferVT {
 
 struct Framebuffer {
     const char* name;
-    FramebufferConfig* config;
     FramebufferVT vt;
-    u32 width;
-    u32 height;
+    u32 width, height;
     u16 samples;
+    FramebufferAttachmentConfig* attachments;
+    size_t attachment_count;
     void* backend_data;
 };
 
