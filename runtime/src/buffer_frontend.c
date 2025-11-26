@@ -6,31 +6,31 @@
 #include "vara/renderer/buffer.h"
 #include "vara/renderer/renderer.h"
 
-extern Buffer* buffer_opengl_init(const BufferConfig* config);
+extern void buffer_opengl_init(Buffer* buffer);
 
 Buffer* buffer_create(const BufferConfig* config) {
-    Buffer* buffer = NULL;
-    RendererInstance* instance = renderer_get_instance();
-    if (instance) {
-        switch (instance->renderer_type) {
-            case GRAPHICS_TYPE_OPENGL:
-                buffer = buffer_opengl_init(config);
-                break;
-            default:
-                ERROR(
-                    "Unsupported graphics type: %s",
-                    graphics_type_to_string(instance->renderer_type)
-                );
-                return NULL;
-        }
-    }
+    Buffer* buffer = platform_allocate(sizeof(Buffer));
+    platform_zero_memory(buffer, sizeof(Buffer));
 
-    if (!buffer) {
-        return NULL;
+    buffer->config = platform_allocate(sizeof(BufferConfig));
+    platform_copy_memory(buffer->config, config, sizeof(BufferConfig));
+
+    if (config->layout) {
+        buffer->config->layout = platform_allocate(sizeof(VertexLayout));
+        platform_copy_memory(
+            buffer->config->layout, config->layout, sizeof(VertexLayout)
+        );
+        const u64 attribute_size =
+            sizeof(VertexAttribute) * config->layout->attribute_count;
+        buffer->config->layout->attributes = platform_allocate(attribute_size);
+        platform_copy_memory(
+            buffer->config->layout->attributes,
+            config->layout->attributes,
+            attribute_size
+        );
     }
 
     // Calculate element count
-    // Can stay in here, since there's no allocation happening.
     switch (buffer->config->type) {
         case BUFFER_TYPE_VERTEX:
             buffer->element_count =
@@ -44,15 +44,23 @@ Buffer* buffer_create(const BufferConfig* config) {
             break;
     }
 
-    if (!buffer->vt.buffer_create(buffer, config)) {
-        if (buffer->config->layout) {
-            if (buffer->config->layout->attributes) {
-                platform_free(buffer->config->layout->attributes);
-            }
-            platform_free(buffer->config->layout);
+    const RendererInstance* instance = renderer_get_instance();
+    if (instance) {
+        switch (instance->renderer_type) {
+            case GRAPHICS_TYPE_OPENGL:
+                buffer_opengl_init(buffer);
+                break;
+            default:
+                ERROR(
+                    "Unsupported graphics type: %s",
+                    graphics_type_to_string(instance->renderer_type)
+                );
+                return NULL;
         }
-        platform_free(buffer->config);
-        platform_free(buffer);
+    }
+
+    if (!buffer->vt.buffer_create(buffer, config)) {
+        buffer_destroy(buffer);
         return NULL;
     }
 

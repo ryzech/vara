@@ -6,34 +6,34 @@
 
 #include "vara/renderer/renderer.h"
 
-extern RendererInstance* renderer_opengl_init(VaraWindow* window);
+extern void renderer_opengl_init(
+    RendererInstance* instance, VaraWindow* window
+);
 
 static RendererInstance* instance;
 
 b8 renderer_create(VaraWindow* window) {
-    instance = NULL;
-    // Support headless with a Renderer?
-    if (window) {
-        switch (window->graphics_type) {
-            case GRAPHICS_TYPE_OPENGL:
-                instance = renderer_opengl_init(window);
-                break;
-            default:
-                ERROR(
-                    "Unsupported graphics type: %s",
-                    graphics_type_to_string(window->graphics_type)
-                );
-                return false;
-        }
-    }
+    instance = platform_allocate(sizeof(RendererInstance));
+    platform_zero_memory(instance, sizeof(RendererInstance));
 
-    if (!instance) {
-        return false;
+    instance->renderer_type = window->graphics_type;
+
+    // Support headless with a Renderer?
+    switch (window->graphics_type) {
+        case GRAPHICS_TYPE_OPENGL:
+            renderer_opengl_init(instance, window);
+            break;
+        default:
+            ERROR(
+                "Unsupported graphics type: %s",
+                graphics_type_to_string(window->graphics_type)
+            );
+            return false;
     }
 
     platform_window_make_context_current(window);
     if (!instance->vt.renderer_create()) {
-        platform_free(instance);
+        renderer_destroy();
         return false;
     }
 
@@ -43,6 +43,7 @@ b8 renderer_create(VaraWindow* window) {
 void renderer_destroy(void) {
     if (instance && instance->vt.renderer_destroy) {
         instance->vt.renderer_destroy();
+        platform_free(instance);
     }
 }
 
@@ -68,13 +69,13 @@ void renderer_clear(void) {
     }
 }
 
-void renderer_clear_color(Vector4 color) {
+void renderer_clear_color(const Vector4 color) {
     if (instance && instance->vt.renderer_clear_color) {
         instance->vt.renderer_clear_color(color);
     }
 }
 
-void renderer_set_viewport(Vector2i position, Vector2i size) {
+void renderer_set_viewport(const Vector2i position, const Vector2i size) {
     if (instance && instance->vt.renderer_set_viewport) {
         instance->vt.renderer_set_viewport(position, size);
     }

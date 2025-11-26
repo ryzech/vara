@@ -182,8 +182,6 @@ static b8 framebuffer_opengl_create(
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         ERROR("Framebuffer named('%s') is not complete!", config->name);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        // Might need more cleanup here?
-        platform_free(buffer_state);
         return false;
     }
 
@@ -210,22 +208,23 @@ static void framebuffer_opengl_destroy(Framebuffer* buffer) {
             buffer_state->color_buffers
         );
         platform_free(buffer_state->color_buffers);
-        buffer_state->color_buffers = NULL;
     }
 
     if (buffer_state->depth_buffer) {
         glDeleteTextures(1, &buffer_state->depth_buffer);
-        buffer_state->depth_buffer = 0;
     }
 
     if (buffer_state->stencil_buffer) {
         glDeleteTextures(1, &buffer_state->stencil_buffer);
-        buffer_state->stencil_buffer = 0;
     }
 
     if (buffer_state->depth_stencil_buffer) {
         glDeleteTextures(1, &buffer_state->depth_stencil_buffer);
-        buffer_state->depth_stencil_buffer = 0;
+    }
+
+    // This should always exist but to be safe we'll check.
+    if (buffer_state->fbo) {
+        glDeleteFramebuffers(1, &buffer_state->fbo);
     }
 
     platform_free(buffer_state);
@@ -265,32 +264,10 @@ static void framebuffer_opengl_resize(
     framebuffer_opengl_create(buffer, buffer->config);
 }
 
-Framebuffer* framebuffer_opengl_init(const FramebufferConfig* config) {
-    Framebuffer* framebuffer = platform_allocate(sizeof(Framebuffer));
-    platform_zero_memory(framebuffer, sizeof(Framebuffer));
-    if (!framebuffer) {
-        return NULL;
-    }
-
-    framebuffer->config = platform_allocate(sizeof(FramebufferConfig));
-    platform_copy_memory(
-        framebuffer->config, config, sizeof(FramebufferConfig)
-    );
-
-    framebuffer->config->attachments = platform_allocate(
-        sizeof(FramebufferAttachmentConfig) * config->attachment_count
-    );
-    platform_copy_memory(
-        framebuffer->config->attachments,
-        config->attachments,
-        sizeof(FramebufferAttachmentConfig) * config->attachment_count
-    );
-
-    framebuffer->vt.framebuffer_create = framebuffer_opengl_create;
-    framebuffer->vt.framebuffer_destroy = framebuffer_opengl_destroy;
-    framebuffer->vt.framebuffer_bind = framebuffer_opengl_bind;
-    framebuffer->vt.framebuffer_unbind = framebuffer_opengl_unbind;
-    framebuffer->vt.framebuffer_resize = framebuffer_opengl_resize;
-
-    return framebuffer;
+void framebuffer_opengl_init(Framebuffer* buffer) {
+    buffer->vt.framebuffer_create = framebuffer_opengl_create;
+    buffer->vt.framebuffer_destroy = framebuffer_opengl_destroy;
+    buffer->vt.framebuffer_bind = framebuffer_opengl_bind;
+    buffer->vt.framebuffer_unbind = framebuffer_opengl_unbind;
+    buffer->vt.framebuffer_resize = framebuffer_opengl_resize;
 }

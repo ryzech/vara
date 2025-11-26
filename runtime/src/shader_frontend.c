@@ -6,15 +6,19 @@
 #include "vara/renderer/renderer.h"
 #include "vara/renderer/shader.h"
 
-extern Shader* shader_opengl_init(const ShaderConfig* config);
+extern void shader_opengl_init(Shader* shader);
 
 Shader* shader_create(const ShaderConfig* config) {
-    Shader* shader = NULL;
-    RendererInstance* instance = renderer_get_instance();
+    Shader* shader = platform_allocate(sizeof(Shader));
+    platform_zero_memory(shader, sizeof(Shader));
+
+    shader->name = config->name;
+
+    const RendererInstance* instance = renderer_get_instance();
     if (instance) {
         switch (instance->renderer_type) {
             case GRAPHICS_TYPE_OPENGL:
-                shader = shader_opengl_init(config);
+                shader_opengl_init(shader);
                 break;
             default:
                 ERROR(
@@ -25,15 +29,9 @@ Shader* shader_create(const ShaderConfig* config) {
         }
     }
 
-    if (!shader) {
-        return NULL;
-    }
-
-    shader->name = config->name;
-
     if (!shader->vt.shader_create(shader, config)) {
         ERROR("Failed to create shader named('%s')", config->name);
-        platform_free(shader);
+        shader_destroy(shader);
         return NULL;
     }
 
@@ -65,7 +63,7 @@ void shader_set_mat4(Shader* shader, const char* name, const Matrix4* matrix) {
     }
 }
 
-void shader_dispatch(Shader* shader, i16 x, i16 y, i16 z) {
+void shader_dispatch(Shader* shader, const i16 x, const i16 y, const i16 z) {
     if (shader && shader->vt.shader_dispatch) {
         shader->vt.shader_dispatch(shader, x, y, z);
     }

@@ -105,19 +105,11 @@ static void shader_opengl_dispatch(Shader* shader, i16 x, i16 y, i16 z) {
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
 }
 
-Shader* shader_opengl_init(const ShaderConfig* config) {
-    Shader* opengl_shader = platform_allocate(sizeof(Shader));
-    platform_zero_memory(opengl_shader, sizeof(Shader));
-    if (!opengl_shader) {
-        return NULL;
-    }
-
-    opengl_shader->vt.shader_create = shader_opengl_create;
-    opengl_shader->vt.shader_destroy = shader_opengl_destroy;
-    opengl_shader->vt.shader_bind = shader_opengl_bind;
-    opengl_shader->vt.shader_unbind = shader_opengl_unbind;
-    opengl_shader->vt.shader_set_mat4 = shader_opengl_set_mat4;
-    opengl_shader->vt.shader_dispatch = shader_opengl_dispatch;
-
-    return opengl_shader;
+void shader_opengl_init(Shader* shader) {
+    shader->vt.shader_create = shader_opengl_create;
+    shader->vt.shader_destroy = shader_opengl_destroy;
+    shader->vt.shader_bind = shader_opengl_bind;
+    shader->vt.shader_unbind = shader_opengl_unbind;
+    shader->vt.shader_set_mat4 = shader_opengl_set_mat4;
+    shader->vt.shader_dispatch = shader_opengl_dispatch;
 }

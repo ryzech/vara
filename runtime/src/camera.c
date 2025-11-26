@@ -2,6 +2,24 @@
 
 #include "vara/core/platform/platform.h"
 
+// Should this be exposed in the API?
+// For now, I'll keep it static to the implementation.
+static void camera_recalculate_view(Camera* camera) {
+    const Vector3 forward = (Vector3){
+        0.0f,
+        0.0f,
+        -1.0f,
+    };
+    const Vector3 target = vec3_add(camera->position, forward);
+    const Vector3 up = (Vector3){
+        0.0f,
+        1.0f,
+        0.0f,
+    };
+
+    camera->view = mat4_look_at(camera->position, target, up);
+}
+
 Camera* camera_create(void) {
     Camera* camera = platform_allocate(sizeof(Camera));
     if (!camera) {
@@ -33,22 +51,10 @@ Matrix4 camera_get_projection(const Camera* camera) {
 
 void camera_set_position(Camera* camera, const Vector3 position) {
     camera->position = position;
+    camera_recalculate_view(camera);
 }
 
 void camera_move(Camera* camera, Vector3 delta) {
     camera->position = vec3_add(camera->position, delta);
-
-    const Vector3 forward = (Vector3){
-        0.0f,
-        0.0f,
-        -1.0f,
-    };
-    const Vector3 target = vec3_add(camera->position, forward);
-    const Vector3 up = (Vector3){
-        0.0f,
-        1.0f,
-        0.0f,
-    };
-
-    camera->view = mat4_look_at(camera->position, target, up);
+    camera_recalculate_view(camera);
 }

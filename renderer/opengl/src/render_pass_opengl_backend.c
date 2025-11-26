@@ -95,24 +95,10 @@ static void render_pass_opengl_end(RenderPass* pass) {
     render_pass_state->active = false;
 }
 
-RenderPass* render_pass_opengl_init(const RenderPassConfig* config) {
-    RenderPass* opengl_render_pass = platform_allocate(sizeof(RenderPass));
-    platform_zero_memory(opengl_render_pass, sizeof(RenderPass));
-    if (!opengl_render_pass) {
-        return NULL;
-    }
-
-    opengl_render_pass->config = platform_allocate(sizeof(RenderPassConfig));
-    platform_copy_memory(
-        opengl_render_pass->config, config, sizeof(RenderPassConfig)
-    );
-
-    opengl_render_pass->vt.render_pass_create = render_pass_opengl_create;
-    opengl_render_pass->vt.render_pass_destroy = render_pass_opengl_destroy;
-    opengl_render_pass->vt.render_pass_begin = render_pass_opengl_begin;
-    opengl_render_pass->vt.render_pass_draw_indexed =
-        render_pass_opengl_draw_indexed;
-    opengl_render_pass->vt.render_pass_end = render_pass_opengl_end;
-
-    return opengl_render_pass;
+void render_pass_opengl_init(RenderPass* pass) {
+    pass->vt.render_pass_create = render_pass_opengl_create;
+    pass->vt.render_pass_destroy = render_pass_opengl_destroy;
+    pass->vt.render_pass_begin = render_pass_opengl_begin;
+    pass->vt.render_pass_draw_indexed = render_pass_opengl_draw_indexed;
+    pass->vt.render_pass_end = render_pass_opengl_end;
 }

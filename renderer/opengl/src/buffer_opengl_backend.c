@@ -190,35 +190,9 @@ static void buffer_opengl_unbind(Buffer* buffer) {
     }
 }
 
-Buffer* buffer_opengl_init(const BufferConfig* config) {
-    Buffer* buffer = platform_allocate(sizeof(Buffer));
-    platform_zero_memory(buffer, sizeof(Buffer));
-    if (!buffer) {
-        return NULL;
-    }
-
-    buffer->config = platform_allocate(sizeof(BufferConfig));
-    platform_copy_memory(buffer->config, config, sizeof(BufferConfig));
-
-    if (config->layout) {
-        buffer->config->layout = platform_allocate(sizeof(VertexLayout));
-        platform_copy_memory(
-            buffer->config->layout, config->layout, sizeof(VertexLayout)
-        );
-        const u64 attribute_size =
-            sizeof(VertexAttribute) * config->layout->attribute_count;
-        buffer->config->layout->attributes = platform_allocate(attribute_size);
-        platform_copy_memory(
-            buffer->config->layout->attributes,
-            config->layout->attributes,
-            attribute_size
-        );
-    }
-
+void buffer_opengl_init(Buffer* buffer) {
     buffer->vt.buffer_create = buffer_opengl_create;
     buffer->vt.buffer_destroy = buffer_opengl_destroy;
     buffer->vt.buffer_bind = buffer_opengl_bind;
     buffer->vt.buffer_unbind = buffer_opengl_unbind;
-
-    return buffer;
 }

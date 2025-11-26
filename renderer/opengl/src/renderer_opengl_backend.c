@@ -47,21 +47,16 @@ static void renderer_opengl_present(void) {
 static void renderer_opengl_destroy(void) {
 }
 
-RendererInstance* renderer_opengl_init(VaraWindow* window) {
+void renderer_opengl_init(RendererInstance* instance, VaraWindow* window) {
     renderer_state.window = window;
 
-    RendererInstance* opengl_instance =
-        platform_allocate(sizeof(RendererInstance));
-    opengl_instance->name = "OpenGL";
-    opengl_instance->renderer_type = renderer_state.window->graphics_type;
-    opengl_instance->vt.renderer_create = renderer_opengl_create;
-    opengl_instance->vt.renderer_clear = renderer_opengl_clear;
-    opengl_instance->vt.renderer_clear_color = renderer_opengl_clear_color;
-    opengl_instance->vt.renderer_set_viewport = renderer_opengl_set_viewport;
-    opengl_instance->vt.renderer_present = renderer_opengl_present;
-    opengl_instance->vt.renderer_destroy = renderer_opengl_destroy;
+    instance->name = "OpenGL";
+    instance->vt.renderer_create = renderer_opengl_create;
+    instance->vt.renderer_clear = renderer_opengl_clear;
+    instance->vt.renderer_clear_color = renderer_opengl_clear_color;
+    instance->vt.renderer_set_viewport = renderer_opengl_set_viewport;
+    instance->vt.renderer_present = renderer_opengl_present;
+    instance->vt.renderer_destroy = renderer_opengl_destroy;
 
-    DEBUG("Creating RendererInstance named('%s')", opengl_instance->name);
-
-    return opengl_instance;
+    DEBUG("Creating RendererInstance named('%s')", instance->name);
 }

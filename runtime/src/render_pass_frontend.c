@@ -7,15 +7,22 @@
 #include "vara/renderer/render_pass.h"
 #include "vara/renderer/renderer.h"
 
-extern RenderPass* render_pass_opengl_init(const RenderPassConfig* config);
+extern void render_pass_opengl_init(RenderPass* pass);
 
 RenderPass* render_pass_create(const RenderPassConfig* config) {
-    RenderPass* render_pass = NULL;
-    RendererInstance* instance = renderer_get_instance();
+    RenderPass* pass = platform_allocate(sizeof(RenderPass));
+    platform_zero_memory(pass, sizeof(RenderPass));
+
+    pass->config = platform_allocate(sizeof(RenderPassConfig));
+    platform_copy_memory(pass->config, config, sizeof(RenderPassConfig));
+
+    pass->name = config->name;
+
+    const RendererInstance* instance = renderer_get_instance();
     if (instance) {
         switch (instance->renderer_type) {
             case GRAPHICS_TYPE_OPENGL:
-                render_pass = render_pass_opengl_init(config);
+                render_pass_opengl_init(pass);
                 break;
             default:
                 ERROR(
@@ -26,40 +33,34 @@ RenderPass* render_pass_create(const RenderPassConfig* config) {
         }
     }
 
-    if (!render_pass) {
-        return NULL;
-    }
-
-    render_pass->name = config->name;
-
-    if (!render_pass->vt.render_pass_create(render_pass, config)) {
+    if (!pass->vt.render_pass_create(pass, config)) {
         ERROR("Failed to create render pass named('%s')", config->name);
-        platform_free(render_pass->config);
-        platform_free(render_pass);
+        render_pass_destroy(pass);
         return NULL;
     }
 
-    return render_pass;
+    return pass;
 }
 
-void render_pass_destroy(RenderPass* render_pass) {
-    if (render_pass && render_pass->vt.render_pass_destroy) {
-        render_pass->vt.render_pass_destroy(render_pass);
-        platform_free(render_pass->config);
-        platform_free(render_pass);
+void render_pass_destroy(RenderPass* pass) {
+    if (pass && pass->vt.render_pass_destroy) {
+        pass->vt.render_pass_destroy(pass);
+
+        platform_free(pass->config);
+        platform_free(pass);
     }
 }
 
-void render_pass_begin(RenderPass* render_pass) {
-    if (render_pass && render_pass->vt.render_pass_begin) {
-        if (render_pass->config->target) {
-            framebuffer_bind(render_pass->config->target);
+void render_pass_begin(RenderPass* pass) {
+    if (pass && pass->vt.render_pass_begin) {
+        if (pass->config->target) {
+            framebuffer_bind(pass->config->target);
         }
-        if (render_pass->config->clear) {
-            renderer_clear_color(render_pass->config->clear_color);
+        if (pass->config->clear) {
+            renderer_clear_color(pass->config->clear_color);
             renderer_clear();
         }
-        render_pass->vt.render_pass_begin(render_pass);
+        pass->vt.render_pass_begin(pass);
     }
 }
 
@@ -77,13 +78,13 @@ void render_pass_draw_indexed(
     }
 }
 
-void render_pass_end(RenderPass* render_pass) {
-    if (render_pass && render_pass->vt.render_pass_end) {
-        render_pass->is_recording = false;
+void render_pass_end(RenderPass* pass) {
+    if (pass && pass->vt.render_pass_end) {
+        pass->is_recording = false;
 
-        if (render_pass->config->target) {
-            framebuffer_unbind(render_pass->config->target);
+        if (pass->config->target) {
+            framebuffer_unbind(pass->config->target);
         }
-        render_pass->vt.render_pass_end(render_pass);
+        pass->vt.render_pass_end(pass);
     }
 }
