@@ -1,5 +1,6 @@
 #include <GLFW/glfw3.h>
 
+#include "vara/core/event/event.h"
 #include "vara/core/input/input.h"
 #include "vara/core/input/keycodes.h"
 #include "vara/core/logger.h"
@@ -234,13 +235,23 @@ static Key glfw_to_keycode(const i32 keycode) {
     }
 }
 
-// TODO: register callback outside of here possibly? For now this should work.
+// TODO: register the following
+// callbacks outside of here possibly? For now this should work.
 static void glfw_key_callback(
     GLFWwindow* window, int key, int scancode, int action, int mods
 ) {
     const Key keycode = glfw_to_keycode(key);
     const b8 is_pressed = action == GLFW_PRESS || action == GLFW_REPEAT;
     input_system_process_key(keycode, is_pressed);
+}
+
+// Same question as above.
+// This works, but it doesn't feel very clean.
+static void glfw_resize_callback(GLFWwindow* window, i32 width, i32 height) {
+    EventData data = {0};
+    data.i32[0] = width;
+    data.i32[1] = height;
+    event_fire(EVENT_WINDOW_RESIZE, NULL, &data);
 }
 
 VaraWindow* platform_window_create(const VaraWindowConfig* config) {
@@ -303,6 +314,7 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
     window->graphics_type = config->graphics_type;
 
     glfwSetKeyCallback(glfw_window, glfw_key_callback);
+    glfwSetFramebufferSizeCallback(glfw_window, glfw_resize_callback);
 
     return window;
 }

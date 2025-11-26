@@ -5,19 +5,8 @@
 // Should this be exposed in the API?
 // For now, I'll keep it static to the implementation.
 static void camera_recalculate_view(Camera* camera) {
-    const Vector3 forward = (Vector3){
-        0.0f,
-        0.0f,
-        -1.0f,
-    };
-    const Vector3 target = vec3_add(camera->position, forward);
-    const Vector3 up = (Vector3){
-        0.0f,
-        1.0f,
-        0.0f,
-    };
-
-    camera->view = mat4_look_at(camera->position, target, up);
+    const Vector3 target = vec3_add(camera->position, vec3_forward());
+    camera->view = mat4_look_at(camera->position, target, vec3_up());
 }
 
 Camera* camera_create(void) {

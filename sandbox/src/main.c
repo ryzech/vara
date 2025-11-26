@@ -2,6 +2,7 @@
 #include <vara/application/application.h>
 #include <vara/camera/camera.h>
 #include <vara/core/defines.h>
+#include <vara/core/event/event.h>
 #include <vara/core/input/input.h>
 #include <vara/core/logger.h>
 #include <vara/core/math/math.h>
@@ -35,7 +36,21 @@ static Camera* camera;
 
 static f32 timer;
 
+static b8 on_window_resize(i16 event_code, void* sender, EventData* event) {
+    i32 width = event->i32[0];
+    i32 height = event->i32[1];
+
+    camera->projection = mat4_perspective(
+        degrees_to_radians(60.0f), (f32)width / (f32)height, 0.01f, 100.0f
+    );
+    renderer_set_viewport(vec2i_zero(), (Vector2i){width, height});
+
+    return false;
+}
+
 void sandbox_init(void) {
+    event_register(EVENT_WINDOW_RESIZE, on_window_resize);
+
     f32 vertices[] = {0.0f, 0.5f, 0.0f, -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f};
     u32 indices[] = {0, 1, 2};
 
@@ -117,16 +132,6 @@ void sandbox_update(f32 delta_time) {
     if (input_is_key_down(KEY_ESCAPE)) {
         application_exit();
     }
-
-    // Temporary perspective update on resize - will move to resize event when done.
-    Vector2i size =
-        platform_window_get_framebuffer_size(application_get_window());
-    camera->projection = mat4_perspective(
-        degrees_to_radians(60.0f), (f32)size.x / (f32)size.y, 0.01f, 100.0f
-    );
-    // Also temporary viewport update, this function likely won't
-    // Even exist later, and will be handled internally.
-    renderer_set_viewport(vec2i_zero(), size);
 
     timer += delta_time;
     // Otherwise title goes brrrr

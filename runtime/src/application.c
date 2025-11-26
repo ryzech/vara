@@ -1,9 +1,9 @@
 #include "vara/application/application.h"
 
+#include <vara/core/event/event.h>
+#include <vara/core/input/input.h>
 #include <vara/core/logger.h>
 #include <vara/core/platform/platform.h>
-
-#include "vara/core/input/input.h"
 
 typedef struct ApplicationState ApplicationState;
 
@@ -21,6 +21,7 @@ int application_main(int argc, char** argv) {
         ERROR("Failed to create platform!");
         return EXIT_FAILURE;
     }
+    event_system_create();
 
     application_init(&application_state.config);
     logging_system_create(application_state.config.level);
@@ -91,6 +92,7 @@ int application_main(int argc, char** argv) {
 
     input_system_destroy();
     logging_system_destroy();
+    event_system_destroy();
     platform_destroy();
 
     return EXIT_SUCCESS;
@@ -101,5 +103,6 @@ VaraWindow* application_get_window(void) {
 }
 
 void application_exit(void) {
+    event_fire(EVENT_APPLICATION_QUIT, NULL, NULL);
     application_state.is_running = false;
 }

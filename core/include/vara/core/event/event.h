@@ -4,13 +4,12 @@
 
 typedef enum EventCode EventCode;
 typedef struct EventData EventData;
+
 enum EventCode {
     EVENT_INVALID = -1,
 
-    EVENT_QUIT = 0,
-    EVENT_KEY_PRESSED = 1,
-    EVENT_KEY_RELEASED = 2,
-    EVENT_WINDOW_RESIZE = 3,
+    EVENT_APPLICATION_QUIT = 0,
+    EVENT_WINDOW_RESIZE = 1,
 
     EVENT_INTERNAL_MAX = 255,
 };
