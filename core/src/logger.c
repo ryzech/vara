@@ -20,9 +20,7 @@ void logging_system_destroy(void) {
     // Do something here.
 }
 
-void _log_output(
-    const LogLevel level, const char* func, const char* message, ...
-) {
+void _log_output(const LogLevel level, const char* func, const char* message, ...) {
     if (!message) {
         return;
     }

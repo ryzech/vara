@@ -6,11 +6,10 @@
 
 #include "vara/renderer/renderer.h"
 
-extern void renderer_opengl_init(
-    RendererInstance* instance, VaraWindow* window
-);
+extern void renderer_opengl_init(RendererInstance* instance, VaraWindow* window);
 
 static RendererInstance* instance;
+static RenderCommandBuffer* command_buffer;
 
 b8 renderer_create(VaraWindow* window) {
     instance = platform_allocate(sizeof(RendererInstance));
@@ -24,10 +23,7 @@ b8 renderer_create(VaraWindow* window) {
             renderer_opengl_init(instance, window);
             break;
         default:
-            ERROR(
-                "Unsupported graphics type: %s",
-                renderer_type_to_string(window->renderer_type)
-            );
+            ERROR("Unsupported graphics type: %s", renderer_type_to_string(window->renderer_type));
             return false;
     }
 
@@ -61,6 +57,22 @@ PlatformRendererType renderer_get_renderer_type(void) {
     }
 
     return RENDERER_TYPE_NONE;
+}
+
+RenderCommandBuffer* renderer_get_frame_command_buffer(void) {
+    if (!command_buffer) {
+        command_buffer = render_cmd_buffer_create();
+    }
+    return command_buffer;
+}
+
+void renderer_begin_frame(void) {
+    render_cmd_buffer_reset(renderer_get_frame_command_buffer());
+}
+
+void renderer_end_frame(void) {
+    render_cmd_execute(renderer_get_frame_command_buffer());
+    renderer_present();
 }
 
 void renderer_clear(void) {

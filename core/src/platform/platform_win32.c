@@ -2,10 +2,10 @@
 
 #ifdef VARA_PLATFORM_WINDOWS
 
-#include <windows.h>
 #include <GLFW/glfw3.h>
 #include <memory.h>
 #include <stdio.h>
+#include <windows.h>
 
 #include "vara/core/defines.h"
 #include "vara/core/logger.h"

@@ -34,9 +34,8 @@ Buffer* buffer_create(const BufferConfig* config) {
         buffer->layout.attribute_count = config->layout->attribute_count;
 
         if (config->layout->attributes > 0) {
-            buffer->layout.attributes = platform_allocate(
-                sizeof(VertexAttribute) * config->layout->attribute_count
-            );
+            buffer->layout.attributes =
+                platform_allocate(sizeof(VertexAttribute) * config->layout->attribute_count);
             platform_copy_memory(
                 buffer->layout.attributes,
                 config->layout->attributes,

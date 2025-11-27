@@ -9,12 +9,9 @@ typedef struct OpenGLRenderPassState {
     b8 active;
 } OpenGLRenderPassState;
 
-static b8 render_pass_opengl_create(
-    RenderPass* pass, const RenderPassConfig* config
-) {
+static b8 render_pass_opengl_create(RenderPass* pass, const RenderPassConfig* config) {
     DEBUG("Creating render pass named('%s')", config->name);
-    OpenGLRenderPassState* render_pass_state =
-        platform_allocate(sizeof(OpenGLRenderPassState));
+    OpenGLRenderPassState* render_pass_state = platform_allocate(sizeof(OpenGLRenderPassState));
     if (!render_pass_state) {
         return false;
     }
@@ -49,9 +46,7 @@ static void render_pass_opengl_begin(RenderPass* pass) {
     render_pass_state->active = true;
 }
 
-static void render_pass_opengl_draw_indexed(
-    RenderPass* pass, Buffer* index_buffer
-) {
+static void render_pass_opengl_draw_indexed(RenderPass* pass, Buffer* index_buffer) {
     if (!pass || !pass->backend_data) {
         return;
     }
@@ -71,12 +66,7 @@ static void render_pass_opengl_draw_indexed(
         return;
     }
 
-    glDrawElements(
-        GL_TRIANGLES,
-        (GLsizei)index_buffer->element_count,
-        GL_UNSIGNED_INT,
-        NULL
-    );
+    glDrawElements(GL_TRIANGLES, (GLsizei)index_buffer->element_count, GL_UNSIGNED_INT, NULL);
 }
 
 static void render_pass_opengl_end(RenderPass* pass) {

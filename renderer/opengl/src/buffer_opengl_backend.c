@@ -82,8 +82,7 @@ static b8 buffer_opengl_create(Buffer* buffer, const BufferConfig* config) {
         return false;
     }
 
-    OpenGLBufferState* buffer_state =
-        platform_allocate(sizeof(OpenGLBufferState));
+    OpenGLBufferState* buffer_state = platform_allocate(sizeof(OpenGLBufferState));
     platform_zero_memory(buffer_state, sizeof(OpenGLBufferState));
     if (!buffer_state) {
         return false;
@@ -117,9 +116,7 @@ static b8 buffer_opengl_create(Buffer* buffer, const BufferConfig* config) {
 
             GLenum gl_type;
             GLint component_count;
-            attribute_to_gl_attribute(
-                attribute->type, &gl_type, &component_count
-            );
+            attribute_to_gl_attribute(attribute->type, &gl_type, &component_count);
 
             glEnableVertexAttribArray(attribute->location);
             glVertexAttribPointer(

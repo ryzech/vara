@@ -12,6 +12,7 @@ typedef struct RenderPassConfig RenderPassConfig;
 struct Framebuffer;
 struct Buffer;
 struct Shader;
+struct RenderCommandBuffer;
 
 struct RenderPassConfig {
     Vector4 clear_color;
@@ -25,9 +26,7 @@ struct RenderPassVT {
     b8 (*render_pass_create)(RenderPass* pass, const RenderPassConfig* config);
     void (*render_pass_destroy)(RenderPass* pass);
     void (*render_pass_begin)(RenderPass* pass);
-    void (*render_pass_draw_indexed)(
-        RenderPass* pass, struct Buffer* index_buffer
-    );
+    void (*render_pass_draw_indexed)(RenderPass* pass, struct Buffer* index_buffer);
     void (*render_pass_end)(RenderPass* pass);
 };
 
@@ -38,7 +37,6 @@ struct RenderPass {
     struct Framebuffer* target;
     void* backend_data;
     b8 clear;
-    b8 is_recording;
 };
 
 RenderPass* render_pass_create(const RenderPassConfig* config);

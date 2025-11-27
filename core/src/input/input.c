@@ -30,15 +30,12 @@ void input_system_destroy(void) {
 
 void input_system_update(void) {
     platform_copy_memory(
-        &input_state->previous_key_state,
-        &input_state->current_key_state,
-        sizeof(KeyState)
+        &input_state->previous_key_state, &input_state->current_key_state, sizeof(KeyState)
     );
 }
 
 void input_system_process_key(const Key key, const b8 is_pressed) {
-    const b8 changed =
-        input_state->current_key_state.is_pressed[key] != is_pressed;
+    const b8 changed = input_state->current_key_state.is_pressed[key] != is_pressed;
     if (changed) {
         input_state->current_key_state.is_pressed[key] = is_pressed;
     }

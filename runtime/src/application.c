@@ -30,8 +30,7 @@ int application_main(int argc, char** argv) {
     INFO("Running Vara Engine (%s)", VARA_VERSION);
 
     if (application_state.config.window_config) {
-        application_state.window =
-            platform_window_create(application_state.config.window_config);
+        application_state.window = platform_window_create(application_state.config.window_config);
         if (!application_state.window) {
             ERROR("Failed to create window!");
             platform_destroy();
@@ -68,8 +67,7 @@ int application_main(int argc, char** argv) {
         }
 
         const f64 current_time = platform_get_time();
-        const f32 delta_time =
-            (f32)(current_time - application_state.last_time);
+        const f32 delta_time = (f32)(current_time - application_state.last_time);
         application_state.last_time = current_time;
 
         input_system_update();

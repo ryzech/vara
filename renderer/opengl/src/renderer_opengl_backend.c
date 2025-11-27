@@ -18,11 +18,7 @@ static b8 renderer_opengl_create(void) {
     glEnable(GL_DEBUG_OUTPUT);
     // Should likely move this into config somewhere, or be pass specific?
     glEnable(GL_DEPTH_TEST);
-    DEBUG(
-        "Loaded OpenGL: %s | %s",
-        glGetString(GL_VERSION),
-        glGetString(GL_RENDERER)
-    );
+    DEBUG("Loaded OpenGL: %s | %s", glGetString(GL_VERSION), glGetString(GL_RENDERER));
     return true;
 }
 

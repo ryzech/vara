@@ -17,8 +17,6 @@ RenderPass* render_pass_create(const RenderPassConfig* config) {
     pass->target = config->target;
     pass->clear = config->clear;
     pass->clear_color = config->clear_color;
-    // Set false on creation, only true when pass begins.
-    pass->is_recording = false;
 
     const RendererInstance* instance = renderer_get_instance();
     if (instance) {
@@ -52,39 +50,21 @@ void render_pass_destroy(RenderPass* pass) {
 }
 
 void render_pass_begin(RenderPass* pass) {
-    if (pass && pass->vt.render_pass_begin) {
-        if (pass->target) {
-            framebuffer_bind(pass->target);
-        }
-        if (pass->clear) {
-            renderer_clear_color(pass->clear_color);
-            renderer_clear();
-        }
-        pass->vt.render_pass_begin(pass);
+    if (pass->clear) {
+        renderer_clear_color(pass->clear_color);
+        renderer_clear();
     }
+    render_cmd_begin_pass(renderer_get_frame_command_buffer(), pass);
 }
 
 void render_pass_draw_indexed(
-    RenderPass* pass,
-    Shader* shader,
-    Buffer* vertex_buffer,
-    Buffer* index_buffer
+    RenderPass* pass, Shader* shader, Buffer* vertex_buffer, Buffer* index_buffer
 ) {
-    if (pass && pass->vt.render_pass_draw_indexed) {
-        shader_bind(shader);
-        buffer_bind(vertex_buffer);
-        buffer_bind(index_buffer);
-        pass->vt.render_pass_draw_indexed(pass, index_buffer);
-    }
+    render_cmd_draw_indexed(
+        renderer_get_frame_command_buffer(), pass, shader, vertex_buffer, index_buffer
+    );
 }
 
 void render_pass_end(RenderPass* pass) {
-    if (pass && pass->vt.render_pass_end) {
-        pass->is_recording = false;
-
-        if (pass->target) {
-            framebuffer_unbind(pass->target);
-        }
-        pass->vt.render_pass_end(pass);
-    }
+    render_cmd_end_pass(renderer_get_frame_command_buffer(), pass);
 }

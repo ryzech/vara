@@ -44,10 +44,7 @@ static GLenum format_to_gl_type(FramebufferAttachmentFormat format) {
 }
 
 static GLuint opengl_texture_create(
-    const FramebufferAttachmentConfig* config,
-    u32 width,
-    u32 height,
-    u32 samples
+    const FramebufferAttachmentConfig* config, u32 width, u32 height, u32 samples
 ) {
     GLuint texture;
     glGenTextures(1, &texture);
@@ -61,24 +58,11 @@ static GLuint opengl_texture_create(
 
     if (samples > 1) {
         glTexImage2DMultisample(
-            target,
-            (GLsizei)samples,
-            internal_format,
-            (GLsizei)width,
-            (GLsizei)height,
-            GL_TRUE
+            target, (GLsizei)samples, internal_format, (GLsizei)width, (GLsizei)height, GL_TRUE
         );
     } else {
         glTexImage2D(
-            target,
-            0,
-            internal_format,
-            (GLsizei)width,
-            (GLsizei)height,
-            0,
-            format,
-            type,
-            NULL
+            target, 0, internal_format, (GLsizei)width, (GLsizei)height, 0, format, type, NULL
         );
     }
 
@@ -93,15 +77,12 @@ static GLuint opengl_texture_create(
     return texture;
 }
 
-static b8 framebuffer_opengl_create(
-    Framebuffer* buffer, const FramebufferConfig* config
-) {
+static b8 framebuffer_opengl_create(Framebuffer* buffer, const FramebufferConfig* config) {
     if (!buffer || !config) {
         return false;
     }
 
-    OpenGLFramebufferState* buffer_state =
-        platform_allocate(sizeof(OpenGLFramebufferState));
+    OpenGLFramebufferState* buffer_state = platform_allocate(sizeof(OpenGLFramebufferState));
     platform_zero_memory(buffer_state, sizeof(OpenGLFramebufferState));
     if (!buffer_state) {
         return false;
@@ -118,48 +99,35 @@ static b8 framebuffer_opengl_create(
     }
 
     if (color_count > 0) {
-        buffer_state->color_buffers =
-            platform_allocate(sizeof(GLuint) * color_count);
+        buffer_state->color_buffers = platform_allocate(sizeof(GLuint) * color_count);
         buffer_state->color_buffer_count = color_count;
     }
 
     u32 color_index = 0;
     for (u32 i = 0; i < config->attachment_count; i++) {
         const FramebufferAttachmentConfig* attachment = &config->attachments[i];
-        GLuint texture = opengl_texture_create(
-            attachment, config->width, config->height, config->samples
-        );
-        GLenum target =
-            (config->samples > 1) ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
+        GLuint texture =
+            opengl_texture_create(attachment, config->width, config->height, config->samples);
+        GLenum target = (config->samples > 1) ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
 
         switch (attachment->type) {
             case FRAMEBUFFER_ATTACHMENT_COLOR: {
                 GLenum color = GL_COLOR_ATTACHMENT0 + color_index;
-                glFramebufferTexture2D(
-                    GL_FRAMEBUFFER, color, target, texture, 0
-                );
+                glFramebufferTexture2D(GL_FRAMEBUFFER, color, target, texture, 0);
                 buffer_state->color_buffers[color_index++] = texture;
                 break;
             }
             case FRAMEBUFFER_ATTACHMENT_DEPTH:
-                glFramebufferTexture2D(
-                    GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, target, texture, 0
-                );
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, target, texture, 0);
                 buffer_state->depth_buffer = texture;
                 break;
             case FRAMEBUFFER_ATTACHMENT_STENCIL:
-                glFramebufferTexture2D(
-                    GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, target, texture, 0
-                );
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, target, texture, 0);
                 buffer_state->stencil_buffer = texture;
                 break;
             case FRAMEBUFFER_ATTACHMENT_DEPTH_STENCIL:
                 glFramebufferTexture2D(
-                    GL_FRAMEBUFFER,
-                    GL_DEPTH_STENCIL_ATTACHMENT,
-                    target,
-                    texture,
-                    0
+                    GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, target, texture, 0
                 );
                 buffer_state->depth_stencil_buffer = texture;
                 break;
@@ -203,10 +171,7 @@ static void framebuffer_opengl_destroy(Framebuffer* buffer) {
     OpenGLFramebufferState* buffer_state = buffer->backend_data;
 
     if (buffer_state->color_buffers) {
-        glDeleteTextures(
-            (GLsizei)buffer_state->color_buffer_count,
-            buffer_state->color_buffers
-        );
+        glDeleteTextures((GLsizei)buffer_state->color_buffer_count, buffer_state->color_buffers);
         platform_free(buffer_state->color_buffers);
     }
 
@@ -249,9 +214,7 @@ static void framebuffer_opengl_unbind(Framebuffer* buffer) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-static void framebuffer_opengl_resize(
-    Framebuffer* buffer, u32 width, u32 height
-) {
+static void framebuffer_opengl_resize(Framebuffer* buffer, u32 width, u32 height) {
     if (!buffer) {
         return;
     }

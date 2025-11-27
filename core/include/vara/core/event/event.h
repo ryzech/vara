@@ -8,8 +8,9 @@ typedef struct EventData EventData;
 enum EventCode {
     EVENT_INVALID = -1,
 
-    EVENT_APPLICATION_QUIT = 0,
-    EVENT_WINDOW_RESIZE = 1,
+    EVENT_APPLICATION_QUIT,
+    EVENT_WINDOW_RESIZE,
+    EVENT_WINDOW_CLOSE,
 
     EVENT_INTERNAL_MAX = 255,
 };
@@ -30,7 +31,9 @@ struct EventData {
     };
 };
 
-typedef b8 (*EventCallback)(i16 event_code, void* sender, EventData* event);
+typedef b8 (*EventCallback)(
+    i16 event_code, void* sender, const EventData* event
+);
 
 b8 event_system_create(void);
 void event_system_destroy(void);

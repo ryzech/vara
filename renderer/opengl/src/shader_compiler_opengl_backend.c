@@ -21,14 +21,10 @@ static GLenum stage_to_gl_type(ShaderStage stage, const char** out_name) {
     }
 }
 
-static GLuint compile_shader_stage(
-    GLenum type, const char* source, const char* stage_name
-) {
+static GLuint compile_shader_stage(GLenum type, const char* source, const char* stage_name) {
     GLuint shader = glCreateShader(type);
     if (!shader) {
-        ERROR(
-            "Failed to create shader object for stage named('%s')", stage_name
-        );
+        ERROR("Failed to create shader object for stage named('%s')", stage_name);
         return 0;
     }
 
@@ -40,11 +36,7 @@ static GLuint compile_shader_stage(
     if (!success) {
         char info_log[512];
         glGetShaderInfoLog(shader, sizeof(info_log), 0, info_log);
-        ERROR(
-            "Shader compilation failed for stage named('%s'):\n%s",
-            stage_name,
-            info_log
-        );
+        ERROR("Shader compilation failed for stage named('%s'):\n%s", stage_name, info_log);
         glDeleteShader(shader);
         return 0;
     }
@@ -96,11 +88,7 @@ GLuint shader_compiler_opengl_compile(const ShaderConfig* config) {
     if (!success) {
         char info_log[1024];
         glGetProgramInfoLog(program, sizeof(info_log), 0, info_log);
-        ERROR(
-            "Program linking failed for shader named('%s'):\n%s",
-            config->name,
-            info_log
-        );
+        ERROR("Program linking failed for shader named('%s'):\n%s", config->name, info_log);
         return 0;
     }
 

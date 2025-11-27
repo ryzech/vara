@@ -36,13 +36,12 @@ static Camera* camera;
 
 static f32 timer;
 
-static b8 on_window_resize(i16 event_code, void* sender, EventData* event) {
+static b8 on_window_resize(i16 event_code, void* sender, const EventData* event) {
     i32 width = event->i32[0];
     i32 height = event->i32[1];
 
-    camera->projection = mat4_perspective(
-        degrees_to_radians(60.0f), (f32)width / (f32)height, 0.01f, 100.0f
-    );
+    camera->projection =
+        mat4_perspective(degrees_to_radians(60.0f), (f32)width / (f32)height, 0.01f, 100.0f);
     renderer_set_viewport(vec2i_zero(), (Vector2i){width, height});
 
     return false;
@@ -55,16 +54,11 @@ void sandbox_init(void) {
     u32 indices[] = {0, 1, 2};
 
     VertexAttribute attributes[] = {
-        {.location = 0,
-         .type = VERTEX_ATTRIBUTE_FLOAT3,
-         .offset = 0,
-         .normalized = false}
+        {.location = 0, .type = VERTEX_ATTRIBUTE_FLOAT3, .offset = 0, .normalized = false}
     };
 
     VertexLayout layout = {
-        .attributes = attributes,
-        .attribute_count = 1,
-        .stride = 3 * sizeof(f32)
+        .attributes = attributes, .attribute_count = 1, .stride = 3 * sizeof(f32)
     };
 
     const BufferConfig vertex_buffer_config = {
@@ -106,6 +100,7 @@ void sandbox_init(void) {
         .name = "main_pass",
         .target = NULL,
         .clear = true,
+        .clear_color = (Vector4){0.1f, 0.1f, 0.1f, 1.0f},
     };
     render_pass = render_pass_create(&pass_config);
 
@@ -120,8 +115,7 @@ void sandbox_init(void) {
     );
     camera->projection = mat4_perspective(
         degrees_to_radians(60.0f),
-        (f32)application_get_window()->width
-            / (f32)application_get_window()->height,
+        (f32)application_get_window()->width / (f32)application_get_window()->height,
         0.01f,
         100.0f
     );
@@ -165,8 +159,7 @@ void sandbox_update(f32 delta_time) {
     if (input_is_key_down(KEY_SPACE)) {
         delta.y += speed;
     }
-    if (input_is_key_down(KEY_RIGHT_SHIFT)
-        || input_is_key_down(KEY_LEFT_SHIFT)) {
+    if (input_is_key_down(KEY_RIGHT_SHIFT) || input_is_key_down(KEY_LEFT_SHIFT)) {
         delta.y -= speed;
     }
 
@@ -178,16 +171,17 @@ void sandbox_update(f32 delta_time) {
     const Matrix4 transform_matrix =
         mat4_mul(camera_get_projection(camera), camera_get_view(camera));
 
+    renderer_begin_frame();
     render_pass_begin(render_pass);
     {
-        shader_set_mat4(shader, "uTransform", &transform_matrix);
-        render_pass_draw_indexed(
-            render_pass, shader, vertex_buffer, index_buffer
+        // Need a high level wrapper for this.
+        render_cmd_shader_set_mat4(
+            renderer_get_frame_command_buffer(), shader, "uTransform", &transform_matrix
         );
+        render_pass_draw_indexed(render_pass, shader, vertex_buffer, index_buffer);
     }
     render_pass_end(render_pass);
-
-    renderer_present();
+    renderer_end_frame();
 }
 
 void sandbox_shutdown() {
@@ -195,7 +189,6 @@ void sandbox_shutdown() {
     buffer_destroy(vertex_buffer);
     buffer_destroy(index_buffer);
 
-    camera_destroy(camera);
     render_pass_destroy(render_pass);
 }
 

@@ -2,6 +2,7 @@ set(RUNTIME_SOURCES src/application.c src/renderer_frontend.c src/shader_fronten
         src/entrypoint.c
         src/camera.c
         src/framebuffer_frontend.c
+        src/render_command.c
 )
 
 add_library(vara-runtime STATIC ${RUNTIME_SOURCES})

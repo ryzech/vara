@@ -10,7 +10,7 @@ enum PlatformRendererType {
     RENDERER_TYPE_METAL = 4
 };
 
-static inline char* renderer_type_to_string(PlatformRendererType type) {
+static char* renderer_type_to_string(PlatformRendererType type) {
     switch (type) {
         case RENDERER_TYPE_NONE:
             return "None";

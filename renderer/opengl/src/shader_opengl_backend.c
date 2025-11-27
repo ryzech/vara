@@ -12,8 +12,7 @@ typedef struct OpenGLShaderState {
 
 static b8 shader_opengl_create(Shader* shader, const ShaderConfig* config) {
     DEBUG("Creating shader program named('%s')", config->name);
-    OpenGLShaderState* shader_state =
-        platform_allocate(sizeof(OpenGLShaderState));
+    OpenGLShaderState* shader_state = platform_allocate(sizeof(OpenGLShaderState));
     if (!shader_state) {
         return false;
     }
@@ -49,11 +48,7 @@ static void shader_opengl_bind(Shader* shader) {
     }
 
     OpenGLShaderState* shader_state = shader->backend_data;
-    TRACE(
-        "Binding shader named('%s') in program(%d)",
-        shader->name,
-        shader_state->shader_program
-    );
+    TRACE("Binding shader named('%s') in program(%d)", shader->name, shader_state->shader_program);
     glUseProgram(shader_state->shader_program);
 }
 
@@ -65,16 +60,12 @@ static void shader_opengl_unbind(Shader* shader) {
     OpenGLShaderState* shader_state = shader->backend_data;
 
     TRACE(
-        "Unbinding shader named('%s') in program(%d)",
-        shader->name,
-        shader_state->shader_program
+        "Unbinding shader named('%s') in program(%d)", shader->name, shader_state->shader_program
     );
     glUseProgram(0);
 }
 
-static void shader_opengl_set_mat4(
-    Shader* shader, const char* name, const Matrix4* matrix
-) {
+static void shader_opengl_set_mat4(Shader* shader, const char* name, const Matrix4* matrix) {
     if (!shader || !shader->backend_data) {
         return;
     }

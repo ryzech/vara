@@ -235,8 +235,6 @@ static Key glfw_to_keycode(const i32 keycode) {
     }
 }
 
-// TODO: register the following
-// callbacks outside of here possibly? For now this should work.
 static void glfw_key_callback(
     GLFWwindow* window, int key, int scancode, int action, int mods
 ) {
@@ -245,13 +243,17 @@ static void glfw_key_callback(
     input_system_process_key(keycode, is_pressed);
 }
 
-// Same question as above.
-// This works, but it doesn't feel very clean.
 static void glfw_resize_callback(GLFWwindow* window, i32 width, i32 height) {
     EventData data = {0};
     data.i32[0] = width;
     data.i32[1] = height;
     event_fire(EVENT_WINDOW_RESIZE, NULL, &data);
+}
+
+static void glfw_close_callback(GLFWwindow* window) {
+    EventData data = {0};
+    // Pass the closed window here somehow?
+    event_fire(EVENT_WINDOW_CLOSE, NULL, &data);
 }
 
 VaraWindow* platform_window_create(const VaraWindowConfig* config) {
@@ -315,6 +317,7 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
 
     glfwSetKeyCallback(glfw_window, glfw_key_callback);
     glfwSetFramebufferSizeCallback(glfw_window, glfw_resize_callback);
+    glfwSetWindowCloseCallback(glfw_window, glfw_close_callback);
 
     return window;
 }

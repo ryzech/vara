@@ -57,8 +57,7 @@ void _log_output(LogLevel level, const char* func, const char* message, ...);
  * additional parameters.
  * @param ... Additional parameters to be logged.
  */
-#define FATAL(message, ...)                                                    \
-    _log_output(LOG_LEVEL_FATAL, __FUNCTION__, message, ##__VA_ARGS__);
+#define FATAL(message, ...) _log_output(LOG_LEVEL_FATAL, __FUNCTION__, message, ##__VA_ARGS__);
 
 #ifndef ERROR
 /**
@@ -67,8 +66,7 @@ void _log_output(LogLevel level, const char* func, const char* message, ...);
  * @param message The message to be logged.
  * @param ... Any formatted data that should be included in the log entry.
  */
-#define ERROR(message, ...)                                                    \
-    _log_output(LOG_LEVEL_ERROR, __FUNCTION__, message, ##__VA_ARGS__);
+#define ERROR(message, ...) _log_output(LOG_LEVEL_ERROR, __FUNCTION__, message, ##__VA_ARGS__);
 #endif
 
 #if LOG_WARN_ENABLED == 1
@@ -78,8 +76,7 @@ void _log_output(LogLevel level, const char* func, const char* message, ...);
  * @param message The message to be logged.
  * @param ... Any formatted data that should be included in the log entry.
  */
-#define WARN(message, ...)                                                     \
-    _log_output(LOG_LEVEL_WARN, __FUNCTION__, message, ##__VA_ARGS__);
+#define WARN(message, ...) _log_output(LOG_LEVEL_WARN, __FUNCTION__, message, ##__VA_ARGS__);
 #else
 /**
  * @brief Logs a warning-level message. Should be used to indicate non-critial
@@ -98,8 +95,7 @@ void _log_output(LogLevel level, const char* func, const char* message, ...);
  * @param message The message to be logged.
  * @param ... Any formatted data that should be included in the log entry.
  */
-#define INFO(message, ...)                                                     \
-    _log_output(LOG_LEVEL_INFO, __FUNCTION__, message, ##__VA_ARGS__);
+#define INFO(message, ...) _log_output(LOG_LEVEL_INFO, __FUNCTION__, message, ##__VA_ARGS__);
 #else
 /**
  * @brief Logs an info-level message. Should be used for non-erronuous
@@ -116,8 +112,7 @@ void _log_output(LogLevel level, const char* func, const char* message, ...);
  * @param message The message to be logged.
  * @param ... Any formatted data that should be included in the log entry.
  */
-#define DEBUG(message, ...)                                                    \
-    _log_output(LOG_LEVEL_DEBUG, __FUNCTION__, message, ##__VA_ARGS__);
+#define DEBUG(message, ...) _log_output(LOG_LEVEL_DEBUG, __FUNCTION__, message, ##__VA_ARGS__);
 #else
 /**
  * @brief Logs a debug-level message. Should be used for debugging purposes.
@@ -135,8 +130,7 @@ void _log_output(LogLevel level, const char* func, const char* message, ...);
  * @param message The message to be logged.
  * @param ... Any formatted data that should be included in the log entry.
  */
-#define TRACE(message, ...)                                                    \
-    _log_output(LOG_LEVEL_TRACE, __FUNCTION__, message, ##__VA_ARGS__);
+#define TRACE(message, ...) _log_output(LOG_LEVEL_TRACE, __FUNCTION__, message, ##__VA_ARGS__);
 #else
 /**
  * @brief Logs a trace-level message. Should be used for verbose debugging

@@ -37,9 +37,7 @@ struct FramebufferConfig {
 };
 
 struct FramebufferVT {
-    b8 (*framebuffer_create)(
-        Framebuffer* buffer, const FramebufferConfig* config
-    );
+    b8 (*framebuffer_create)(Framebuffer* buffer, const FramebufferConfig* config);
     void (*framebuffer_destroy)(Framebuffer* buffer);
     void (*framebuffer_bind)(Framebuffer* buffer);
     void (*framebuffer_unbind)(Framebuffer* buffer);

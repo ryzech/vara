@@ -10,9 +10,8 @@ Framebuffer* framebuffer_create(const FramebufferConfig* config) {
     Framebuffer* buffer = platform_allocate(sizeof(Framebuffer));
     platform_zero_memory(buffer, sizeof(Framebuffer));
 
-    buffer->attachments = platform_allocate(
-        sizeof(FramebufferAttachmentConfig) * config->attachment_count
-    );
+    buffer->attachments =
+        platform_allocate(sizeof(FramebufferAttachmentConfig) * config->attachment_count);
     platform_copy_memory(
         buffer->attachments,
         config->attachments,
@@ -70,9 +69,7 @@ void framebuffer_unbind(Framebuffer* buffer) {
     }
 }
 
-void framebuffer_resize(
-    Framebuffer* buffer, const u32 width, const u32 height
-) {
+void framebuffer_resize(Framebuffer* buffer, const u32 width, const u32 height) {
     if (buffer && buffer->vt.framebuffer_resize) {
         buffer->vt.framebuffer_resize(buffer, width, height);
     }

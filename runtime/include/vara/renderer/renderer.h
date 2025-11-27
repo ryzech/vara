@@ -62,6 +62,12 @@ RendererInstance* renderer_get_instance(void);
  */
 PlatformRendererType renderer_get_renderer_type(void);
 
+RenderCommandBuffer* renderer_get_frame_command_buffer(void);
+
+void renderer_begin_frame(void);
+
+void renderer_end_frame(void);
+
 /**
  * Clear the screen from the previous frame.\n
  * Clears both color and depth buffers.
