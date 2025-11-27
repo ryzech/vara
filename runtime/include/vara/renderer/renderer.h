@@ -33,9 +33,9 @@ struct RendererInstanceVT {
  * any issues encountered.
  */
 struct RendererInstance {
-    const char* name;
-    PlatformGraphicsType renderer_type;
     RendererInstanceVT vt;
+    const char* name;
+    PlatformRendererType renderer_type;
 };
 
 /**
@@ -60,7 +60,7 @@ RendererInstance* renderer_get_instance(void);
  * Get the active PlatformGraphicsType (i.e. OpenGL, Vulkan, etc.)
  * @return Type of active RendererInstance.
  */
-PlatformGraphicsType renderer_get_renderer_type(void);
+PlatformRendererType renderer_get_renderer_type(void);
 
 /**
  * Clear the screen from the previous frame.\n

@@ -10,8 +10,8 @@ typedef struct ApplicationState ApplicationState;
 struct ApplicationState {
     ApplicationConfig config;
     VaraWindow* window;
-    b8 is_running;
     f64 last_time;
+    b8 is_running;
 };
 
 static ApplicationState application_state;
@@ -39,7 +39,7 @@ int application_main(int argc, char** argv) {
         }
     }
 
-    if (application_state.config.graphics_type != GRAPHICS_TYPE_NONE) {
+    if (application_state.config.renderer_type != RENDERER_TYPE_NONE) {
         if (!renderer_create(application_state.window)) {
             ERROR("Failed to create renderer!");
             platform_window_destroy(application_state.window);
@@ -56,7 +56,7 @@ int application_main(int argc, char** argv) {
     }
 
     application_state.is_running = true;
-    application_state.last_time = platform_get_time();
+    application_state.last_time = (f32)platform_get_time();
 
     while (application_state.is_running) {
         if (application_state.window) {
@@ -68,12 +68,13 @@ int application_main(int argc, char** argv) {
         }
 
         const f64 current_time = platform_get_time();
-        const f64 delta_time = current_time - application_state.last_time;
+        const f32 delta_time =
+            (f32)(current_time - application_state.last_time);
         application_state.last_time = current_time;
 
         input_system_update();
         if (application_state.config.app.on_update) {
-            application_state.config.app.on_update((f32)delta_time);
+            application_state.config.app.on_update(delta_time);
         }
     }
 

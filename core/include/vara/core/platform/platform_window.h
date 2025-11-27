@@ -10,34 +10,34 @@ typedef struct VaraWindowConfig VaraWindowConfig;
 
 /** */
 struct VaraWindow {
-    /** */
-    i32 width, height;
-    /** */
-    i32 x, y;
+    /** Window state, holds information about the given window. */
+    VaraWindowState* platform_state;
     /** */
     const char* title;
     /** */
     const char* name;
+    /** */
+    i32 width, height;
+    /** */
+    i32 x, y;
     /** Pixel density of the given display the window is on. */
     f32 pixel_density;
     /** Type of graphics API to use (decides whether to create a window context). */
-    PlatformGraphicsType graphics_type;
-    /** Window state, holds information about the given window. */
-    VaraWindowState* platform_state;
+    PlatformRendererType renderer_type;
 };
 
 /** */
 struct VaraWindowConfig {
     /** */
-    i32 position_x, position_y;
-    /** */
-    i32 width, height;
-    /** */
     const char* title;
     /** */
     const char* name;
+    /** */
+    i32 width, height;
+    /** */
+    i32 x, y;
     /** Type of graphics API to use (decides whether or not to create a window context). */
-    PlatformGraphicsType graphics_type;
+    PlatformRendererType renderer_type;
 };
 
 VaraWindow* platform_window_create(const VaraWindowConfig* config);

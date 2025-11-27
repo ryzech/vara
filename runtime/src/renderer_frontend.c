@@ -16,17 +16,17 @@ b8 renderer_create(VaraWindow* window) {
     instance = platform_allocate(sizeof(RendererInstance));
     platform_zero_memory(instance, sizeof(RendererInstance));
 
-    instance->renderer_type = window->graphics_type;
+    instance->renderer_type = window->renderer_type;
 
     // Support headless with a Renderer?
-    switch (window->graphics_type) {
-        case GRAPHICS_TYPE_OPENGL:
+    switch (window->renderer_type) {
+        case RENDERER_TYPE_OPENGL:
             renderer_opengl_init(instance, window);
             break;
         default:
             ERROR(
                 "Unsupported graphics type: %s",
-                graphics_type_to_string(window->graphics_type)
+                renderer_type_to_string(window->renderer_type)
             );
             return false;
     }
@@ -55,12 +55,12 @@ RendererInstance* renderer_get_instance(void) {
     return NULL;
 }
 
-PlatformGraphicsType renderer_get_renderer_type(void) {
+PlatformRendererType renderer_get_renderer_type(void) {
     if (instance) {
         return instance->renderer_type;
     }
 
-    return GRAPHICS_TYPE_NONE;
+    return RENDERER_TYPE_NONE;
 }
 
 void renderer_clear(void) {

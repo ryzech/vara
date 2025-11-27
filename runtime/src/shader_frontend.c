@@ -17,13 +17,13 @@ Shader* shader_create(const ShaderConfig* config) {
     const RendererInstance* instance = renderer_get_instance();
     if (instance) {
         switch (instance->renderer_type) {
-            case GRAPHICS_TYPE_OPENGL:
+            case RENDERER_TYPE_OPENGL:
                 shader_opengl_init(shader);
                 break;
             default:
                 ERROR(
                     "Unsupported graphics type: %s",
-                    graphics_type_to_string(instance->renderer_type)
+                    renderer_type_to_string(instance->renderer_type)
                 );
                 return NULL;
         }

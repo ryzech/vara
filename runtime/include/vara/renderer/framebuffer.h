@@ -30,10 +30,9 @@ struct FramebufferAttachmentConfig {
 
 struct FramebufferConfig {
     const char* name;
-    u32 width;
-    u32 height;
     FramebufferAttachmentConfig* attachments;
-    size_t attachment_count;
+    u32 width, height;
+    u32 attachment_count;
     u16 samples;
 };
 
@@ -48,13 +47,13 @@ struct FramebufferVT {
 };
 
 struct Framebuffer {
-    const char* name;
     FramebufferVT vt;
-    u32 width, height;
-    u16 samples;
+    const char* name;
     FramebufferAttachmentConfig* attachments;
-    size_t attachment_count;
     void* backend_data;
+    u32 width, height;
+    u32 attachment_count;
+    u16 samples;
 };
 
 Framebuffer* framebuffer_create(const FramebufferConfig* config);

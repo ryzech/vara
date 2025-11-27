@@ -201,11 +201,11 @@ void sandbox_shutdown() {
 
 void application_init(ApplicationConfig* config) {
     static VaraWindowConfig window_config = {
-        .position_x = 100,
-        .position_y = 100,
+        .x = 100,
+        .y = 100,
         .width = 800,
         .height = 600,
-        .graphics_type = GRAPHICS_TYPE_OPENGL,
+        .renderer_type = RENDERER_TYPE_OPENGL,
         .title = "Vara Engine - Sandbox",
         .name = "vara_sandbox"
     };
@@ -213,7 +213,7 @@ void application_init(ApplicationConfig* config) {
     config->name = window_config.name;
     config->level = LOG_LEVEL_DEBUG;
     config->window_config = &window_config;
-    config->graphics_type = window_config.graphics_type;
+    config->renderer_type = window_config.renderer_type;
 
     config->app.on_init = sandbox_init;
     config->app.on_update = sandbox_update;

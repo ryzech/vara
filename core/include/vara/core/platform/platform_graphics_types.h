@@ -1,26 +1,26 @@
 #pragma once
 
-typedef enum PlatformGraphicsType PlatformGraphicsType;
+typedef enum PlatformRendererType PlatformRendererType;
 
-enum PlatformGraphicsType {
-    GRAPHICS_TYPE_NONE = 0,
-    GRAPHICS_TYPE_OPENGL = 1,
-    GRAPHICS_TYPE_VULKAN = 2,
-    GRAPHICS_TYPE_DIRECTX = 3,
-    GRAPHICS_TYPE_METAL = 4
+enum PlatformRendererType {
+    RENDERER_TYPE_NONE = 0,
+    RENDERER_TYPE_OPENGL = 1,
+    RENDERER_TYPE_VULKAN = 2,
+    RENDERER_TYPE_DIRECTX = 3,
+    RENDERER_TYPE_METAL = 4
 };
 
-static inline char* graphics_type_to_string(PlatformGraphicsType type) {
+static inline char* renderer_type_to_string(PlatformRendererType type) {
     switch (type) {
-        case GRAPHICS_TYPE_NONE:
+        case RENDERER_TYPE_NONE:
             return "None";
-        case GRAPHICS_TYPE_OPENGL:
+        case RENDERER_TYPE_OPENGL:
             return "OpenGL";
-        case GRAPHICS_TYPE_VULKAN:
+        case RENDERER_TYPE_VULKAN:
             return "Vulkan";
-        case GRAPHICS_TYPE_DIRECTX:
+        case RENDERER_TYPE_DIRECTX:
             return "DirectX";
-        case GRAPHICS_TYPE_METAL:
+        case RENDERER_TYPE_METAL:
             return "Metal";
         default:
             return "Unknown";

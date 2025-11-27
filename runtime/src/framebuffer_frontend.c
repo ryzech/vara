@@ -27,13 +27,13 @@ Framebuffer* framebuffer_create(const FramebufferConfig* config) {
     const RendererInstance* instance = renderer_get_instance();
     if (instance) {
         switch (instance->renderer_type) {
-            case GRAPHICS_TYPE_OPENGL:
+            case RENDERER_TYPE_OPENGL:
                 framebuffer_opengl_init(buffer);
                 break;
             default:
                 ERROR(
                     "Unsupported graphics type: %s",
-                    graphics_type_to_string(instance->renderer_type)
+                    renderer_type_to_string(instance->renderer_type)
                 );
                 return NULL;
         }

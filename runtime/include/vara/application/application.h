@@ -17,11 +17,11 @@ struct Application {
 };
 
 struct ApplicationConfig {
-    const char* name;
-    LogLevel level;
-    VaraWindowConfig* window_config;
-    PlatformGraphicsType graphics_type;
     Application app;
+    const char* name;
+    VaraWindowConfig* window_config;
+    LogLevel level;
+    PlatformRendererType renderer_type;
 };
 
 int application_main(int argc, char** argv);

@@ -277,7 +277,7 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
     glfwDefaultWindowHints();
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
-    if (config->graphics_type == GRAPHICS_TYPE_OPENGL) {
+    if (config->renderer_type == RENDERER_TYPE_OPENGL) {
 #ifdef VARA_PLATFORM_APPLE
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
@@ -306,12 +306,12 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
     window->platform_state->window = glfw_window;
     window->width = config->width;
     window->height = config->height;
-    window->x = config->position_x;
-    window->y = config->position_y;
+    window->x = config->x;
+    window->y = config->y;
     window->title = config->title;
     window->name = config->name;
     window->pixel_density = 1.0f;
-    window->graphics_type = config->graphics_type;
+    window->renderer_type = config->renderer_type;
 
     glfwSetKeyCallback(glfw_window, glfw_key_callback);
     glfwSetFramebufferSizeCallback(glfw_window, glfw_resize_callback);
@@ -372,11 +372,11 @@ void* platform_window_get_proc_address(const char* name) {
 }
 
 void platform_window_make_context_current(VaraWindow* window) {
-    if (!window || window->graphics_type != GRAPHICS_TYPE_OPENGL) {
+    if (!window || window->renderer_type != RENDERER_TYPE_OPENGL) {
         WARN(
             "Tried to make context current in window. Renderer named('%s') "
             "does not support this. OpenGL only!",
-            graphics_type_to_string(window->graphics_type)
+            renderer_type_to_string(window->renderer_type)
         );
         return;
     }
@@ -385,11 +385,11 @@ void platform_window_make_context_current(VaraWindow* window) {
 }
 
 void platform_window_swap_buffers(VaraWindow* window) {
-    if (!window || window->graphics_type != GRAPHICS_TYPE_OPENGL) {
+    if (!window || window->renderer_type != RENDERER_TYPE_OPENGL) {
         WARN(
             "Tried to swap buffers in window. Renderer named('%s') "
             "does not support this. OpenGL only!",
-            graphics_type_to_string(window->graphics_type)
+            renderer_type_to_string(window->renderer_type)
         );
 
         return;

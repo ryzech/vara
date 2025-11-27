@@ -14,11 +14,11 @@ struct Buffer;
 struct Shader;
 
 struct RenderPassConfig {
+    Vector4 clear_color;
     const char* name;
     struct Framebuffer* target;
     // TODO: LOAD/STORE ops rather than just clear.
     b8 clear;
-    Vector4 clear_color;
 };
 
 struct RenderPassVT {
@@ -32,13 +32,13 @@ struct RenderPassVT {
 };
 
 struct RenderPass {
+    RenderPassVT vt;
+    Vector4 clear_color;
     const char* name;
     struct Framebuffer* target;
-    b8 clear;
-    Vector4 clear_color;
-    RenderPassVT vt;
-    b8 is_recording;
     void* backend_data;
+    b8 clear;
+    b8 is_recording;
 };
 
 RenderPass* render_pass_create(const RenderPassConfig* config);

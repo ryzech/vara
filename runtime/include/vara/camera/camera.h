@@ -9,9 +9,9 @@
 typedef struct Camera Camera;
 
 struct Camera {
-    Vector3 position;
     Matrix4 view;
     Matrix4 projection;
+    Vector3 position;
 };
 
 /**

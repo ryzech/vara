@@ -18,8 +18,8 @@ enum ShaderStage {
 
 // TODO: this needs re-wrote so one file can have frag and vert
 struct ShaderSource {
-    ShaderStage stage;
     const char* source;
+    ShaderStage stage;
 };
 
 struct ShaderConfig {
@@ -41,8 +41,8 @@ struct ShaderVT {
 };
 
 struct Shader {
-    const char* name;
     ShaderVT vt;
+    const char* name;
     void* backend_data;
 };
 
