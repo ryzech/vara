@@ -33,7 +33,7 @@ Buffer* buffer_create(const BufferConfig* config) {
         buffer->layout.stride = config->layout->stride;
         buffer->layout.attribute_count = config->layout->attribute_count;
 
-        if (config->layout->attributes > 0) {
+        if (config->layout->attribute_count > 0) {
             buffer->layout.attributes =
                 platform_allocate(sizeof(VertexAttribute) * config->layout->attribute_count);
             platform_copy_memory(
