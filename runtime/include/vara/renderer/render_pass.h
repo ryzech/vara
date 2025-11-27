@@ -49,4 +49,7 @@ void render_pass_draw_indexed(
     struct Buffer* vertex_buffer,
     struct Buffer* index_buffer
 );
+void render_pass_shader_set_mat4(
+    RenderPass* pass, struct Shader* shader, const char* name, Matrix4 matrix
+);
 void render_pass_end(RenderPass* pass);

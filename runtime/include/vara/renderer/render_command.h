@@ -33,7 +33,7 @@ void render_cmd_buffer_reset(RenderCommandBuffer* buffer);
 
 void render_cmd_begin_pass(RenderCommandBuffer* buffer, RenderPass* pass);
 void render_cmd_shader_set_mat4(
-    RenderCommandBuffer* buffer, struct Shader* shader, const char* name, const Matrix4* matrix
+    RenderCommandBuffer* buffer, struct Shader* shader, const char* name, Matrix4 matrix
 );
 void render_cmd_draw_indexed(
     RenderCommandBuffer* buffer,

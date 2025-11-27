@@ -32,9 +32,9 @@ struct RenderCmdDrawIndexed {
 
 struct RenderCmdSetShaderMat4 {
     RenderCommandHeader header;
+    Matrix4 matrix;
     Shader* shader;
     const char* name;
-    const Matrix4* matrix;
 };
 
 static void* render_cmd_allocate(RenderCommandBuffer* buffer, u32 size) {
@@ -102,7 +102,7 @@ void render_cmd_draw_indexed(
 }
 
 void render_cmd_shader_set_mat4(
-    RenderCommandBuffer* buffer, Shader* shader, const char* name, const Matrix4* matrix
+    RenderCommandBuffer* buffer, Shader* shader, const char* name, Matrix4 matrix
 ) {
     RenderCmdSetShaderMat4* cmd = render_cmd_allocate(buffer, sizeof(RenderCmdSetShaderMat4));
     cmd->header.type = RENDER_CMD_SET_SHADER_MAT4;

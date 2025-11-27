@@ -72,7 +72,13 @@ int application_main(int argc, char** argv) {
 
         input_system_update();
         if (application_state.config.app.on_update) {
+            if (renderer_get_instance()) {
+                renderer_begin_frame();
+            }
             application_state.config.app.on_update(delta_time);
+            if (renderer_get_instance()) {
+                renderer_end_frame();
+            }
         }
     }
 

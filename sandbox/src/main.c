@@ -171,24 +171,18 @@ void sandbox_update(f32 delta_time) {
     const Matrix4 transform_matrix =
         mat4_mul(camera_get_projection(camera), camera_get_view(camera));
 
-    renderer_begin_frame();
     render_pass_begin(render_pass);
     {
-        // Need a high level wrapper for this.
-        render_cmd_shader_set_mat4(
-            renderer_get_frame_command_buffer(), shader, "uTransform", &transform_matrix
-        );
+        render_pass_shader_set_mat4(render_pass, shader, "uTransform", transform_matrix);
         render_pass_draw_indexed(render_pass, shader, vertex_buffer, index_buffer);
     }
     render_pass_end(render_pass);
-    renderer_end_frame();
 }
 
 void sandbox_shutdown() {
     shader_destroy(shader);
     buffer_destroy(vertex_buffer);
     buffer_destroy(index_buffer);
-
     render_pass_destroy(render_pass);
 }
 

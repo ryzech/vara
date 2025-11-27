@@ -65,7 +65,7 @@ static void shader_opengl_unbind(Shader* shader) {
     glUseProgram(0);
 }
 
-static void shader_opengl_set_mat4(Shader* shader, const char* name, const Matrix4* matrix) {
+static void shader_opengl_set_mat4(Shader* shader, const char* name, Matrix4 matrix) {
     if (!shader || !shader->backend_data) {
         return;
     }
@@ -73,7 +73,7 @@ static void shader_opengl_set_mat4(Shader* shader, const char* name, const Matri
     OpenGLShaderState* shader_state = shader->backend_data;
 
     GLint location = glGetUniformLocation(shader_state->shader_program, name);
-    glUniformMatrix4fv(location, 1, GL_FALSE, matrix->elements);
+    glUniformMatrix4fv(location, 1, GL_FALSE, matrix.elements);
 }
 
 static void shader_opengl_dispatch(Shader* shader, i16 x, i16 y, i16 z) {

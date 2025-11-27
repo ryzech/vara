@@ -41,6 +41,9 @@ void renderer_destroy(void) {
         instance->vt.renderer_destroy();
         platform_free(instance);
     }
+    if (command_buffer) {
+        render_cmd_buffer_destroy(command_buffer);
+    }
 }
 
 RendererInstance* renderer_get_instance(void) {

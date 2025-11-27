@@ -65,6 +65,12 @@ void render_pass_draw_indexed(
     );
 }
 
+void render_pass_shader_set_mat4(
+    RenderPass* pass, Shader* shader, const char* name, Matrix4 matrix
+) {
+    render_cmd_shader_set_mat4(renderer_get_frame_command_buffer(), shader, name, matrix);
+}
+
 void render_pass_end(RenderPass* pass) {
     render_cmd_end_pass(renderer_get_frame_command_buffer(), pass);
 }

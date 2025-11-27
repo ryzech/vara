@@ -57,7 +57,7 @@ void shader_unbind(Shader* shader) {
     }
 }
 
-void shader_set_mat4(Shader* shader, const char* name, const Matrix4* matrix) {
+void shader_set_mat4(Shader* shader, const char* name, Matrix4 matrix) {
     if (shader && shader->vt.shader_set_mat4) {
         shader->vt.shader_set_mat4(shader, name, matrix);
     }
