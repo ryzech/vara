@@ -142,6 +142,7 @@ void render_cmd_execute(RenderCommandBuffer* buffer) {
             }
             case RENDER_CMD_SET_SHADER_MAT4: {
                 const RenderCmdSetShaderMat4* set_mat4 = (RenderCmdSetShaderMat4*)cmd;
+                shader_bind(set_mat4->shader);
                 shader_set_mat4(set_mat4->shader, set_mat4->name, set_mat4->matrix);
                 break;
             }

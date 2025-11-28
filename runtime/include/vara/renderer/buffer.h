@@ -62,6 +62,7 @@ struct BufferVT {
     void (*buffer_destroy)(Buffer* buffer);
     void (*buffer_bind)(Buffer* buffer);
     void (*buffer_unbind)(Buffer* buffer);
+    void (*buffer_set_data)(Buffer* buffer, const void* data, size_t size, size_t offset);
 };
 
 struct Buffer {
@@ -79,3 +80,4 @@ void buffer_destroy(Buffer* buffer);
 
 void buffer_bind(Buffer* buffer);
 void buffer_unbind(Buffer* buffer);
+void buffer_set_data(Buffer* buffer, const void* data, size_t size, size_t offset);

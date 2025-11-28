@@ -3,7 +3,57 @@
 #include <math.h>
 #include "types.h"
 
+// Constructors
+
+static Vector3 vec3(f32 x, f32 y, f32 z) {
+    return (Vector3){
+        x,
+        y,
+        z,
+    };
+}
+
+static Vector3i vec3i(i32 x, i32 y, i32 z) {
+    return (Vector3i){
+        x,
+        y,
+        z,
+    };
+}
+
 // Conversion helpers
+
+static Vector3 vec2_to_vec3(const Vector2 vec) {
+    return (Vector3){
+        vec.x,
+        vec.y,
+        0.0f,
+    };
+}
+
+static Vector3i vec2i_to_vec3i(const Vector2i vec) {
+    return (Vector3i){
+        vec.x,
+        vec.y,
+        0,
+    };
+}
+
+static Vector3 vec4_to_vec3(const Vector4 vec) {
+    return (Vector3){
+        vec.x,
+        vec.y,
+        vec.z,
+    };
+}
+
+static Vector3i vec4_to_vec3i(const Vector4i vec) {
+    return (Vector3i){
+        vec.x,
+        vec.y,
+        vec.z,
+    };
+}
 
 static Vector3 vec3_from_i(const Vector3i vec) {
     return (Vector3){

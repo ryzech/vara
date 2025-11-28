@@ -91,3 +91,13 @@ typedef Vector4 Quaternion;
 typedef union matrix4_u {
     f32 elements[16];
 } Matrix4;
+
+typedef struct Vertex {
+    Vector3 position;
+    Vector3 color;
+} Vertex;
+
+typedef struct Rect {
+    Vector3 position;
+    Vector3 size;
+} Rect;

@@ -48,9 +48,7 @@ static Matrix4 mat4_look_at(Vector3 position, Vector3 target, Vector3 up) {
     return out;
 }
 
-static Matrix4 mat4_perspective(
-    f32 fov, f32 aspect, f32 near_clip, f32 far_clip
-) {
+static Matrix4 mat4_perspective(f32 fov, f32 aspect, f32 near_clip, f32 far_clip) {
     Matrix4 out = mat4_identity();
 
     f32 tan_half_fov = tan(fov * 0.5);
@@ -61,6 +59,19 @@ static Matrix4 mat4_perspective(
     out.elements[10] = (far_clip + near_clip) * range_inv;
     out.elements[11] = -1.0f;
     out.elements[14] = 2.0f * far_clip * near_clip * range_inv;
+
+    return out;
+}
+
+static Matrix4 mat4_ortho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 far) {
+    Matrix4 out = mat4_identity();
+
+    out.elements[0] = 2.0f / (right - left);
+    out.elements[5] = 2.0f / (top - bottom);
+    out.elements[10] = -2.0f / (far - near);
+    out.elements[12] = -(right + left) / (right - left);
+    out.elements[13] = -(top + bottom) / (top - bottom);
+    out.elements[14] = -(far + near) / (far - near);
 
     return out;
 }

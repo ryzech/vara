@@ -89,3 +89,17 @@ void buffer_unbind(Buffer* buffer) {
         buffer->vt.buffer_unbind(buffer);
     }
 }
+
+void buffer_set_data(Buffer* buffer, const void* data, size_t size, size_t offset) {
+    if (!buffer || !data) {
+        return;
+    }
+
+    if (offset + size > buffer->size) {
+        return;
+    }
+
+    if (buffer->vt.buffer_set_data) {
+        buffer->vt.buffer_set_data(buffer, data, size, offset);
+    }
+}

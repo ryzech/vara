@@ -187,9 +187,19 @@ static void buffer_opengl_unbind(Buffer* buffer) {
     }
 }
 
+static void buffer_opengl_set_data(Buffer* buffer, const void* data, size_t size, size_t offset) {
+    if (!buffer || !buffer->backend_data) {
+        return;
+    }
+
+    GLenum gl_type = type_to_gl_type(buffer->type);
+    glBufferSubData(gl_type, (GLsizeiptr)offset, (GLsizeiptr)size, data);
+}
+
 void buffer_opengl_init(Buffer* buffer) {
     buffer->vt.buffer_create = buffer_opengl_create;
     buffer->vt.buffer_destroy = buffer_opengl_destroy;
     buffer->vt.buffer_bind = buffer_opengl_bind;
     buffer->vt.buffer_unbind = buffer_opengl_unbind;
+    buffer->vt.buffer_set_data = buffer_opengl_set_data;
 }

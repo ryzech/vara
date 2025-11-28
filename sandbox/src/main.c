@@ -13,18 +13,22 @@
 
 const char* vertex_src = "#version 330 core\n"
                          "layout (location = 0) in vec3 aPos;\n"
+                         "layout (location = 1) in vec3 aColor;\n"
                          "uniform mat4 uTransform;\n"
                          "out vec3 vPosition;\n"
+                         "out vec3 vColor;\n"
                          "void main() {\n"
                          "    vPosition = aPos;\n"
+                         "    vColor = aColor;\n"
                          "    gl_Position = uTransform * vec4(aPos, 1.0);\n"
                          "}\n";
 
 const char* fragment_src = "#version 330 core\n"
                            "layout(location = 0) out vec4 color;\n"
                            "in vec3 vPosition;\n"
+                           "in vec3 vColor;\n"
                            "void main() {\n"
-                           "    color = vec4(vPosition * 0.5 + 0.5, 1.0);\n"
+                           "    color = vec4(0.2, 0.3, 0.4, 1.0);\n"
                            "}\n";
 
 static Buffer* index_buffer;
@@ -50,15 +54,18 @@ static b8 on_window_resize(i16 event_code, void* sender, const EventData* event)
 void sandbox_init(void) {
     event_register(EVENT_WINDOW_RESIZE, on_window_resize);
 
-    f32 vertices[] = {0.0f, 0.5f, 0.0f, -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f};
+    Vertex vertices[] = {
+        {.position = vec3(0.0f, 0.5f, 0.0f)},
+        {.position = vec3(-0.5f, -0.5f, 0.0f)},
+        {.position = vec3(0.5f, -0.5f, 0.0f)},
+    };
     u32 indices[] = {0, 1, 2};
 
     VertexAttribute attributes[] = {
-        {.location = 0, .type = VERTEX_ATTRIBUTE_FLOAT3, .offset = 0, .normalized = false}
+        {.location = 0, .type = VERTEX_ATTRIBUTE_FLOAT3, .offset = 0, .normalized = false},
     };
-
     VertexLayout layout = {
-        .attributes = attributes, .attribute_count = 1, .stride = 3 * sizeof(f32)
+        .attributes = attributes, .attribute_count = 1, .stride = sizeof(Vertex)
     };
 
     const BufferConfig vertex_buffer_config = {
