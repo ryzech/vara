@@ -99,6 +99,9 @@ void buffer_set_data(Buffer* buffer, const void* data, size_t size, size_t offse
         return;
     }
 
+    buffer->element_count =
+        size / (buffer->type == BUFFER_TYPE_INDEX ? sizeof(u32) : buffer->layout.stride);
+
     if (buffer->vt.buffer_set_data) {
         buffer->vt.buffer_set_data(buffer, data, size, offset);
     }

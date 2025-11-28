@@ -33,6 +33,7 @@ void editor_update(f32 delta_time) {
         application_exit();
     }
 
+    render_pass_begin(ui_pass);
     renderer2d_begin(renderer);
 
     const Rect rect = {
@@ -43,6 +44,7 @@ void editor_update(f32 delta_time) {
     renderer2d_draw_rect(renderer, rect, color);
 
     renderer2d_end(renderer);
+    render_pass_end(ui_pass);
 }
 
 void editor_shutdown(void) {

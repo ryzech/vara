@@ -108,14 +108,9 @@ void renderer2d_end(Renderer2D* renderer) {
         return;
     }
 
-    INFO("renderer2d_end: Drawing %d vertices, %d indices",
-         renderer->vertex_count, renderer->index_count);
-    buffer_bind(renderer->vertex_buffer);
     buffer_set_data(
         renderer->vertex_buffer, renderer->vertices, sizeof(Vertex) * renderer->vertex_count, 0
     );
-
-    buffer_bind(renderer->index_buffer);
     buffer_set_data(
         renderer->index_buffer, renderer->indices, sizeof(u32) * renderer->index_count, 0
     );

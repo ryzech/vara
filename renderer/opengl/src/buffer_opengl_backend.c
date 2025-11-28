@@ -191,9 +191,12 @@ static void buffer_opengl_set_data(Buffer* buffer, const void* data, size_t size
     if (!buffer || !buffer->backend_data) {
         return;
     }
+    OpenGLBufferState* state = buffer->backend_data;
 
     GLenum gl_type = type_to_gl_type(buffer->type);
+    glBindBuffer(state->target, state->id);
     glBufferSubData(gl_type, (GLsizeiptr)offset, (GLsizeiptr)size, data);
+    glBindBuffer(state->target, 0);
 }
 
 void buffer_opengl_init(Buffer* buffer) {
