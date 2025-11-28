@@ -17,15 +17,10 @@ void editor_init(void) {
     ui_pass = render_pass_create(&ui_pass_config);
 
     const Renderer2DConfig renderer2d_config = {
-        .max_vertices = 32,
-        .max_indices = 32,
-        .render_pass = ui_pass,
+        .max_vertices = 1024,
+        .max_indices = 1024
     };
     renderer = renderer2d_create(&renderer2d_config);
-
-    VaraWindow* window = application_get_window();
-    Vector2i size = platform_window_get_size(window);
-    renderer_set_viewport((Vector2i){0, 0}, size);
 }
 
 void editor_update(f32 delta_time) {
@@ -40,10 +35,15 @@ void editor_update(f32 delta_time) {
         .position = {100.0f, 100.0f, 0.0f},
         .size = {200.0f, 200.0f},
     };
-    const Vector4 color = {0.8f, 0.2f, 0.2f, 1.0f};
+    const Rect rect2 = {
+        .position = {400.0f, 100.0f, 0.0f},
+        .size = {200.0f, 200.0f},
+    };
+    const Vector4 color = {0.1f, 0.5f, 0.4f, 1.0f};
     renderer2d_draw_rect(renderer, rect, color);
+    renderer2d_draw_rect(renderer, rect2, color);
 
-    renderer2d_end(renderer);
+    renderer2d_end(renderer, ui_pass);
     render_pass_end(ui_pass);
 }
 
@@ -65,7 +65,7 @@ void application_init(ApplicationConfig* config) {
     };
 
     config->name = window_config.name;
-    config->level = LOG_LEVEL_TRACE;
+    config->level = LOG_LEVEL_DEBUG;
     config->window_config = &window_config;
     config->renderer_type = window_config.renderer_type;
 

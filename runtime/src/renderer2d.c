@@ -80,9 +80,6 @@ Renderer2D* renderer2d_create(const Renderer2DConfig* config) {
     };
     renderer->shader = shader_create(&shader_config);
 
-    renderer->render_pass = config->render_pass;
-    ;
-
     return renderer;
 }
 
@@ -103,7 +100,7 @@ void renderer2d_begin(Renderer2D* renderer) {
     renderer->index_count = 0;
 }
 
-void renderer2d_end(Renderer2D* renderer) {
+void renderer2d_end(Renderer2D* renderer, RenderPass* pass) {
     if (renderer->vertex_count == 0) {
         return;
     }
@@ -120,16 +117,10 @@ void renderer2d_end(Renderer2D* renderer) {
     Vector2i size = platform_window_get_size(window);
     Matrix4 ortho = mat4_ortho(0.0f, (f32)size.x, (f32)size.y, 0.0f, -1.0f, 1.0f);
 
-    render_cmd_begin_pass(command, renderer->render_pass);
     render_cmd_shader_set_mat4(command, renderer->shader, "uTransform", ortho);
     render_cmd_draw_indexed(
-        command,
-        renderer->render_pass,
-        renderer->shader,
-        renderer->vertex_buffer,
-        renderer->index_buffer
+        command, pass, renderer->shader, renderer->vertex_buffer, renderer->index_buffer
     );
-    render_cmd_end_pass(command, renderer->render_pass);
 }
 
 void renderer2d_draw_rect(Renderer2D* renderer, Rect rect, Vector4 color) {
