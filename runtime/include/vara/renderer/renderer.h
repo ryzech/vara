@@ -10,6 +10,7 @@
 #include "vara/renderer/render_command.h"
 #include "vara/renderer/render_pass.h"
 #include "vara/renderer/shader.h"
+#include "vara/renderer/texture.h"
 
 // Forward declarations, in case they need access to each other.
 typedef struct RendererInstanceVT RendererInstanceVT;
