@@ -19,6 +19,11 @@ Camera* camera_create(void) {
     camera->view = mat4_identity();
     camera->projection = mat4_identity();
 
+    // Need functions to set these.
+    camera->near = 0.1f;
+    camera->far = 100.0f;
+    camera->fov = degrees_to_radians(60.0f);
+
     return camera;
 }
 
@@ -38,6 +43,10 @@ Matrix4 camera_get_projection(const Camera* camera) {
     return camera->projection;
 }
 
+Matrix4 camera_get_view_projection(const Camera* camera) {
+    return mat4_mul(camera->projection, camera->view);
+}
+
 void camera_set_position(Camera* camera, const Vector3 position) {
     camera->position = position;
     camera_recalculate_view(camera);
@@ -46,4 +55,12 @@ void camera_set_position(Camera* camera, const Vector3 position) {
 void camera_move(Camera* camera, Vector3 delta) {
     camera->position = vec3_add(camera->position, delta);
     camera_recalculate_view(camera);
+}
+
+void camera_update(Camera* camera, Vector2i viewport_size) {
+    camera_recalculate_view(camera);
+    // Need configuration for the near/far/fov.
+    camera->projection = mat4_perspective(
+        camera->fov, (f32)viewport_size.x / (f32)viewport_size.y, camera->near, camera->far
+    );
 }

@@ -95,6 +95,7 @@ typedef union matrix4_u {
 typedef struct Vertex {
     Vector3 position;
     Vector3 color;
+    Vector2 uv;
 } Vertex;
 
 typedef struct Rect {

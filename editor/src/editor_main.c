@@ -18,7 +18,7 @@ void editor_init(void) {
 
     const Renderer2DConfig renderer2d_config = {
         .max_vertices = 1024,
-        .max_indices = 1024
+        .max_indices = 1024,
     };
     renderer = renderer2d_create(&renderer2d_config);
 }

@@ -44,8 +44,8 @@ static b8 on_window_resize(i16 event_code, void* sender, const EventData* event)
     i32 width = event->i32[0];
     i32 height = event->i32[1];
 
-    camera->projection =
-        mat4_perspective(degrees_to_radians(60.0f), (f32)width / (f32)height, 0.01f, 100.0f);
+    camera_update(camera, (Vector2i){width, height});
+    // TODO: handle this in framebuffer.
     renderer_set_viewport(vec2i_zero(), (Vector2i){width, height});
 
     return false;
@@ -112,21 +112,13 @@ void sandbox_init(void) {
     render_pass = render_pass_create(&pass_config);
 
     camera = camera_create();
-    camera_set_position(
+    camera_update(
         camera,
-        (Vector3){
-            0.0f,
-            0.0f,
-            0.5f,
+        (Vector2i){
+            application_get_window()->width,
+            application_get_window()->height,
         }
     );
-    camera->projection = mat4_perspective(
-        degrees_to_radians(60.0f),
-        (f32)application_get_window()->width / (f32)application_get_window()->height,
-        0.01f,
-        100.0f
-    );
-    camera_move(camera, vec3_zero());
 }
 
 void sandbox_update(f32 delta_time) {
@@ -175,12 +167,11 @@ void sandbox_update(f32 delta_time) {
         camera_move(camera, delta);
     }
 
-    const Matrix4 transform_matrix =
-        mat4_mul(camera_get_projection(camera), camera_get_view(camera));
-
     render_pass_begin(render_pass);
     {
-        render_pass_shader_set_mat4(render_pass, shader, "uTransform", transform_matrix);
+        render_pass_shader_set_mat4(
+            render_pass, shader, "uTransform", camera_get_view_projection(camera)
+        );
         render_pass_draw_indexed(render_pass, shader, vertex_buffer, index_buffer);
     }
     render_pass_end(render_pass);
