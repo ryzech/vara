@@ -49,6 +49,7 @@ struct Texture {
 };
 
 Texture* texture_create(const TextureConfig* config);
+Texture* texture_load_file(const TextureConfig* config, const char* file);
 void texture_destroy(Texture* texture);
 
 void texture_bind(Texture* texture, u32 slot);

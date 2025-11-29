@@ -4,6 +4,7 @@
 
 #include "vara/renderer/renderer.h"
 #include "vara/renderer/texture.h"
+#include "vendor/stb/stb_image.h"
 
 extern void texture_opengl_init(Texture* texture);
 
@@ -32,6 +33,46 @@ Texture* texture_create(const TextureConfig* config) {
         texture_destroy(texture);
         return NULL;
     }
+
+    return texture;
+}
+
+Texture* texture_load_file(const TextureConfig* config, const char* file) {
+    if (!file) {
+        return NULL;
+    }
+
+    i32 width, height, channels;
+    stbi_set_flip_vertically_on_load(1);
+    unsigned char* data = stbi_load(file, &width, &height, &channels, 0);
+    if (!data) {
+        ERROR("stbi failed to load image('%s')\nError: %s", file, stbi_failure_reason());
+        return NULL;
+    }
+
+    TextureFormat format;
+    switch (channels) {
+        case 3:
+            format = TEXTURE_FORMAT_RGB;
+            break;
+        case 4:
+            format = TEXTURE_FORMAT_RGBA;
+            break;
+        default:
+            stbi_image_free(data);
+            return NULL;
+    }
+
+    const TextureConfig new_config = {
+        .filter = config->filter,
+        .format = format,
+        .width = (u32)width,
+        .height = (u32)height,
+    };
+
+    Texture* texture = texture_create(&new_config);
+    texture_set_data(texture, data, width * height * channels);
+    stbi_image_free(data);
 
     return texture;
 }
