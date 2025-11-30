@@ -5,6 +5,8 @@
 #include "vara/renderer/renderer.h"
 #include "vara/renderer2d/renderer2d.h"
 
+static Texture* default_texture;
+
 Renderer2D* renderer2d_create(const Renderer2DConfig* config) {
     Renderer2D* renderer = platform_allocate(sizeof(Renderer2D));
     platform_zero_memory(renderer, sizeof(Renderer2D));
@@ -28,10 +30,22 @@ Renderer2D* renderer2d_create(const Renderer2DConfig* config) {
             .offset = offsetof(Vertex, color),
             .normalized = false,
         },
+        {
+            .location = 2,
+            .type = VERTEX_ATTRIBUTE_FLOAT2,
+            .offset = offsetof(Vertex, tex_coord),
+            .normalized = false,
+        },
+        {
+            .location = 3,
+            .type = VERTEX_ATTRIBUTE_FLOAT,
+            .offset = offsetof(Vertex, tex_index),
+            .normalized = false,
+        },
     };
     VertexLayout layout = {
         .attributes = attributes,
-        .attribute_count = 2,
+        .attribute_count = 4,
         .stride = sizeof(Vertex),
     };
 
@@ -55,20 +69,30 @@ Renderer2D* renderer2d_create(const Renderer2DConfig* config) {
     const char* vertex_src = "#version 330 core\n"
                              "layout(location = 0) in vec3 aPos;\n"
                              "layout(location = 1) in vec3 aColor;\n"
-                             "uniform mat4 uTransform;\n"
+                             "layout(location = 2) in vec2 aTexCoord;\n"
+                             "layout(location = 3) in float aTexIndex;\n"
+                             "uniform mat4 uProjection;\n"
                              "out vec3 vColor;\n"
+                             "out vec2 vTexCoord;\n"
+                             "out float vTexIndex;\n"
                              "void main() {\n"
                              "    vColor = aColor;\n"
-                             "    gl_Position = uTransform * vec4(aPos, 1.0);\n"
+                             "    vTexCoord = aTexCoord;\n"
+                             "    vTexIndex = aTexIndex;\n"
+                             "    gl_Position = uProjection * vec4(aPos, 1.0);\n"
                              "}\n";
 
     const char* fragment_src = "#version 330 core\n"
                                "in vec3 vColor;\n"
+                               "in vec2 vTexCoord;\n"
+                               "in float vTexIndex;\n"
                                "out vec4 FragColor;\n"
+                               "uniform sampler2D uTextures[16];\n"
                                "void main() {\n"
-                               "    FragColor = vec4(vColor, 1.0);\n"
+                               "    int index = int(vTexIndex);\n"
+                               "    vec4 texColor = texture(uTextures[index], vTexCoord);\n"
+                               "    FragColor = texColor * vec4(vColor, 1.0);\n"
                                "}\n";
-
     ShaderSource sources[] = {
         {.stage = SHADER_STAGE_VERTEX, .source = vertex_src},
         {.stage = SHADER_STAGE_FRAGMENT, .source = fragment_src},
@@ -80,6 +104,17 @@ Renderer2D* renderer2d_create(const Renderer2DConfig* config) {
     };
     renderer->shader = shader_create(&shader_config);
 
+    // Set the default white texture if no texture is requested.
+    u8 white_pixels[4] = {255, 255, 255, 255};
+    TextureConfig default_texture_config = {
+        .width = 1,
+        .height = 1,
+        .format = TEXTURE_FORMAT_RGBA,
+        .filter = TEXTURE_FILTER_LINEAR,
+    };
+    default_texture = texture_create(&default_texture_config);
+    texture_set_data(default_texture, white_pixels, 4);
+
     return renderer;
 }
 
@@ -88,6 +123,7 @@ void renderer2d_destroy(Renderer2D* renderer) {
         buffer_destroy(renderer->vertex_buffer);
         buffer_destroy(renderer->index_buffer);
         shader_destroy(renderer->shader);
+        texture_destroy(default_texture);
 
         platform_free(renderer->vertices);
         platform_free(renderer->indices);
@@ -98,6 +134,9 @@ void renderer2d_destroy(Renderer2D* renderer) {
 void renderer2d_begin(Renderer2D* renderer) {
     renderer->vertex_count = 0;
     renderer->index_count = 0;
+    renderer->texture_count = 0;
+
+    renderer->textures[renderer->texture_count++] = default_texture;
 }
 
 void renderer2d_end(Renderer2D* renderer, RenderPass* pass) {
@@ -112,51 +151,75 @@ void renderer2d_end(Renderer2D* renderer, RenderPass* pass) {
         renderer->index_buffer, renderer->indices, sizeof(u32) * renderer->index_count, 0
     );
 
+    int samplers[16];
+    for (i32 i = 0; i < renderer->texture_count; i++) {
+        texture_bind(renderer->textures[i], i);
+        samplers[i] = i;
+    }
+
     RenderCommandBuffer* command = renderer_get_frame_command_buffer();
     VaraWindow* window = application_get_window();
-    Vector2i size = platform_window_get_size(window);
-    Matrix4 ortho = mat4_ortho(0.0f, (f32)size.x, (f32)size.y, 0.0f, -1.0f, 1.0f);
+    Vector2i size = platform_window_get_framebuffer_size(window);
+    Matrix4 ortho = mat4_ortho(0.0f, (f32)size.x, 0.0f, (f32)size.y, -1.0f, 1.0f);
 
-    render_cmd_shader_set_mat4(command, renderer->shader, "uTransform", ortho);
+    render_cmd_shader_set_mat4(command, renderer->shader, "uProjection", ortho);
+    render_cmd_shader_set_int_array(
+        command, renderer->shader, "uTextures", samplers, renderer->texture_count
+    );
     render_cmd_draw_indexed(
         command, pass, renderer->shader, renderer->vertex_buffer, renderer->index_buffer
     );
 }
 
 void renderer2d_draw_rect(Renderer2D* renderer, Rect rect, Vector4 color) {
-    if (!renderer) {
+    renderer2d_draw_rect_texture(renderer, rect, default_texture, color);
+}
+
+void renderer2d_draw_rect_texture(Renderer2D* renderer, Rect rect, Texture* texture, Vector4 tint) {
+    if (!renderer || !texture) {
         return;
+    }
+
+    f32 tex_index = 0;
+    b8 found = false;
+    for (u32 i = 0; i < renderer->texture_count; i++) {
+        if (renderer->textures[i] == texture) {
+            tex_index = (f32)i;
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        tex_index = (f32)renderer->texture_count;
+        renderer->textures[renderer->texture_count++] = texture;
     }
 
     u32 current_vertex_count = renderer->vertex_count;
 
-    const Vertex v0 = {.position = rect.position, .color = vec4_to_vec3(color)};
+    const Vertex v0 = {
+        .position = rect.position,
+        .color = vec4_to_vec3(tint),
+        .tex_coord = {0.0f, 0.0f},
+        .tex_index = tex_index,
+    };
     const Vertex v1 = {
-        .position =
-            {
-                rect.position.x + rect.size.x,
-                rect.position.y,
-                rect.position.z,
-            },
-        .color = vec4_to_vec3(color)
+        .position = {rect.position.x + rect.size.x, rect.position.y, rect.position.z},
+        .color = vec4_to_vec3(tint),
+        .tex_coord = {1.0f, 0.0f},
+        .tex_index = tex_index,
     };
     const Vertex v2 = {
-        .position =
-            {
-                rect.position.x + rect.size.x,
-                rect.position.y + rect.size.y,
-                rect.position.z,
-            },
-        .color = vec4_to_vec3(color)
+        .position = {rect.position.x + rect.size.x, rect.position.y + rect.size.y, rect.position.z},
+        .color = vec4_to_vec3(tint),
+        .tex_coord = {1.0f, 1.0f},
+        .tex_index = tex_index,
     };
     const Vertex v3 = {
-        .position =
-            {
-                rect.position.x,
-                rect.position.y + rect.size.y,
-                rect.position.z,
-            },
-        .color = vec4_to_vec3(color)
+        .position = {rect.position.x, rect.position.y + rect.size.y, rect.position.z},
+        .color = vec4_to_vec3(tint),
+        .tex_coord = {0.0f, 1.0f},
+        .tex_index = tex_index,
     };
 
     renderer->vertices[renderer->vertex_count + 0] = v0;

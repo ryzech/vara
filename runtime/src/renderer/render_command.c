@@ -10,6 +10,7 @@ typedef struct RenderCmdBeginPass RenderCmdBeginPass;
 typedef struct RenderCmdEndPass RenderCmdEndPass;
 typedef struct RenderCmdDrawIndexed RenderCmdDrawIndexed;
 typedef struct RenderCmdSetShaderMat4 RenderCmdSetShaderMat4;
+typedef struct RenderCmdSetShaderIntArray RenderCmdSetShaderIntArray;
 typedef struct RenderCmdClearColor RenderCmdClearColor;
 
 struct RenderCmdBeginPass {
@@ -34,6 +35,14 @@ struct RenderCmdSetShaderMat4 {
     RenderCommandHeader header;
     Matrix4 matrix;
     Shader* shader;
+    const char* name;
+};
+
+struct RenderCmdSetShaderIntArray {
+    RenderCommandHeader header;
+    i32 array[32];
+    Shader* shader;
+    u32 count;
     const char* name;
 };
 
@@ -112,6 +121,20 @@ void render_cmd_shader_set_mat4(
     cmd->matrix = matrix;
 }
 
+void render_cmd_shader_set_int_array(
+    RenderCommandBuffer* buffer, Shader* shader, const char* name, const i32* array, u32 count
+) {
+    RenderCmdSetShaderIntArray* cmd =
+        render_cmd_allocate(buffer, sizeof(RenderCmdSetShaderIntArray));
+    cmd->header.type = RENDER_CMD_SET_SHADER_INT_ARRAY;
+    cmd->header.size = sizeof(RenderCmdSetShaderIntArray);
+    cmd->shader = shader;
+    cmd->name = name;
+    cmd->count = count;
+
+    platform_copy_memory(cmd->array, array, count * sizeof(i32));
+}
+
 void render_cmd_execute(RenderCommandBuffer* buffer) {
     u8* cmd = buffer->buffer;
     const u8* end = buffer->buffer + buffer->used;
@@ -144,6 +167,17 @@ void render_cmd_execute(RenderCommandBuffer* buffer) {
                 const RenderCmdSetShaderMat4* set_mat4 = (RenderCmdSetShaderMat4*)cmd;
                 shader_bind(set_mat4->shader);
                 shader_set_mat4(set_mat4->shader, set_mat4->name, set_mat4->matrix);
+                break;
+            }
+            case RENDER_CMD_SET_SHADER_INT_ARRAY: {
+                const RenderCmdSetShaderIntArray* set_int_array = (RenderCmdSetShaderIntArray*)cmd;
+                shader_bind(set_int_array->shader);
+                shader_set_int_array(
+                    set_int_array->shader,
+                    set_int_array->name,
+                    set_int_array->array,
+                    set_int_array->count
+                );
                 break;
             }
             default: {

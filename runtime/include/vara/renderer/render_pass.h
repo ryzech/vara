@@ -52,4 +52,7 @@ void render_pass_draw_indexed(
 void render_pass_shader_set_mat4(
     RenderPass* pass, struct Shader* shader, const char* name, Matrix4 matrix
 );
+void render_pass_shader_set_int_array(
+    RenderPass* pass, struct Shader* shader, const char* name, i32* array, u32 count
+);
 void render_pass_end(RenderPass* pass);

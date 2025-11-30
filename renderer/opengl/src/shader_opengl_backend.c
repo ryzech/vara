@@ -76,6 +76,19 @@ static void shader_opengl_set_mat4(Shader* shader, const char* name, Matrix4 mat
     glUniformMatrix4fv(location, 1, GL_FALSE, matrix.elements);
 }
 
+static void shader_opengl_set_int_array(
+    Shader* shader, const char* name, const i32* array, u32 count
+) {
+    if (!shader || !shader->backend_data) {
+        return;
+    }
+
+    OpenGLShaderState* shader_state = shader->backend_data;
+
+    GLint location = glGetUniformLocation(shader_state->shader_program, name);
+    glUniform1iv(location, (GLint)count, array);
+}
+
 static void shader_opengl_dispatch(Shader* shader, i16 x, i16 y, i16 z) {
     if (!shader || !shader->backend_data) {
         return;
@@ -102,5 +115,6 @@ void shader_opengl_init(Shader* shader) {
     shader->vt.shader_bind = shader_opengl_bind;
     shader->vt.shader_unbind = shader_opengl_unbind;
     shader->vt.shader_set_mat4 = shader_opengl_set_mat4;
+    shader->vt.shader_set_int_array = shader_opengl_set_int_array;
     shader->vt.shader_dispatch = shader_opengl_dispatch;
 }

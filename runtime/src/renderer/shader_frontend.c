@@ -63,6 +63,12 @@ void shader_set_mat4(Shader* shader, const char* name, Matrix4 matrix) {
     }
 }
 
+void shader_set_int_array(Shader* shader, const char* name, const i32* array, u32 count) {
+    if (shader && shader->vt.shader_set_int_array) {
+        shader->vt.shader_set_int_array(shader, name, array, count);
+    }
+}
+
 void shader_dispatch(Shader* shader, const i16 x, const i16 y, const i16 z) {
     if (shader && shader->vt.shader_dispatch) {
         shader->vt.shader_dispatch(shader, x, y, z);

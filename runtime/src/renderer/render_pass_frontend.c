@@ -50,6 +50,9 @@ void render_pass_destroy(RenderPass* pass) {
 }
 
 void render_pass_begin(RenderPass* pass) {
+    if (pass->target) {
+        framebuffer_bind(pass->target);
+    }
     if (pass->clear) {
         renderer_clear_color(pass->clear_color);
         renderer_clear();
@@ -71,6 +74,17 @@ void render_pass_shader_set_mat4(
     render_cmd_shader_set_mat4(renderer_get_frame_command_buffer(), shader, name, matrix);
 }
 
+void render_pass_shader_set_int_array(
+    RenderPass* pass, Shader* shader, const char* name, i32* array, u32 count
+) {
+    render_cmd_shader_set_int_array(
+        renderer_get_frame_command_buffer(), shader, name, array, count
+    );
+}
+
 void render_pass_end(RenderPass* pass) {
     render_cmd_end_pass(renderer_get_frame_command_buffer(), pass);
+    if (pass->target) {
+        framebuffer_unbind(pass->target);
+    }
 }
