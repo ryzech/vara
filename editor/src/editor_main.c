@@ -3,8 +3,8 @@
 #include <vara/core/input/input.h>
 #include <vara/core/logger.h>
 #include <vara/core/platform/platform_window.h>
-#include <vara/renderer2d/renderer2d.h>
 #include <vara/renderer/render_pass.h>
+#include <vara/renderer2d/renderer2d.h>
 
 static Renderer2D* renderer;
 static RenderPass* ui_pass;
@@ -36,13 +36,11 @@ void editor_update(f32 delta_time) {
         .position = {100.0f, 100.0f, 0.0f},
         .size = {200.0f, 200.0f},
     };
-    const Rect rect2 = {
-        .position = {400.0f, 100.0f, 0.0f},
-        .size = {200.0f, 200.0f},
-    };
-    const Vector4 color = {0.1f, 0.5f, 0.4f, 1.0f};
+    Vector4 color = {0.1f, 0.5f, 0.4f, 1.0f};
+    if (point_in_rect(input_get_mouse_position(), rect)) {
+        color.y = 0.6f;
+    }
     renderer2d_draw_rect(renderer, rect, color);
-    renderer2d_draw_rect(renderer, rect2, color);
 
     renderer2d_end(renderer, ui_pass);
     render_pass_end(ui_pass);

@@ -235,15 +235,46 @@ static Key glfw_to_keycode(const i32 keycode) {
     }
 }
 
-static void glfw_key_callback(
-    GLFWwindow* window, int key, int scancode, int action, int mods
-) {
+static MouseButton glfw_to_mouse(const i32 keycode) {
+    switch (keycode) {
+        case GLFW_MOUSE_BUTTON_LEFT:
+            return MOUSE_BUTTON_LEFT;
+        case GLFW_MOUSE_BUTTON_RIGHT:
+            return MOUSE_BUTTON_RIGHT;
+        case GLFW_MOUSE_BUTTON_MIDDLE:
+            return MOUSE_BUTTON_MIDDLE;
+        default:
+            return -1;
+    }
+}
+
+static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     const Key keycode = glfw_to_keycode(key);
     const b8 is_pressed = action == GLFW_PRESS || action == GLFW_REPEAT;
     input_system_process_key(keycode, is_pressed);
 }
 
+static void glfw_mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+    const MouseButton keycode = glfw_to_mouse(button);
+    const b8 is_pressed = action == GLFW_PRESS;
+    input_system_process_mouse(keycode, is_pressed);
+}
+
+static void glfw_mouse_move_callback(GLFWwindow* window, f64 xpos, f64 ypos) {
+    VaraWindow* vara_window = glfwGetWindowUserPointer(window);
+
+    f32 scaled_x = (f32)xpos / vara_window->pixel_density;
+    f32 scaled_y = (f32)ypos / vara_window->pixel_density;
+
+    input_system_process_mouse_move(scaled_x, scaled_y);
+}
+
 static void glfw_resize_callback(GLFWwindow* window, i32 width, i32 height) {
+    VaraWindow* vara_window = glfwGetWindowUserPointer(window);
+
+    const Vector2i framebuffer_size = platform_window_get_framebuffer_size(vara_window);
+    vara_window->pixel_density = (f32)framebuffer_size.x / (f32)width;
+
     EventData data = {0};
     data.i32[0] = width;
     data.i32[1] = height;
@@ -294,9 +325,8 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     }
 
-    GLFWwindow* glfw_window = glfwCreateWindow(
-        config->width, config->height, config->title, NULL, NULL
-    );
+    GLFWwindow* glfw_window =
+        glfwCreateWindow(config->width, config->height, config->title, NULL, NULL);
 
     if (!glfw_window) {
         ERROR("Failed to create GLFW window.");
@@ -312,10 +342,18 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
     window->y = config->y;
     window->title = config->title;
     window->name = config->name;
-    window->pixel_density = 1.0f;
     window->renderer_type = config->renderer_type;
 
+    // Calculate DPI / Pixel Density
+    const Vector2i framebuffer_size = platform_window_get_framebuffer_size(window);
+    const Vector2i logical_size = platform_window_get_size(window);
+    window->pixel_density = (f32)framebuffer_size.x / (f32)logical_size.x;
+
+    glfwSetWindowUserPointer(glfw_window, window);
+
     glfwSetKeyCallback(glfw_window, glfw_key_callback);
+    glfwSetMouseButtonCallback(glfw_window, glfw_mouse_button_callback);
+    glfwSetCursorPosCallback(glfw_window, glfw_mouse_move_callback);
     glfwSetFramebufferSizeCallback(glfw_window, glfw_resize_callback);
     glfwSetWindowCloseCallback(glfw_window, glfw_close_callback);
 

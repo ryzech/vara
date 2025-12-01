@@ -138,8 +138,8 @@ void renderer2d_end(Renderer2D* renderer, RenderPass* pass) {
 
     RenderCommandBuffer* command = renderer_get_frame_command_buffer();
     VaraWindow* window = application_get_window();
-    Vector2i size = platform_window_get_framebuffer_size(window);
-    Matrix4 ortho = mat4_ortho(0.0f, (f32)size.x, 0.0f, (f32)size.y, -1.0f, 1.0f);
+    Vector2i size = platform_window_get_size(window);
+    Matrix4 ortho = mat4_ortho(0.0f, (f32)size.x, (f32)size.y, 0.0f, -1.0f, 1.0f);
 
     render_cmd_shader_set_mat4(command, renderer->shader, "uProjection", ortho);
     render_cmd_shader_set_int_array(
