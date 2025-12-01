@@ -9,6 +9,7 @@ typedef struct RenderPass RenderPass;
 typedef struct RenderPassConfig RenderPassConfig;
 
 // Redeclaration's so we don't have to include header.
+struct Material;
 struct Framebuffer;
 struct Buffer;
 struct Shader;

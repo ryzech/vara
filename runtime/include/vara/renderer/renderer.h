@@ -5,16 +5,11 @@
 #include <vara/core/platform/platform_graphics_types.h>
 #include <vara/core/platform/platform_window.h>
 
-#include "vara/renderer/buffer.h"
-#include "vara/renderer/framebuffer.h"
-#include "vara/renderer/render_command.h"
-#include "vara/renderer/render_pass.h"
-#include "vara/renderer/shader.h"
-#include "vara/renderer/texture.h"
-
 // Forward declarations, in case they need access to each other.
 typedef struct RendererInstanceVT RendererInstanceVT;
 typedef struct RendererInstance RendererInstance;
+
+struct RenderCommandBuffer;
 
 struct RendererInstanceVT {
     b8 (*renderer_create)(void);
@@ -63,7 +58,7 @@ RendererInstance* renderer_get_instance(void);
  */
 PlatformRendererType renderer_get_renderer_type(void);
 
-RenderCommandBuffer* renderer_get_frame_command_buffer(void);
+struct RenderCommandBuffer* renderer_get_frame_command_buffer(void);
 
 void renderer_begin_frame(void);
 

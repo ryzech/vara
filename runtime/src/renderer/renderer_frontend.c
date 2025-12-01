@@ -4,6 +4,7 @@
 #include <vara/core/platform/platform_graphics_types.h>
 #include <vara/core/platform/platform_window.h>
 
+#include "vara/renderer/render_command.h"
 #include "vara/renderer/renderer.h"
 
 extern void renderer_opengl_init(RendererInstance* instance, VaraWindow* window);

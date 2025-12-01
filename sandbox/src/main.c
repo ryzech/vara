@@ -9,7 +9,9 @@
 #include <vara/core/platform/platform.h>
 #include <vara/core/platform/platform_graphics_types.h>
 #include <vara/core/platform/platform_window.h>
-#include <vara/renderer/renderer.h>
+#include <vara/renderer/buffer.h>
+#include <vara/renderer/render_pass.h>
+#include <vara/renderer/shader.h>
 
 const char* vertex_src = "#version 330 core\n"
                          "layout (location = 0) in vec3 aPos;\n"

@@ -4,8 +4,11 @@
 #include <vara/core/platform/platform_graphics_types.h>
 
 #include "vara/renderer/buffer.h"
+#include "vara/renderer/framebuffer.h"
+#include "vara/renderer/render_command.h"
 #include "vara/renderer/render_pass.h"
 #include "vara/renderer/renderer.h"
+#include "vara/renderer/shader.h"
 
 extern void render_pass_opengl_init(RenderPass* pass);
 

@@ -1,8 +1,13 @@
 #include <vara/core/platform/platform.h>
 
 #include "vara/application/application.h"
+#include "vara/material/material.h"
+#include "vara/renderer/buffer.h"
 #include "vara/renderer/render_command.h"
+#include "vara/renderer/render_pass.h"
 #include "vara/renderer/renderer.h"
+#include "vara/renderer/shader.h"
+#include "vara/renderer/texture.h"
 #include "vara/renderer2d/renderer2d.h"
 
 static Texture* default_texture;

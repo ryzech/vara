@@ -4,6 +4,7 @@
 #include <vara/core/logger.h>
 #include <vara/core/platform/platform_window.h>
 #include <vara/renderer2d/renderer2d.h>
+#include <vara/renderer/render_pass.h>
 
 static Renderer2D* renderer;
 static RenderPass* ui_pass;
