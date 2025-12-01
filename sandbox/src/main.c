@@ -43,13 +43,11 @@ static Camera* camera;
 static f32 timer;
 
 static b8 on_window_resize(i16 event_code, void* sender, const EventData* event) {
-    i32 width = event->i32[0];
-    i32 height = event->i32[1];
+    const i32 width = event->i32[0];
+    const i32 height = event->i32[1];
+    const Vector2i size = {width, height};
 
-    camera_update(camera, (Vector2i){width, height});
-    // TODO: handle this in framebuffer.
-    renderer_set_viewport(vec2i_zero(), (Vector2i){width, height});
-
+    camera_update(camera, size);
     return false;
 }
 

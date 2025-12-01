@@ -47,6 +47,12 @@ b8 renderer_create(VaraWindow* window);
 void renderer_destroy(void);
 
 /**
+ * Window resize callback.
+ * @param new_size New window size.
+ */
+void renderer_on_window_resize(Vector2i new_size);
+
+/**
  * Get RendererInstance singleton.
  * @return RendererInstance if exists, else NULL.
  */
@@ -75,15 +81,6 @@ void renderer_clear(void);
  * @param color Color to use when clearing the screen.
  */
 void renderer_clear_color(Vector4 color);
-
-/**
- * Update the viewport for the given Renderer.
- * @param position Position of the viewport.
- * @param size Size of the viewport.
- */
-// This will need moved out of here and likely into the framebuffer.
-// For now in order to get this working, it will be here.
-void renderer_set_viewport(Vector2i position, Vector2i size);
 
 /**
  * This submits all the commands in the pass queue.\n

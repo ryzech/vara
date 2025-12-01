@@ -6,6 +6,7 @@
 #include "vara/renderer/buffer.h"
 #include "vara/renderer/render_command.h"
 #include "vara/renderer/render_pass.h"
+#include "vara/renderer/renderer.h"
 #include "vara/renderer/shader.h"
 
 typedef struct RenderCmdBeginPass RenderCmdBeginPass;
@@ -13,6 +14,7 @@ typedef struct RenderCmdEndPass RenderCmdEndPass;
 typedef struct RenderCmdDrawIndexed RenderCmdDrawIndexed;
 typedef struct RenderCmdSetShaderMat4 RenderCmdSetShaderMat4;
 typedef struct RenderCmdSetShaderIntArray RenderCmdSetShaderIntArray;
+typedef struct RenderCmdSetViewport RenderCmdSetViewport;
 typedef struct RenderCmdClearColor RenderCmdClearColor;
 
 struct RenderCmdBeginPass {
@@ -46,6 +48,11 @@ struct RenderCmdSetShaderIntArray {
     Shader* shader;
     u32 count;
     const char* name;
+};
+
+struct RenderCmdSetViewport {
+    RenderCommandHeader header;
+    Vector2i viewport_size;
 };
 
 static void* render_cmd_allocate(RenderCommandBuffer* buffer, u32 size) {
@@ -137,6 +144,13 @@ void render_cmd_shader_set_int_array(
     platform_copy_memory(cmd->array, array, count * sizeof(i32));
 }
 
+void render_cmd_set_viewport(RenderCommandBuffer* buffer, Vector2i viewport_size) {
+    RenderCmdSetViewport* cmd = render_cmd_allocate(buffer, sizeof(RenderCmdSetViewport));
+    cmd->header.type = RENDER_CMD_SET_VIEWPORT;
+    cmd->header.size = sizeof(RenderCmdSetViewport);
+    cmd->viewport_size = viewport_size;
+}
+
 void render_cmd_execute(RenderCommandBuffer* buffer) {
     u8* cmd = buffer->buffer;
     const u8* end = buffer->buffer + buffer->used;
@@ -180,6 +194,12 @@ void render_cmd_execute(RenderCommandBuffer* buffer) {
                     set_int_array->array,
                     set_int_array->count
                 );
+                break;
+            }
+            case RENDER_CMD_SET_VIEWPORT: {
+                const RenderCmdSetViewport* set_viewport = (RenderCmdSetViewport*)cmd;
+                RendererInstance* instance = renderer_get_instance();
+                instance->vt.renderer_set_viewport(vec2i_zero(), set_viewport->viewport_size);
                 break;
             }
             default: {

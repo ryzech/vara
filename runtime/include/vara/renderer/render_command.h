@@ -17,6 +17,7 @@ enum RenderCommandType {
     RENDER_CMD_DRAW_INDEXED,
     RENDER_CMD_SET_SHADER_MAT4,
     RENDER_CMD_SET_SHADER_INT_ARRAY,
+    RENDER_CMD_SET_VIEWPORT,
     RENDER_CMD_END_PASS,
 };
 
@@ -53,5 +54,6 @@ void render_cmd_draw_indexed(
     struct Buffer* vertex,
     struct Buffer* index
 );
+void render_cmd_set_viewport(RenderCommandBuffer* buffer, Vector2i viewport_size);
 void render_cmd_end_pass(RenderCommandBuffer* buffer, struct RenderPass* pass);
 void render_cmd_execute(RenderCommandBuffer* buffer);

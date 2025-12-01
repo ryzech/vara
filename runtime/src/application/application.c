@@ -16,12 +16,25 @@ struct ApplicationState {
 
 static ApplicationState application_state;
 
+static b8 application_on_window_resize(i16 event_code, void* sender, const EventData* event) {
+    const i32 width = event->i32[0];
+    const i32 height = event->i32[1];
+    const Vector2i size = {width, height};
+
+    if (renderer_get_instance()) {
+        renderer_on_window_resize(size);
+    }
+
+    return false;
+}
+
 int application_main(int argc, char** argv) {
     if (!platform_create()) {
         ERROR("Failed to create platform!");
         return EXIT_FAILURE;
     }
     event_system_create();
+    event_register(EVENT_WINDOW_RESIZE, application_on_window_resize);
 
     application_init(&application_state.config);
     logging_system_create(application_state.config.level);
