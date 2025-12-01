@@ -7,3 +7,6 @@ build-test/
 buildDir/
 subprojects/*
 !subprojects/*.wrap
+
+# Generated GLSL headers for embedding.
+*.gen.h

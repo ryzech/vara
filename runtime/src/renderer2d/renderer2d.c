@@ -9,6 +9,7 @@
 #include "vara/renderer/shader.h"
 #include "vara/renderer/texture.h"
 #include "vara/renderer2d/renderer2d.h"
+#include "vara/shaders/renderer2d.glsl.gen.h"
 
 static Texture* default_texture;
 
@@ -71,36 +72,9 @@ Renderer2D* renderer2d_create(const Renderer2DConfig* config) {
     };
     renderer->index_buffer = buffer_create(&index_buffer_config);
 
-    const char* vertex_src = "#version 330 core\n"
-                             "layout(location = 0) in vec3 aPos;\n"
-                             "layout(location = 1) in vec3 aColor;\n"
-                             "layout(location = 2) in vec2 aTexCoord;\n"
-                             "layout(location = 3) in float aTexIndex;\n"
-                             "uniform mat4 uProjection;\n"
-                             "out vec3 vColor;\n"
-                             "out vec2 vTexCoord;\n"
-                             "out float vTexIndex;\n"
-                             "void main() {\n"
-                             "    vColor = aColor;\n"
-                             "    vTexCoord = aTexCoord;\n"
-                             "    vTexIndex = aTexIndex;\n"
-                             "    gl_Position = uProjection * vec4(aPos, 1.0);\n"
-                             "}\n";
-
-    const char* fragment_src = "#version 330 core\n"
-                               "in vec3 vColor;\n"
-                               "in vec2 vTexCoord;\n"
-                               "in float vTexIndex;\n"
-                               "out vec4 FragColor;\n"
-                               "uniform sampler2D uTextures[16];\n"
-                               "void main() {\n"
-                               "    int index = int(vTexIndex);\n"
-                               "    vec4 texColor = texture(uTextures[index], vTexCoord);\n"
-                               "    FragColor = texColor * vec4(vColor, 1.0);\n"
-                               "}\n";
     ShaderSource sources[] = {
-        {.stage = SHADER_STAGE_VERTEX, .source = vertex_src},
-        {.stage = SHADER_STAGE_FRAGMENT, .source = fragment_src},
+        {.stage = SHADER_STAGE_VERTEX, .source = renderer2d_vertex_source},
+        {.stage = SHADER_STAGE_FRAGMENT, .source = renderer2d_fragment_source},
     };
     const ShaderConfig shader_config = {
         .name = "renderer2d_shader",
