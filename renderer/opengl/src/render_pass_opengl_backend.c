@@ -2,7 +2,6 @@
 #include <vara/core/defines.h>
 #include <vara/core/logger.h>
 #include <vara/core/platform/platform.h>
-#include <vara/renderer/buffer.h>
 #include <vara/renderer/render_pass.h>
 
 typedef struct OpenGLRenderPassState {
@@ -46,29 +45,6 @@ static void render_pass_opengl_begin(RenderPass* pass) {
     render_pass_state->active = true;
 }
 
-static void render_pass_opengl_draw_indexed(RenderPass* pass, Buffer* index_buffer) {
-    if (!pass || !pass->backend_data) {
-        return;
-    }
-
-    OpenGLRenderPassState* render_pass_state = pass->backend_data;
-
-    if (!render_pass_state->active) {
-        WARN(
-            "Render pass named('%s') is not active! Cannot submit draw indexed "
-            "command.",
-            pass->name
-        );
-        return;
-    }
-
-    if (index_buffer->type != BUFFER_TYPE_INDEX) {
-        return;
-    }
-
-    glDrawElements(GL_TRIANGLES, (GLsizei)index_buffer->element_count, GL_UNSIGNED_INT, NULL);
-}
-
 static void render_pass_opengl_end(RenderPass* pass) {
     if (!pass || !pass->backend_data) {
         return;
@@ -89,6 +65,5 @@ void render_pass_opengl_init(RenderPass* pass) {
     pass->vt.render_pass_create = render_pass_opengl_create;
     pass->vt.render_pass_destroy = render_pass_opengl_destroy;
     pass->vt.render_pass_begin = render_pass_opengl_begin;
-    pass->vt.render_pass_draw_indexed = render_pass_opengl_draw_indexed;
     pass->vt.render_pass_end = render_pass_opengl_end;
 }

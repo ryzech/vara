@@ -3,10 +3,11 @@
 #include <vara/core/defines.h>
 #include <vara/core/math/types.h>
 
+#define RENDERER2D_MAX_TEXTURES 16
+
 typedef struct Renderer2D Renderer2D;
 typedef struct Renderer2DConfig Renderer2DConfig;
 
-struct RenderPass;
 struct Buffer;
 struct Shader;
 struct Texture;
@@ -21,7 +22,7 @@ struct Renderer2D {
     struct Buffer* vertex_buffer;
     struct Buffer* index_buffer;
     struct Shader* shader;
-    struct Texture* textures[16];
+    struct Texture* textures[RENDERER2D_MAX_TEXTURES];
     u32* indices;
     u32 vertex_count;
     u32 max_vertices;
@@ -34,7 +35,7 @@ Renderer2D* renderer2d_create(const Renderer2DConfig* config);
 void renderer2d_destroy(Renderer2D* renderer);
 
 void renderer2d_begin(Renderer2D* renderer);
-void renderer2d_end(Renderer2D* renderer, struct RenderPass* pass);
+void renderer2d_end(Renderer2D* renderer);
 
 void renderer2d_draw_rect(Renderer2D* renderer, Rect rect, Vector4 color);
 void renderer2d_draw_rect_texture(

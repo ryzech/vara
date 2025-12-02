@@ -1,7 +1,7 @@
+#include <vara/core/math/math.h>
 #include <vara/core/platform/platform.h>
 
 #include "vara/application/application.h"
-#include "vara/material/material.h"
 #include "vara/renderer/buffer.h"
 #include "vara/renderer/render_command.h"
 #include "vara/renderer/render_pass.h"
@@ -12,6 +12,39 @@
 #include "vara/shaders/renderer2d.glsl.gen.h"
 
 static Texture* default_texture;
+
+static void renderer2d_flush(Renderer2D* renderer) {
+    if (renderer->vertex_count == 0) {
+        return;
+    }
+
+    buffer_set_data(
+        renderer->vertex_buffer, renderer->vertices, sizeof(Vertex) * renderer->vertex_count, 0
+    );
+    buffer_set_data(
+        renderer->index_buffer, renderer->indices, sizeof(u32) * renderer->index_count, 0
+    );
+
+    int samplers[16];
+    for (i32 i = 0; i < renderer->texture_count; i++) {
+        texture_bind(renderer->textures[i], i);
+        samplers[i] = i;
+    }
+
+    RenderCommandBuffer* command = renderer_get_frame_command_buffer();
+
+    render_cmd_shader_set_int_array(
+        command, renderer->shader, "uTextures", samplers, renderer->texture_count
+    );
+    render_cmd_draw_indexed(
+        command, renderer->shader, renderer->vertex_buffer, renderer->index_buffer
+    );
+
+    renderer->vertex_count = 0;
+    renderer->index_count = 0;
+    renderer->texture_count = 1;
+    renderer->textures[0] = renderer->textures[0];
+}
 
 Renderer2D* renderer2d_create(const Renderer2DConfig* config) {
     Renderer2D* renderer = platform_allocate(sizeof(Renderer2D));
@@ -111,43 +144,21 @@ void renderer2d_destroy(Renderer2D* renderer) {
 }
 
 void renderer2d_begin(Renderer2D* renderer) {
-    renderer->vertex_count = 0;
-    renderer->index_count = 0;
-    renderer->texture_count = 0;
-
-    renderer->textures[renderer->texture_count++] = default_texture;
-}
-
-void renderer2d_end(Renderer2D* renderer, RenderPass* pass) {
-    if (renderer->vertex_count == 0) {
-        return;
-    }
-
-    buffer_set_data(
-        renderer->vertex_buffer, renderer->vertices, sizeof(Vertex) * renderer->vertex_count, 0
-    );
-    buffer_set_data(
-        renderer->index_buffer, renderer->indices, sizeof(u32) * renderer->index_count, 0
-    );
-
-    int samplers[16];
-    for (i32 i = 0; i < renderer->texture_count; i++) {
-        texture_bind(renderer->textures[i], i);
-        samplers[i] = i;
-    }
+    VaraWindow* window = application_get_window();
+    const Vector2i size = platform_window_get_size(window);
+    const Matrix4 ortho = mat4_ortho(0.0f, (f32)size.x, (f32)size.y, 0.0f, -1.0f, 1.0f);
 
     RenderCommandBuffer* command = renderer_get_frame_command_buffer();
-    VaraWindow* window = application_get_window();
-    Vector2i size = platform_window_get_size(window);
-    Matrix4 ortho = mat4_ortho(0.0f, (f32)size.x, (f32)size.y, 0.0f, -1.0f, 1.0f);
-
     render_cmd_shader_set_mat4(command, renderer->shader, "uProjection", ortho);
-    render_cmd_shader_set_int_array(
-        command, renderer->shader, "uTextures", samplers, renderer->texture_count
-    );
-    render_cmd_draw_indexed(
-        command, pass, renderer->shader, renderer->vertex_buffer, renderer->index_buffer
-    );
+
+    renderer->vertex_count = 0;
+    renderer->index_count = 0;
+    renderer->texture_count = 1;
+    renderer->textures[0] = default_texture;
+}
+
+void renderer2d_end(Renderer2D* renderer) {
+    renderer2d_flush(renderer);
 }
 
 void renderer2d_draw_rect(Renderer2D* renderer, Rect rect, Vector4 color) {
@@ -157,6 +168,11 @@ void renderer2d_draw_rect(Renderer2D* renderer, Rect rect, Vector4 color) {
 void renderer2d_draw_rect_texture(Renderer2D* renderer, Rect rect, Texture* texture, Vector4 tint) {
     if (!renderer || !texture) {
         return;
+    }
+
+    if (renderer->vertex_count + 4 > renderer->max_vertices
+        || renderer->index_count + 6 > renderer->max_indices) {
+        renderer2d_flush(renderer);
     }
 
     f32 tex_index = 0;
@@ -170,32 +186,37 @@ void renderer2d_draw_rect_texture(Renderer2D* renderer, Rect rect, Texture* text
     }
 
     if (!found) {
-        tex_index = (f32)renderer->texture_count;
-        renderer->textures[renderer->texture_count++] = texture;
+        if (renderer->texture_count >= RENDERER2D_MAX_TEXTURES) {
+            renderer2d_flush(renderer);
+            tex_index = 0;
+        } else {
+            tex_index = (f32)renderer->texture_count;
+            renderer->textures[renderer->texture_count++] = texture;
+        }
     }
 
     u32 current_vertex_count = renderer->vertex_count;
 
     const Vertex v0 = {
-        .position = rect.position,
+        .position = vec2_to_vec3(rect.position),
         .color = vec4_to_vec3(tint),
         .tex_coord = {0.0f, 0.0f},
         .tex_index = tex_index,
     };
     const Vertex v1 = {
-        .position = {rect.position.x + rect.size.x, rect.position.y, rect.position.z},
+        .position = {rect.position.x + rect.size.x, rect.position.y, 0.0f},
         .color = vec4_to_vec3(tint),
         .tex_coord = {1.0f, 0.0f},
         .tex_index = tex_index,
     };
     const Vertex v2 = {
-        .position = {rect.position.x + rect.size.x, rect.position.y + rect.size.y, rect.position.z},
+        .position = {rect.position.x + rect.size.x, rect.position.y + rect.size.y, 0.0f},
         .color = vec4_to_vec3(tint),
         .tex_coord = {1.0f, 1.0f},
         .tex_index = tex_index,
     };
     const Vertex v3 = {
-        .position = {rect.position.x, rect.position.y + rect.size.y, rect.position.z},
+        .position = {rect.position.x, rect.position.y + rect.size.y, 0.0f},
         .color = vec4_to_vec3(tint),
         .tex_coord = {0.0f, 1.0f},
         .tex_index = tex_index,

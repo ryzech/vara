@@ -43,7 +43,6 @@ Texture* texture_load_file(const TextureConfig* config, const char* file) {
     }
 
     i32 width, height, channels;
-    stbi_set_flip_vertically_on_load(1);
     unsigned char* data = stbi_load(file, &width, &height, &channels, 0);
     if (!data) {
         ERROR("stbi failed to load image('%s')\nError: %s", file, stbi_failure_reason());

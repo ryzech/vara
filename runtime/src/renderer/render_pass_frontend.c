@@ -3,12 +3,10 @@
 #include <vara/core/platform/platform.h>
 #include <vara/core/platform/platform_graphics_types.h>
 
-#include "vara/renderer/buffer.h"
 #include "vara/renderer/framebuffer.h"
 #include "vara/renderer/render_command.h"
 #include "vara/renderer/render_pass.h"
 #include "vara/renderer/renderer.h"
-#include "vara/renderer/shader.h"
 
 extern void render_pass_opengl_init(RenderPass* pass);
 
@@ -61,28 +59,6 @@ void render_pass_begin(RenderPass* pass) {
         renderer_clear();
     }
     render_cmd_begin_pass(renderer_get_frame_command_buffer(), pass);
-}
-
-void render_pass_draw_indexed(
-    RenderPass* pass, Shader* shader, Buffer* vertex_buffer, Buffer* index_buffer
-) {
-    render_cmd_draw_indexed(
-        renderer_get_frame_command_buffer(), pass, shader, vertex_buffer, index_buffer
-    );
-}
-
-void render_pass_shader_set_mat4(
-    RenderPass* pass, Shader* shader, const char* name, Matrix4 matrix
-) {
-    render_cmd_shader_set_mat4(renderer_get_frame_command_buffer(), shader, name, matrix);
-}
-
-void render_pass_shader_set_int_array(
-    RenderPass* pass, Shader* shader, const char* name, i32* array, u32 count
-) {
-    render_cmd_shader_set_int_array(
-        renderer_get_frame_command_buffer(), shader, name, array, count
-    );
 }
 
 void render_pass_end(RenderPass* pass) {

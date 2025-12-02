@@ -13,6 +13,8 @@
 #include <vara/renderer/render_pass.h>
 #include <vara/renderer/shader.h>
 
+#include "vara/renderer/render_command.h"
+
 const char* vertex_src = "#version 330 core\n"
                          "layout (location = 0) in vec3 aPos;\n"
                          "layout (location = 1) in vec3 aColor;\n"
@@ -167,12 +169,14 @@ void sandbox_update(f32 delta_time) {
         camera_move(camera, delta);
     }
 
+    RenderCommandBuffer* buffer = renderer_get_frame_command_buffer();
+
     render_pass_begin(render_pass);
     {
-        render_pass_shader_set_mat4(
-            render_pass, shader, "uTransform", camera_get_view_projection(camera)
+        render_cmd_shader_set_mat4(
+            buffer, shader, "uTransform", camera_get_view_projection(camera)
         );
-        render_pass_draw_indexed(render_pass, shader, vertex_buffer, index_buffer);
+        render_cmd_draw_indexed(buffer, shader, vertex_buffer, index_buffer);
     }
     render_pass_end(render_pass);
 }

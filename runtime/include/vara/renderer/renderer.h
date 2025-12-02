@@ -16,7 +16,7 @@ struct RendererInstanceVT {
     void (*renderer_destroy)(void);
     void (*renderer_clear)(void);
     void (*renderer_clear_color)(Vector4 color);
-    void (*renderer_set_viewport)(Vector2i position, Vector2i size);
+    void (*renderer_execute_commands)(struct RenderCommandBuffer* buffer);
     void (*renderer_present)(void);
 };
 
@@ -81,6 +81,12 @@ void renderer_clear(void);
  * @param color Color to use when clearing the screen.
  */
 void renderer_clear_color(Vector4 color);
+
+/**
+ * Execute commands in given RenderCommandBuffer.
+ * @param buffer RenderCommandBuffer to execute commands of.
+ */
+void renderer_execute_commands(struct RenderCommandBuffer* buffer);
 
 /**
  * This submits all the commands in the pass queue.\n

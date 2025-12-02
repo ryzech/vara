@@ -6,6 +6,13 @@
 typedef enum RenderCommandType RenderCommandType;
 typedef struct RenderCommandHeader RenderCommandHeader;
 typedef struct RenderCommandBuffer RenderCommandBuffer;
+typedef struct RenderCmdBeginPass RenderCmdBeginPass;
+typedef struct RenderCmdEndPass RenderCmdEndPass;
+typedef struct RenderCmdDrawIndexed RenderCmdDrawIndexed;
+typedef struct RenderCmdSetShaderMat4 RenderCmdSetShaderMat4;
+typedef struct RenderCmdSetShaderIntArray RenderCmdSetShaderIntArray;
+typedef struct RenderCmdSetViewport RenderCmdSetViewport;
+typedef struct RenderCmdClearColor RenderCmdClearColor;
 
 struct Buffer;
 struct Shader;
@@ -32,11 +39,49 @@ struct RenderCommandBuffer {
     u32 capacity;
 };
 
+struct RenderCmdBeginPass {
+    RenderCommandHeader header;
+    struct RenderPass* pass;
+};
+
+struct RenderCmdEndPass {
+    RenderCommandHeader header;
+    struct RenderPass* pass;
+};
+
+struct RenderCmdDrawIndexed {
+    RenderCommandHeader header;
+    struct Shader* shader;
+    struct Buffer* vertex;
+    struct Buffer* index;
+};
+
+struct RenderCmdSetShaderMat4 {
+    RenderCommandHeader header;
+    Matrix4 matrix;
+    struct Shader* shader;
+    const char* name;
+};
+
+struct RenderCmdSetShaderIntArray {
+    RenderCommandHeader header;
+    i32 array[32];
+    struct Shader* shader;
+    u32 count;
+    const char* name;
+};
+
+struct RenderCmdSetViewport {
+    RenderCommandHeader header;
+    Vector2i viewport_size;
+};
+
 RenderCommandBuffer* render_cmd_buffer_create(void);
 void render_cmd_buffer_destroy(RenderCommandBuffer* buffer);
 void render_cmd_buffer_reset(RenderCommandBuffer* buffer);
 
 void render_cmd_begin_pass(RenderCommandBuffer* buffer, struct RenderPass* pass);
+void render_cmd_end_pass(RenderCommandBuffer* buffer, struct RenderPass* pass);
 void render_cmd_shader_set_mat4(
     RenderCommandBuffer* buffer, struct Shader* shader, const char* name, Matrix4 matrix
 );
@@ -48,12 +93,6 @@ void render_cmd_shader_set_int_array(
     u32 count
 );
 void render_cmd_draw_indexed(
-    RenderCommandBuffer* buffer,
-    struct RenderPass* pass,
-    struct Shader* shader,
-    struct Buffer* vertex,
-    struct Buffer* index
+    RenderCommandBuffer* buffer, struct Shader* shader, struct Buffer* vertex, struct Buffer* index
 );
 void render_cmd_set_viewport(RenderCommandBuffer* buffer, Vector2i viewport_size);
-void render_cmd_end_pass(RenderCommandBuffer* buffer, struct RenderPass* pass);
-void render_cmd_execute(RenderCommandBuffer* buffer);

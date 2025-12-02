@@ -79,7 +79,7 @@ void renderer_begin_frame(void) {
 }
 
 void renderer_end_frame(void) {
-    render_cmd_execute(renderer_get_frame_command_buffer());
+    renderer_execute_commands(renderer_get_frame_command_buffer());
     renderer_present();
 }
 
@@ -92,6 +92,12 @@ void renderer_clear(void) {
 void renderer_clear_color(const Vector4 color) {
     if (instance && instance->vt.renderer_clear_color) {
         instance->vt.renderer_clear_color(color);
+    }
+}
+
+void renderer_execute_commands(RenderCommandBuffer* buffer) {
+    if (instance && instance->vt.renderer_execute_commands) {
+        instance->vt.renderer_execute_commands(buffer);
     }
 }
 

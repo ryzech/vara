@@ -102,6 +102,6 @@ typedef struct Vertex {
 
 // TODO: 2d and 3d variants of this.
 typedef struct Rect {
-    Vector3 position;
-    Vector3 size;
+    Vector2 position;
+    Vector2 size;
 } Rect;

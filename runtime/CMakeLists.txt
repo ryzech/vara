@@ -2,7 +2,7 @@ set(RUNTIME_SOURCES src/application/application.c src/renderer/renderer_frontend
         src/application/entrypoint.c
         src/camera/camera.c
         src/renderer/framebuffer_frontend.c
-        src/renderer/render_command.c
+        src/renderer/render_command_frontend.c
         src/renderer2d/renderer2d.c
         src/renderer/texture_frontend.c
         src/vendor/stb_image.c
