@@ -269,11 +269,11 @@ static void glfw_mouse_move_callback(GLFWwindow* window, f64 xpos, f64 ypos) {
     input_system_process_mouse_move(scaled_x, scaled_y);
 }
 
-static void glfw_resize_callback(GLFWwindow* window, i32 width, i32 height) {
+static void glfw_framebuffer_resize_callback(GLFWwindow* window, i32 width, i32 height) {
     VaraWindow* vara_window = glfwGetWindowUserPointer(window);
 
-    const Vector2i framebuffer_size = platform_window_get_framebuffer_size(vara_window);
-    vara_window->pixel_density = (f32)framebuffer_size.x / (f32)width;
+    const Vector2i window_size = platform_window_get_size(vara_window);
+    vara_window->pixel_density = (f32)width / (f32)window_size.x;
 
     EventData data = {0};
     data.i32[0] = width;
@@ -354,7 +354,7 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
     glfwSetKeyCallback(glfw_window, glfw_key_callback);
     glfwSetMouseButtonCallback(glfw_window, glfw_mouse_button_callback);
     glfwSetCursorPosCallback(glfw_window, glfw_mouse_move_callback);
-    glfwSetFramebufferSizeCallback(glfw_window, glfw_resize_callback);
+    glfwSetFramebufferSizeCallback(glfw_window, glfw_framebuffer_resize_callback);
     glfwSetWindowCloseCallback(glfw_window, glfw_close_callback);
 
     return window;

@@ -83,6 +83,7 @@ static void renderer_opengl_execute_commands(RenderCommandBuffer* buffer) {
             }
             case RENDER_CMD_SET_VIEWPORT: {
                 const RenderCmdSetViewport* set_viewport = (RenderCmdSetViewport*)cmd;
+                DEBUG("Setting viewport to: %d x %d", set_viewport->viewport_size.x, set_viewport->viewport_size.y);
                 glViewport(0, 0, set_viewport->viewport_size.x, set_viewport->viewport_size.y);
                 break;
             }
