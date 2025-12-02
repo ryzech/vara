@@ -10,6 +10,8 @@
 #include <vara/renderer/renderer.h>
 #include <vara/renderer/shader.h>
 
+#include "vara/application/application.h"
+
 typedef struct OpenGLRendererState {
     VaraWindow* window;
 } OpenGLRendererState;
@@ -36,7 +38,13 @@ static void renderer_opengl_clear_color(Vector4 color) {
 }
 
 static void renderer_opengl_set_viewport(Vector2i viewport_size) {
-    glViewport(0, 0, viewport_size.x, viewport_size.y);
+    // Calculate scaled size (framebuffer size).
+    // Should be the same regardless of window, so we query the main window.
+    const f32 scale = application_get_window()->pixel_density;
+    const i32 scaled_x = (i32)((f32)viewport_size.x * scale);
+    const i32 scaled_y = (i32)((f32)viewport_size.y * scale);
+
+    glViewport(0, 0, scaled_x, scaled_y);
 }
 
 static void renderer_opengl_execute_commands(RenderCommandBuffer* buffer) {

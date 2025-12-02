@@ -47,7 +47,6 @@ void platform_window_set_title(VaraWindow* window, const char* title);
 void platform_window_set_size(VaraWindow* window, u32 width, u32 height);
 void platform_window_set_position(VaraWindow* window, i32 x, i32 y);
 Vector2i platform_window_get_size(VaraWindow* window);
-Vector2i platform_window_get_framebuffer_size(VaraWindow* window);
 Vector2i platform_window_get_position(VaraWindow* window);
 void* platform_window_get_native_handle(const VaraWindow* window);
 void* platform_window_get_proc_address(const char* name);

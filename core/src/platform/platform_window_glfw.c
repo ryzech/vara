@@ -261,19 +261,18 @@ static void glfw_mouse_button_callback(GLFWwindow* window, int button, int actio
 }
 
 static void glfw_mouse_move_callback(GLFWwindow* window, f64 xpos, f64 ypos) {
-    VaraWindow* vara_window = glfwGetWindowUserPointer(window);
-
-    f32 scaled_x = (f32)xpos / vara_window->pixel_density;
-    f32 scaled_y = (f32)ypos / vara_window->pixel_density;
-
-    input_system_process_mouse_move(scaled_x, scaled_y);
+    input_system_process_mouse_move((f32)xpos, (f32)ypos);
 }
 
-static void glfw_framebuffer_resize_callback(GLFWwindow* window, i32 width, i32 height) {
+static void glfw_resize_callback(GLFWwindow* window, i32 width, i32 height) {
     VaraWindow* vara_window = glfwGetWindowUserPointer(window);
 
-    const Vector2i window_size = platform_window_get_size(vara_window);
-    vara_window->pixel_density = (f32)width / (f32)window_size.x;
+    i32 fb_width, fb_height;
+    glfwGetFramebufferSize(window, &fb_width, &fb_height);
+
+    vara_window->pixel_density = (f32)fb_width / (f32)width;
+    vara_window->width = width;
+    vara_window->height = height;
 
     EventData data = {0};
     data.i32[0] = width;
@@ -345,16 +344,21 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
     window->renderer_type = config->renderer_type;
 
     // Calculate DPI / Pixel Density
-    const Vector2i framebuffer_size = platform_window_get_framebuffer_size(window);
-    const Vector2i logical_size = platform_window_get_size(window);
-    window->pixel_density = (f32)framebuffer_size.x / (f32)logical_size.x;
+    i32 fb_width, fb_height;
+    i32 logical_width, logical_height;
+    glfwGetFramebufferSize(glfw_window, &fb_width, &fb_height);
+    glfwGetWindowSize(glfw_window, &logical_width, &logical_height);
+
+    window->width = logical_width;
+    window->height = logical_height;
+    window->pixel_density = (f32)fb_width / (f32)logical_width;
 
     glfwSetWindowUserPointer(glfw_window, window);
 
     glfwSetKeyCallback(glfw_window, glfw_key_callback);
     glfwSetMouseButtonCallback(glfw_window, glfw_mouse_button_callback);
     glfwSetCursorPosCallback(glfw_window, glfw_mouse_move_callback);
-    glfwSetFramebufferSizeCallback(glfw_window, glfw_framebuffer_resize_callback);
+    glfwSetWindowSizeCallback(glfw_window, glfw_resize_callback);
     glfwSetWindowCloseCallback(glfw_window, glfw_close_callback);
 
     return window;
@@ -381,18 +385,7 @@ void platform_window_set_title(VaraWindow* window, const char* title) {
 }
 
 Vector2i platform_window_get_size(VaraWindow* window) {
-    i32 width, height;
-    glfwGetWindowSize(window->platform_state->window, &width, &height);
-    Vector2i dimensions = {.x = width, .y = height};
-
-    return dimensions;
-}
-
-Vector2i platform_window_get_framebuffer_size(VaraWindow* window) {
-    i32 width, height;
-    glfwGetFramebufferSize(window->platform_state->window, &width, &height);
-    Vector2i dimensions = {.x = width, .y = height};
-
+    Vector2i dimensions = {.x = window->width, .y = window->height};
     return dimensions;
 }
 
