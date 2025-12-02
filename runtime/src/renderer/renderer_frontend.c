@@ -48,7 +48,9 @@ void renderer_destroy(void) {
 }
 
 void renderer_on_window_resize(Vector2i new_size) {
-    render_cmd_set_viewport(renderer_get_frame_command_buffer(), new_size);
+    if (instance && instance->vt.renderer_set_viewport) {
+        instance->vt.renderer_set_viewport(new_size);
+    }
 }
 
 RendererInstance* renderer_get_instance(void) {

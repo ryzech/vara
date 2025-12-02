@@ -16,6 +16,7 @@ struct RendererInstanceVT {
     void (*renderer_destroy)(void);
     void (*renderer_clear)(void);
     void (*renderer_clear_color)(Vector4 color);
+    void (*renderer_set_viewport)(Vector2i viewport_size);
     void (*renderer_execute_commands)(struct RenderCommandBuffer* buffer);
     void (*renderer_present)(void);
 };

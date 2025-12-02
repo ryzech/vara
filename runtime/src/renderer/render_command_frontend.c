@@ -90,10 +90,3 @@ void render_cmd_shader_set_int_array(
 
     platform_copy_memory(cmd->array, array, count * sizeof(i32));
 }
-
-void render_cmd_set_viewport(RenderCommandBuffer* buffer, Vector2i viewport_size) {
-    RenderCmdSetViewport* cmd = render_cmd_allocate(buffer, sizeof(RenderCmdSetViewport));
-    cmd->header.type = RENDER_CMD_SET_VIEWPORT;
-    cmd->header.size = sizeof(RenderCmdSetViewport);
-    cmd->viewport_size = viewport_size;
-}

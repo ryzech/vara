@@ -35,6 +35,10 @@ static void renderer_opengl_clear_color(Vector4 color) {
     glClearColor(color.x, color.y, color.z, color.w);
 }
 
+static void renderer_opengl_set_viewport(Vector2i viewport_size) {
+    glViewport(0, 0, viewport_size.x, viewport_size.y);
+}
+
 static void renderer_opengl_execute_commands(RenderCommandBuffer* buffer) {
     u8* cmd = buffer->buffer;
     const u8* end = buffer->buffer + buffer->used;
@@ -81,12 +85,6 @@ static void renderer_opengl_execute_commands(RenderCommandBuffer* buffer) {
                 );
                 break;
             }
-            case RENDER_CMD_SET_VIEWPORT: {
-                const RenderCmdSetViewport* set_viewport = (RenderCmdSetViewport*)cmd;
-                DEBUG("Setting viewport to: %d x %d", set_viewport->viewport_size.x, set_viewport->viewport_size.y);
-                glViewport(0, 0, set_viewport->viewport_size.x, set_viewport->viewport_size.y);
-                break;
-            }
             default: {
                 ERROR("Unknown render command type!");
                 break;
@@ -111,6 +109,7 @@ void renderer_opengl_init(RendererInstance* instance, VaraWindow* window) {
     instance->vt.renderer_create = renderer_opengl_create;
     instance->vt.renderer_clear = renderer_opengl_clear;
     instance->vt.renderer_clear_color = renderer_opengl_clear_color;
+    instance->vt.renderer_set_viewport = renderer_opengl_set_viewport;
     instance->vt.renderer_execute_commands = renderer_opengl_execute_commands;
     instance->vt.renderer_present = renderer_opengl_present;
     instance->vt.renderer_destroy = renderer_opengl_destroy;

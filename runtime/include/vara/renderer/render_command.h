@@ -11,8 +11,6 @@ typedef struct RenderCmdEndPass RenderCmdEndPass;
 typedef struct RenderCmdDrawIndexed RenderCmdDrawIndexed;
 typedef struct RenderCmdSetShaderMat4 RenderCmdSetShaderMat4;
 typedef struct RenderCmdSetShaderIntArray RenderCmdSetShaderIntArray;
-typedef struct RenderCmdSetViewport RenderCmdSetViewport;
-typedef struct RenderCmdClearColor RenderCmdClearColor;
 
 struct Buffer;
 struct Shader;
@@ -24,7 +22,6 @@ enum RenderCommandType {
     RENDER_CMD_DRAW_INDEXED,
     RENDER_CMD_SET_SHADER_MAT4,
     RENDER_CMD_SET_SHADER_INT_ARRAY,
-    RENDER_CMD_SET_VIEWPORT,
     RENDER_CMD_END_PASS,
 };
 
@@ -71,11 +68,6 @@ struct RenderCmdSetShaderIntArray {
     const char* name;
 };
 
-struct RenderCmdSetViewport {
-    RenderCommandHeader header;
-    Vector2i viewport_size;
-};
-
 RenderCommandBuffer* render_cmd_buffer_create(void);
 void render_cmd_buffer_destroy(RenderCommandBuffer* buffer);
 void render_cmd_buffer_reset(RenderCommandBuffer* buffer);
@@ -95,4 +87,3 @@ void render_cmd_shader_set_int_array(
 void render_cmd_draw_indexed(
     RenderCommandBuffer* buffer, struct Shader* shader, struct Buffer* vertex, struct Buffer* index
 );
-void render_cmd_set_viewport(RenderCommandBuffer* buffer, Vector2i viewport_size);
