@@ -11,6 +11,8 @@ set(RUNTIME_SOURCES src/application/application.c src/renderer/renderer_frontend
 add_library(vara-runtime STATIC ${RUNTIME_SOURCES})
 
 target_include_directories(vara-runtime PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(vara-runtime PUBLIC ${FREETYPE_INCLUDE_DIRS})
+target_link_libraries(vara-runtime PRIVATE ${FREETYPE_LIBRARIES})
 target_link_libraries(vara-runtime PUBLIC vara-core)
 
 # Generate shader headers

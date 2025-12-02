@@ -10,6 +10,16 @@ if (NOT glfw3_FOUND)
     FetchContent_MakeAvailable(glfw3)
 endif ()
 
+find_package(Freetype 2.14.1 QUIET)
+if (NOT Freetype_FOUND)
+    FetchContent_Declare(
+            Freetype
+            DOWNLOAD_EXTRACT_TIMESTAMP OFF
+            URL https://github.com/freetype/freetype/archive/refs/tags/VER-2-14-1.zip
+    )
+    FetchContent_MakeAvailable(freetype)
+endif ()
+
 #find_package(shaderc 2025.4.1 QUIET)
 #if (NOT shaderc_FOUND)
 #    # Needed for libshaderc compilation!

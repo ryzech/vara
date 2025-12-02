@@ -9,6 +9,8 @@ typedef struct OpenGLTextureState {
 
 static GLenum texture_format_to_gl(TextureFormat format) {
     switch (format) {
+        case TEXTURE_FORMAT_R:
+            return GL_RED;
         case TEXTURE_FORMAT_RGB:
             return GL_RGB;
         case TEXTURE_FORMAT_RGBA:
@@ -19,6 +21,8 @@ static GLenum texture_format_to_gl(TextureFormat format) {
 
 static GLint texture_format_to_internal_gl(TextureFormat format) {
     switch (format) {
+        case TEXTURE_FORMAT_R:
+            return GL_R8;
         case TEXTURE_FORMAT_RGB:
             return GL_RGB8;
         case TEXTURE_FORMAT_RGBA:

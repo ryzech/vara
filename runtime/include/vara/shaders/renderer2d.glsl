@@ -30,11 +30,13 @@ out vec4 FragColor;
 
 uniform sampler2D uTextures[16];
 
+// Need to figure out font rendering.
+// Maybe pass in flags?
 void main() {
     int index = int(vTexIndex);
     vec4 texColor = texture(uTextures[index], vTexCoord);
 
-    if (texColor.w <= 0.0f) {
+    if (texColor.a <= 0.0f) {
         discard;
     }
 

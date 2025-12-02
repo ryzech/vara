@@ -10,6 +10,7 @@ typedef struct Texture Texture;
 typedef struct TextureVT TextureVT;
 
 enum TextureFormat {
+    TEXTURE_FORMAT_R,
     TEXTURE_FORMAT_RGB,
     TEXTURE_FORMAT_RGBA,
 };
