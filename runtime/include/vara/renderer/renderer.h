@@ -5,36 +5,6 @@
 #include <vara/core/platform/platform_graphics_types.h>
 #include <vara/core/platform/platform_window.h>
 
-// Forward declarations, in case they need access to each other.
-typedef struct RendererInstanceVT RendererInstanceVT;
-typedef struct RendererInstance RendererInstance;
-
-struct RenderCommandBuffer;
-
-struct RendererInstanceVT {
-    b8 (*renderer_create)(void);
-    void (*renderer_destroy)(void);
-    void (*renderer_clear)(void);
-    void (*renderer_clear_color)(Vector4 color);
-    void (*renderer_set_viewport)(Vector2i viewport_size);
-    void (*renderer_execute_commands)(struct RenderCommandBuffer* buffer);
-    void (*renderer_present)(void);
-};
-
-/**
- * RendererInstance holds pointers to the functions implemented
- * by each Renderer API. 
- *
- * This is so multiple renderers can be supported
- * and users can select (for example on Steam) a different one if there are 
- * any issues encountered.
- */
-struct RendererInstance {
-    RendererInstanceVT vt;
-    const char* name;
-    PlatformRendererType renderer_type;
-};
-
 /**
  * Creates a new RendererInstance singleton and selects specified backend.
  * @param window VaraWindow to create the RendererInstance in.
@@ -52,12 +22,6 @@ void renderer_destroy(void);
  * @param new_size New window size.
  */
 void renderer_on_window_resize(Vector2i new_size);
-
-/**
- * Get RendererInstance singleton.
- * @return RendererInstance if exists, else NULL.
- */
-RendererInstance* renderer_get_instance(void);
 
 /**
  * Get the active PlatformGraphicsType (i.e. OpenGL, Vulkan, etc.)

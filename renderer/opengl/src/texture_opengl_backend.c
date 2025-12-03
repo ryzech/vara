@@ -1,6 +1,6 @@
 #include <glad/gl.h>
 #include <vara/core/platform/platform.h>
-#include <vara/renderer/texture.h>
+#include <vara/renderer/texture_opengl_backend.h>
 
 typedef struct OpenGLTextureState {
     GLuint id;
@@ -147,13 +147,4 @@ u32 texture_opengl_get_id(Texture* texture) {
     OpenGLTextureState* texture_state = texture->backend_data;
 
     return texture_state->id;
-}
-
-void texture_opengl_init(Texture* texture) {
-    texture->vt.texture_create = texture_opengl_create;
-    texture->vt.texture_destroy = texture_opengl_destroy;
-    texture->vt.texture_bind = texture_opengl_bind;
-    texture->vt.texture_unbind = texture_opengl_unbind;
-    texture->vt.texture_set_data = texture_opengl_set_data;
-    texture->vt.texture_get_id = texture_opengl_get_id;
 }

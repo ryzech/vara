@@ -6,7 +6,6 @@
 typedef enum FramebufferAttachmentType FramebufferAttachmentType;
 typedef enum FramebufferAttachmentFormat FramebufferAttachmentFormat;
 typedef struct FramebufferAttachmentConfig FramebufferAttachmentConfig;
-typedef struct FramebufferVT FramebufferVT;
 typedef struct Framebuffer Framebuffer;
 typedef struct FramebufferConfig FramebufferConfig;
 
@@ -36,16 +35,7 @@ struct FramebufferConfig {
     u16 samples;
 };
 
-struct FramebufferVT {
-    b8 (*framebuffer_create)(Framebuffer* buffer, const FramebufferConfig* config);
-    void (*framebuffer_destroy)(Framebuffer* buffer);
-    void (*framebuffer_bind)(Framebuffer* buffer);
-    void (*framebuffer_unbind)(Framebuffer* buffer);
-    void (*framebuffer_resize)(Framebuffer* buffer, u32 width, u32 height);
-};
-
 struct Framebuffer {
-    FramebufferVT vt;
     const char* name;
     FramebufferAttachmentConfig* attachments;
     void* backend_data;

@@ -1,6 +1,7 @@
 #include <glad/gl.h>
 #include <vara/core/platform/platform.h>
-#include <vara/renderer/buffer.h>
+
+#include "vara/renderer/buffer_opengl_backend.h"
 
 typedef struct OpenGLBufferState {
     GLuint id;
@@ -77,7 +78,7 @@ static void attribute_to_gl_attribute(
     }
 }
 
-static b8 buffer_opengl_create(Buffer* buffer, const BufferConfig* config) {
+b8 buffer_opengl_create(Buffer* buffer, const BufferConfig* config) {
     if (!buffer || !config) {
         return false;
     }
@@ -138,7 +139,7 @@ static b8 buffer_opengl_create(Buffer* buffer, const BufferConfig* config) {
     return true;
 }
 
-static void buffer_opengl_destroy(Buffer* buffer) {
+void buffer_opengl_destroy(Buffer* buffer) {
     if (!buffer || !buffer->backend_data) {
         return;
     }
@@ -159,7 +160,7 @@ static void buffer_opengl_destroy(Buffer* buffer) {
     buffer->backend_data = NULL;
 }
 
-static void buffer_opengl_bind(Buffer* buffer) {
+void buffer_opengl_bind(Buffer* buffer) {
     if (!buffer || !buffer->backend_data) {
         return;
     }
@@ -173,7 +174,7 @@ static void buffer_opengl_bind(Buffer* buffer) {
     }
 }
 
-static void buffer_opengl_unbind(Buffer* buffer) {
+void buffer_opengl_unbind(Buffer* buffer) {
     if (!buffer || !buffer->backend_data) {
         return;
     }
@@ -187,7 +188,7 @@ static void buffer_opengl_unbind(Buffer* buffer) {
     }
 }
 
-static void buffer_opengl_set_data(Buffer* buffer, const void* data, size_t size, size_t offset) {
+void buffer_opengl_set_data(Buffer* buffer, const void* data, size_t size, size_t offset) {
     if (!buffer || !buffer->backend_data) {
         return;
     }
@@ -197,12 +198,4 @@ static void buffer_opengl_set_data(Buffer* buffer, const void* data, size_t size
     glBindBuffer(state->target, state->id);
     glBufferSubData(gl_type, (GLsizeiptr)offset, (GLsizeiptr)size, data);
     glBindBuffer(state->target, 0);
-}
-
-void buffer_opengl_init(Buffer* buffer) {
-    buffer->vt.buffer_create = buffer_opengl_create;
-    buffer->vt.buffer_destroy = buffer_opengl_destroy;
-    buffer->vt.buffer_bind = buffer_opengl_bind;
-    buffer->vt.buffer_unbind = buffer_opengl_unbind;
-    buffer->vt.buffer_set_data = buffer_opengl_set_data;
 }

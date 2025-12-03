@@ -4,33 +4,47 @@
 #include <vara/core/platform/platform_graphics_types.h>
 #include <vara/core/platform/platform_window.h>
 
+#include "vara/renderer/internal/renderer_internal.h"
 #include "vara/renderer/render_command.h"
 #include "vara/renderer/renderer.h"
 
-extern void renderer_opengl_init(RendererInstance* instance, VaraWindow* window);
+typedef struct RendererState RendererState;
 
-static RendererInstance* instance;
-static RenderCommandBuffer* command_buffer;
+struct RendererState {
+    RendererBackend* backend;
+    RenderCommandBuffer* frame_cmd_buffer;
+    VaraWindow* main_window;
+};
+
+static RendererState* renderer_state;
 
 b8 renderer_create(VaraWindow* window) {
-    instance = platform_allocate(sizeof(RendererInstance));
-    platform_zero_memory(instance, sizeof(RendererInstance));
-
-    instance->renderer_type = window->renderer_type;
-
-    // Support headless with a Renderer?
-    switch (window->renderer_type) {
-        case RENDERER_TYPE_OPENGL:
-            renderer_opengl_init(instance, window);
-            break;
-        default:
-            ERROR("Unsupported graphics type: %s", renderer_type_to_string(window->renderer_type));
-            return false;
+    if (renderer_state) {
+        ERROR("Renderer('%s') is already initialized!", renderer_state->backend->name);
+        return false;
     }
 
-    platform_window_make_context_current(window);
-    if (!instance->vt.renderer_create()) {
-        renderer_destroy();
+    renderer_state = platform_allocate(sizeof(RendererState));
+    platform_zero_memory(renderer_state, sizeof(RendererState));
+    if (!renderer_state) {
+        FATAL("Failed to allocate RendererState.");
+        return false;
+    }
+
+    renderer_state->main_window = window;
+    renderer_state->backend = renderer_backend_create(window);
+    renderer_backend_set(renderer_state->backend);
+
+    if (!renderer_state->backend) {
+        FATAL("Failed to create RendererBackend.");
+        platform_free(renderer_state);
+        return false;
+    }
+
+    renderer_state->frame_cmd_buffer = render_cmd_buffer_create();
+    if (!renderer_state->frame_cmd_buffer) {
+        FATAL("Failed to create the frames RenderCommandBuffer.");
+        platform_free(renderer_state);
         return false;
     }
 
@@ -38,42 +52,41 @@ b8 renderer_create(VaraWindow* window) {
 }
 
 void renderer_destroy(void) {
-    if (instance && instance->vt.renderer_destroy) {
-        instance->vt.renderer_destroy();
-        platform_free(instance);
-    }
-    if (command_buffer) {
-        render_cmd_buffer_destroy(command_buffer);
+    if (renderer_state) {
+        if (renderer_state->frame_cmd_buffer) {
+            render_cmd_buffer_destroy(renderer_state->frame_cmd_buffer);
+        }
+
+        if (renderer_state->backend) {
+            renderer_backend_destroy(renderer_state->backend);
+        }
+
+        platform_free(renderer_state);
     }
 }
 
 void renderer_on_window_resize(Vector2i new_size) {
-    if (instance && instance->vt.renderer_set_viewport) {
-        instance->vt.renderer_set_viewport(new_size);
+    if (renderer_state) {
+        const RendererBackend* backend = renderer_state->backend;
+        if (backend->renderer.set_viewport) {
+            backend->renderer.set_viewport(new_size);
+        }
     }
-}
-
-RendererInstance* renderer_get_instance(void) {
-    if (instance) {
-        return instance;
-    }
-
-    return NULL;
 }
 
 PlatformRendererType renderer_get_renderer_type(void) {
-    if (instance) {
-        return instance->renderer_type;
+    if (renderer_state) {
+        return renderer_state->backend->type;
     }
 
     return RENDERER_TYPE_NONE;
 }
 
 RenderCommandBuffer* renderer_get_frame_command_buffer(void) {
-    if (!command_buffer) {
-        command_buffer = render_cmd_buffer_create();
+    if (!renderer_state->frame_cmd_buffer) {
+        renderer_state->frame_cmd_buffer = render_cmd_buffer_create();
     }
-    return command_buffer;
+    return renderer_state->frame_cmd_buffer;
 }
 
 void renderer_begin_frame(void) {
@@ -86,25 +99,29 @@ void renderer_end_frame(void) {
 }
 
 void renderer_clear(void) {
-    if (instance && instance->vt.renderer_clear) {
-        instance->vt.renderer_clear();
+    if (renderer_state) {
+        const RendererBackend* backend = renderer_state->backend;
+        backend->renderer.clear();
     }
 }
 
 void renderer_clear_color(const Vector4 color) {
-    if (instance && instance->vt.renderer_clear_color) {
-        instance->vt.renderer_clear_color(color);
+    if (renderer_state) {
+        const RendererBackend* backend = renderer_state->backend;
+        backend->renderer.clear_color(color);
     }
 }
 
 void renderer_execute_commands(RenderCommandBuffer* buffer) {
-    if (instance && instance->vt.renderer_execute_commands) {
-        instance->vt.renderer_execute_commands(buffer);
+    if (renderer_state) {
+        const RendererBackend* backend = renderer_state->backend;
+        backend->renderer.submit(buffer);
     }
 }
 
 void renderer_present(void) {
-    if (instance && instance->vt.renderer_present) {
-        instance->vt.renderer_present();
+    if (renderer_state) {
+        const RendererBackend* backend = renderer_state->backend;
+        backend->renderer.present();
     }
 }

@@ -4,13 +4,13 @@
 #include <vara/core/math/types.h>
 #include <vara/core/platform/platform.h>
 #include <vara/core/platform/platform_window.h>
-#include <vara/renderer/buffer.h>
-#include <vara/renderer/render_command.h>
-#include <vara/renderer/render_pass.h>
-#include <vara/renderer/renderer.h>
-#include <vara/renderer/shader.h>
+#include <vara/renderer/internal/renderer_internal.h>
 
-#include "vara/application/application.h"
+#include "vara/renderer/buffer_opengl_backend.h"
+#include "vara/renderer/framebuffer_opengl_backend.h"
+#include "vara/renderer/render_pass_opengl_backend.h"
+#include "vara/renderer/shader_opengl_backend.h"
+#include "vara/renderer/texture_opengl_backend.h"
 
 typedef struct OpenGLRendererState {
     VaraWindow* window;
@@ -40,14 +40,14 @@ static void renderer_opengl_clear_color(Vector4 color) {
 static void renderer_opengl_set_viewport(Vector2i viewport_size) {
     // Calculate scaled size (framebuffer size).
     // Should be the same regardless of window, so we query the main window.
-    const f32 scale = application_get_window()->pixel_density;
+    const f32 scale = renderer_state.window->pixel_density;
     const i32 scaled_x = (i32)((f32)viewport_size.x * scale);
     const i32 scaled_y = (i32)((f32)viewport_size.y * scale);
 
     glViewport(0, 0, scaled_x, scaled_y);
 }
 
-static void renderer_opengl_execute_commands(RenderCommandBuffer* buffer) {
+static void renderer_opengl_submit(const RenderCommandBuffer* buffer) {
     u8* cmd = buffer->buffer;
     const u8* end = buffer->buffer + buffer->used;
 
@@ -57,12 +57,12 @@ static void renderer_opengl_execute_commands(RenderCommandBuffer* buffer) {
         switch (header->type) {
             case RENDER_CMD_BEGIN_PASS: {
                 const RenderCmdBeginPass* begin_pass = (RenderCmdBeginPass*)cmd;
-                begin_pass->pass->vt.render_pass_begin(begin_pass->pass);
+                render_pass_opengl_begin(begin_pass->pass);
                 break;
             }
             case RENDER_CMD_END_PASS: {
                 const RenderCmdEndPass* end_pass = (RenderCmdEndPass*)cmd;
-                end_pass->pass->vt.render_pass_end(end_pass->pass);
+                render_pass_opengl_end(end_pass->pass);
                 break;
             }
             case RENDER_CMD_DRAW_INDEXED: {
@@ -110,17 +110,57 @@ static void renderer_opengl_present(void) {
 static void renderer_opengl_destroy(void) {
 }
 
-void renderer_opengl_init(RendererInstance* instance, VaraWindow* window) {
+void renderer_opengl_init(RendererBackend* backend, VaraWindow* window) {
     renderer_state.window = window;
 
-    instance->name = "OpenGL";
-    instance->vt.renderer_create = renderer_opengl_create;
-    instance->vt.renderer_clear = renderer_opengl_clear;
-    instance->vt.renderer_clear_color = renderer_opengl_clear_color;
-    instance->vt.renderer_set_viewport = renderer_opengl_set_viewport;
-    instance->vt.renderer_execute_commands = renderer_opengl_execute_commands;
-    instance->vt.renderer_present = renderer_opengl_present;
-    instance->vt.renderer_destroy = renderer_opengl_destroy;
+    backend->name = "OpenGL";
+    backend->type = RENDERER_TYPE_OPENGL;
 
-    DEBUG("Creating RendererInstance named('%s')", instance->name);
+    // Core Renderer
+    backend->renderer.create = renderer_opengl_create;
+    backend->renderer.clear = renderer_opengl_clear;
+    backend->renderer.clear_color = renderer_opengl_clear_color;
+    backend->renderer.set_viewport = renderer_opengl_set_viewport;
+    backend->renderer.submit = renderer_opengl_submit;
+    backend->renderer.present = renderer_opengl_present;
+    backend->renderer.destroy = renderer_opengl_destroy;
+
+    // Buffer API
+    backend->buffer.create = buffer_opengl_create;
+    backend->buffer.destroy = buffer_opengl_destroy;
+    backend->buffer.bind = buffer_opengl_bind;
+    backend->buffer.unbind = buffer_opengl_unbind;
+    backend->buffer.set_data = buffer_opengl_set_data;
+
+    // Render Pass API
+    backend->render_pass.create = render_pass_opengl_create;
+    backend->render_pass.destroy = render_pass_opengl_destroy;
+    backend->render_pass.begin = render_pass_opengl_begin;
+    backend->render_pass.end = render_pass_opengl_end;
+
+    // Shader API
+    backend->shader.create = shader_opengl_create;
+    backend->shader.destroy = shader_opengl_destroy;
+    backend->shader.bind = shader_opengl_bind;
+    backend->shader.unbind = shader_opengl_unbind;
+    backend->shader.set_int_array = shader_opengl_set_int_array;
+    backend->shader.set_mat4 = shader_opengl_set_mat4;
+    backend->shader.dispatch = shader_opengl_dispatch;
+
+    // Texture API
+    backend->texture.create = texture_opengl_create;
+    backend->texture.destroy = texture_opengl_destroy;
+    backend->texture.bind = texture_opengl_bind;
+    backend->texture.unbind = texture_opengl_unbind;
+    backend->texture.set_data = texture_opengl_set_data;
+    backend->texture.get_id = texture_opengl_get_id;
+
+    // Framebuffer API
+    backend->framebuffer.create = framebuffer_opengl_create;
+    backend->framebuffer.destroy = framebuffer_opengl_destroy;
+    backend->framebuffer.bind = framebuffer_opengl_bind;
+    backend->framebuffer.unbind = framebuffer_opengl_unbind;
+    backend->framebuffer.resize = framebuffer_opengl_resize;
+
+    DEBUG("Creating RendererBackend named('%s')", backend->name);
 }

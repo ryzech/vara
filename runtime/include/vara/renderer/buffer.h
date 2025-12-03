@@ -9,7 +9,6 @@ typedef enum VertexAttributeType VertexAttributeType;
 typedef struct VertexAttribute VertexAttribute;
 typedef struct VertexLayout VertexLayout;
 typedef struct BufferConfig BufferConfig;
-typedef struct BufferVT BufferVT;
 typedef struct Buffer Buffer;
 
 enum BufferType {
@@ -57,16 +56,7 @@ struct BufferConfig {
     BufferUsage usage;
 };
 
-struct BufferVT {
-    b8 (*buffer_create)(Buffer* buffer, const BufferConfig* config);
-    void (*buffer_destroy)(Buffer* buffer);
-    void (*buffer_bind)(Buffer* buffer);
-    void (*buffer_unbind)(Buffer* buffer);
-    void (*buffer_set_data)(Buffer* buffer, const void* data, size_t size, size_t offset);
-};
-
 struct Buffer {
-    BufferVT vt;
     VertexLayout layout;
     size_t element_count;
     size_t size;

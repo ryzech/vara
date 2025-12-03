@@ -1,12 +1,9 @@
 #include <stdlib.h>
 #include <vara/core/logger.h>
 #include <vara/core/platform/platform.h>
-#include <vara/core/platform/platform_graphics_types.h>
 
 #include "vara/renderer/buffer.h"
-#include "vara/renderer/renderer.h"
-
-extern void buffer_opengl_init(Buffer* buffer);
+#include "vara/renderer/internal/renderer_internal.h"
 
 Buffer* buffer_create(const BufferConfig* config) {
     Buffer* buffer = platform_allocate(sizeof(Buffer));
@@ -44,22 +41,8 @@ Buffer* buffer_create(const BufferConfig* config) {
         }
     }
 
-    const RendererInstance* instance = renderer_get_instance();
-    if (instance) {
-        switch (instance->renderer_type) {
-            case RENDERER_TYPE_OPENGL:
-                buffer_opengl_init(buffer);
-                break;
-            default:
-                ERROR(
-                    "Unsupported graphics type: %s",
-                    renderer_type_to_string(instance->renderer_type)
-                );
-                return NULL;
-        }
-    }
-
-    if (!buffer->vt.buffer_create(buffer, config)) {
+    const RendererBackend* backend = renderer_backend_get();
+    if (!backend->buffer.create(buffer, config)) {
         buffer_destroy(buffer);
         return NULL;
     }
@@ -68,8 +51,9 @@ Buffer* buffer_create(const BufferConfig* config) {
 }
 
 void buffer_destroy(Buffer* buffer) {
-    if (buffer && buffer->vt.buffer_destroy) {
-        buffer->vt.buffer_destroy(buffer);
+    if (buffer) {
+        const RendererBackend* backend = renderer_backend_get();
+        backend->buffer.destroy(buffer);
 
         if (buffer->layout.attributes) {
             platform_free(buffer->layout.attributes);
@@ -79,14 +63,16 @@ void buffer_destroy(Buffer* buffer) {
 }
 
 void buffer_bind(Buffer* buffer) {
-    if (buffer && buffer->vt.buffer_bind) {
-        buffer->vt.buffer_bind(buffer);
+    if (buffer) {
+        const RendererBackend* backend = renderer_backend_get();
+        backend->buffer.bind(buffer);
     }
 }
 
 void buffer_unbind(Buffer* buffer) {
-    if (buffer && buffer->vt.buffer_unbind) {
-        buffer->vt.buffer_unbind(buffer);
+    if (buffer) {
+        const RendererBackend* backend = renderer_backend_get();
+        backend->buffer.unbind(buffer);
     }
 }
 
@@ -102,7 +88,6 @@ void buffer_set_data(Buffer* buffer, const void* data, size_t size, size_t offse
     buffer->element_count =
         size / (buffer->type == BUFFER_TYPE_INDEX ? sizeof(u32) : buffer->layout.stride);
 
-    if (buffer->vt.buffer_set_data) {
-        buffer->vt.buffer_set_data(buffer, data, size, offset);
-    }
+    const RendererBackend* backend = renderer_backend_get();
+    backend->buffer.set_data(buffer, data, size, offset);
 }

@@ -4,7 +4,6 @@
 #include <vara/core/math/types.h>
 
 // Forward declarations, in case they need access to each other.
-typedef struct RenderPassVT RenderPassVT;
 typedef struct RenderPass RenderPass;
 typedef struct RenderPassConfig RenderPassConfig;
 
@@ -20,15 +19,7 @@ struct RenderPassConfig {
     b8 clear;
 };
 
-struct RenderPassVT {
-    b8 (*render_pass_create)(RenderPass* pass, const RenderPassConfig* config);
-    void (*render_pass_destroy)(RenderPass* pass);
-    void (*render_pass_begin)(RenderPass* pass);
-    void (*render_pass_end)(RenderPass* pass);
-};
-
 struct RenderPass {
-    RenderPassVT vt;
     Vector4 clear_color;
     const char* name;
     struct Framebuffer* target;

@@ -1,9 +1,10 @@
-#include "vara/application/application.h"
-
 #include <vara/core/event/event.h>
 #include <vara/core/input/input.h>
 #include <vara/core/logger.h>
 #include <vara/core/platform/platform.h>
+
+#include "vara/application/application.h"
+#include "vara/renderer/internal/renderer_internal.h"
 
 typedef struct ApplicationState ApplicationState;
 
@@ -21,7 +22,7 @@ static b8 application_on_window_resize(i16 event_code, void* sender, const Event
     const i32 height = event->i32[1];
     const Vector2i size = {width, height};
 
-    if (renderer_get_instance()) {
+    if (renderer_backend_get()) {
         renderer_on_window_resize(size);
     }
 
@@ -44,6 +45,7 @@ int application_main(int argc, char** argv) {
 
     if (application_state.config.window_config) {
         application_state.window = platform_window_create(application_state.config.window_config);
+        platform_window_make_context_current(application_state.window);
         if (!application_state.window) {
             ERROR("Failed to create window!");
             platform_destroy();
@@ -85,11 +87,11 @@ int application_main(int argc, char** argv) {
 
         input_system_update();
         if (application_state.config.app.on_update) {
-            if (renderer_get_instance()) {
+            if (renderer_backend_get()) {
                 renderer_begin_frame();
             }
             application_state.config.app.on_update(delta_time);
-            if (renderer_get_instance()) {
+            if (renderer_backend_get()) {
                 renderer_end_frame();
             }
         }
@@ -104,7 +106,7 @@ int application_main(int argc, char** argv) {
         platform_window_destroy(application_state.window);
     }
 
-    if (renderer_get_instance()) {
+    if (renderer_backend_get()) {
         renderer_destroy();
     }
 

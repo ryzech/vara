@@ -1,7 +1,8 @@
 #include <glad/gl.h>
 #include <vara/core/logger.h>
 #include <vara/core/platform/platform.h>
-#include <vara/renderer/framebuffer.h>
+
+#include <vara/renderer/framebuffer_opengl_backend.h>
 
 typedef struct OpenGLFramebufferState {
     GLuint fbo;
@@ -77,7 +78,7 @@ static GLuint opengl_texture_create(
     return texture;
 }
 
-static b8 framebuffer_opengl_create(Framebuffer* buffer, const FramebufferConfig* config) {
+b8 framebuffer_opengl_create(Framebuffer* buffer, const FramebufferConfig* config) {
     if (!buffer || !config) {
         return false;
     }
@@ -163,7 +164,7 @@ static b8 framebuffer_opengl_create(Framebuffer* buffer, const FramebufferConfig
     return true;
 }
 
-static void framebuffer_opengl_destroy(Framebuffer* buffer) {
+void framebuffer_opengl_destroy(Framebuffer* buffer) {
     if (!buffer || !buffer->backend_data) {
         return;
     }
@@ -196,7 +197,7 @@ static void framebuffer_opengl_destroy(Framebuffer* buffer) {
     buffer->backend_data = NULL;
 }
 
-static void framebuffer_opengl_bind(Framebuffer* buffer) {
+void framebuffer_opengl_bind(Framebuffer* buffer) {
     if (!buffer || !buffer->backend_data) {
         return;
     }
@@ -206,7 +207,7 @@ static void framebuffer_opengl_bind(Framebuffer* buffer) {
     glBindFramebuffer(GL_FRAMEBUFFER, buffer_state->fbo);
 }
 
-static void framebuffer_opengl_unbind(Framebuffer* buffer) {
+void framebuffer_opengl_unbind(Framebuffer* buffer) {
     if (!buffer) {
         return;
     }
@@ -214,7 +215,7 @@ static void framebuffer_opengl_unbind(Framebuffer* buffer) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-static void framebuffer_opengl_resize(Framebuffer* buffer, u32 width, u32 height) {
+void framebuffer_opengl_resize(Framebuffer* buffer, u32 width, u32 height) {
     if (!buffer) {
         return;
     }
@@ -234,12 +235,4 @@ static void framebuffer_opengl_resize(Framebuffer* buffer, u32 width, u32 height
     };
 
     framebuffer_opengl_create(buffer, &config);
-}
-
-void framebuffer_opengl_init(Framebuffer* buffer) {
-    buffer->vt.framebuffer_create = framebuffer_opengl_create;
-    buffer->vt.framebuffer_destroy = framebuffer_opengl_destroy;
-    buffer->vt.framebuffer_bind = framebuffer_opengl_bind;
-    buffer->vt.framebuffer_unbind = framebuffer_opengl_unbind;
-    buffer->vt.framebuffer_resize = framebuffer_opengl_resize;
 }

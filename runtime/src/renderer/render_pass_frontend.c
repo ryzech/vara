@@ -1,14 +1,12 @@
 #include <stdlib.h>
 #include <vara/core/logger.h>
 #include <vara/core/platform/platform.h>
-#include <vara/core/platform/platform_graphics_types.h>
 
 #include "vara/renderer/framebuffer.h"
+#include "vara/renderer/internal/renderer_internal.h"
 #include "vara/renderer/render_command.h"
 #include "vara/renderer/render_pass.h"
 #include "vara/renderer/renderer.h"
-
-extern void render_pass_opengl_init(RenderPass* pass);
 
 RenderPass* render_pass_create(const RenderPassConfig* config) {
     RenderPass* pass = platform_allocate(sizeof(RenderPass));
@@ -19,22 +17,8 @@ RenderPass* render_pass_create(const RenderPassConfig* config) {
     pass->clear = config->clear;
     pass->clear_color = config->clear_color;
 
-    const RendererInstance* instance = renderer_get_instance();
-    if (instance) {
-        switch (instance->renderer_type) {
-            case RENDERER_TYPE_OPENGL:
-                render_pass_opengl_init(pass);
-                break;
-            default:
-                ERROR(
-                    "Unsupported graphics type: %s",
-                    renderer_type_to_string(instance->renderer_type)
-                );
-                return NULL;
-        }
-    }
-
-    if (!pass->vt.render_pass_create(pass, config)) {
+    const RendererBackend* backend = renderer_backend_get();
+    if (!backend->render_pass.create(pass, config)) {
         ERROR("Failed to create render pass named('%s')", config->name);
         render_pass_destroy(pass);
         return NULL;
@@ -44,8 +28,9 @@ RenderPass* render_pass_create(const RenderPassConfig* config) {
 }
 
 void render_pass_destroy(RenderPass* pass) {
-    if (pass && pass->vt.render_pass_destroy) {
-        pass->vt.render_pass_destroy(pass);
+    if (pass) {
+        const RendererBackend* backend = renderer_backend_get();
+        backend->render_pass.destroy(pass);
         platform_free(pass);
     }
 }

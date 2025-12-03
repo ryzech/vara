@@ -8,7 +8,7 @@ typedef struct OpenGLRenderPassState {
     b8 active;
 } OpenGLRenderPassState;
 
-static b8 render_pass_opengl_create(RenderPass* pass, const RenderPassConfig* config) {
+b8 render_pass_opengl_create(RenderPass* pass, const RenderPassConfig* config) {
     DEBUG("Creating render pass named('%s')", config->name);
     OpenGLRenderPassState* render_pass_state = platform_allocate(sizeof(OpenGLRenderPassState));
     if (!render_pass_state) {
@@ -21,7 +21,7 @@ static b8 render_pass_opengl_create(RenderPass* pass, const RenderPassConfig* co
     return true;
 }
 
-static void render_pass_opengl_destroy(RenderPass* pass) {
+void render_pass_opengl_destroy(RenderPass* pass) {
     if (!pass || !pass->backend_data) {
         return;
     }
@@ -30,7 +30,7 @@ static void render_pass_opengl_destroy(RenderPass* pass) {
     pass->backend_data = NULL;
 }
 
-static void render_pass_opengl_begin(RenderPass* pass) {
+void render_pass_opengl_begin(RenderPass* pass) {
     if (!pass || !pass->backend_data) {
         return;
     }
@@ -45,7 +45,7 @@ static void render_pass_opengl_begin(RenderPass* pass) {
     render_pass_state->active = true;
 }
 
-static void render_pass_opengl_end(RenderPass* pass) {
+void render_pass_opengl_end(RenderPass* pass) {
     if (!pass || !pass->backend_data) {
         return;
     }
@@ -59,11 +59,4 @@ static void render_pass_opengl_end(RenderPass* pass) {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     render_pass_state->active = false;
-}
-
-void render_pass_opengl_init(RenderPass* pass) {
-    pass->vt.render_pass_create = render_pass_opengl_create;
-    pass->vt.render_pass_destroy = render_pass_opengl_destroy;
-    pass->vt.render_pass_begin = render_pass_opengl_begin;
-    pass->vt.render_pass_end = render_pass_opengl_end;
 }

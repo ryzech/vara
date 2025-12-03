@@ -1,16 +1,15 @@
 #include <glad/gl.h>
 #include <vara/core/logger.h>
 #include <vara/core/platform/platform.h>
-#include <vara/renderer/renderer.h>
-#include <vara/renderer/shader.h>
 
 #include "vara/renderer/shader_compiler_opengl.h"
+#include "vara/renderer/shader_opengl_backend.h"
 
 typedef struct OpenGLShaderState {
     GLuint shader_program;
 } OpenGLShaderState;
 
-static b8 shader_opengl_create(Shader* shader, const ShaderConfig* config) {
+b8 shader_opengl_create(Shader* shader, const ShaderConfig* config) {
     DEBUG("Creating shader program named('%s')", config->name);
     OpenGLShaderState* shader_state = platform_allocate(sizeof(OpenGLShaderState));
     if (!shader_state) {
@@ -27,7 +26,7 @@ static b8 shader_opengl_create(Shader* shader, const ShaderConfig* config) {
     return true;
 }
 
-static void shader_opengl_destroy(Shader* shader) {
+void shader_opengl_destroy(Shader* shader) {
     if (!shader || !shader->backend_data) {
         return;
     }
@@ -42,7 +41,7 @@ static void shader_opengl_destroy(Shader* shader) {
     shader->backend_data = NULL;
 }
 
-static void shader_opengl_bind(Shader* shader) {
+void shader_opengl_bind(Shader* shader) {
     if (!shader || !shader->backend_data) {
         return;
     }
@@ -52,7 +51,7 @@ static void shader_opengl_bind(Shader* shader) {
     glUseProgram(shader_state->shader_program);
 }
 
-static void shader_opengl_unbind(Shader* shader) {
+void shader_opengl_unbind(Shader* shader) {
     if (!shader || !shader->backend_data) {
         return;
     }
@@ -65,7 +64,7 @@ static void shader_opengl_unbind(Shader* shader) {
     glUseProgram(0);
 }
 
-static void shader_opengl_set_mat4(Shader* shader, const char* name, Matrix4 matrix) {
+void shader_opengl_set_mat4(Shader* shader, const char* name, Matrix4 matrix) {
     if (!shader || !shader->backend_data) {
         return;
     }
@@ -76,9 +75,7 @@ static void shader_opengl_set_mat4(Shader* shader, const char* name, Matrix4 mat
     glUniformMatrix4fv(location, 1, GL_FALSE, matrix.elements);
 }
 
-static void shader_opengl_set_int_array(
-    Shader* shader, const char* name, const i32* array, u32 count
-) {
+void shader_opengl_set_int_array(Shader* shader, const char* name, const i32* array, u32 count) {
     if (!shader || !shader->backend_data) {
         return;
     }
@@ -89,7 +86,7 @@ static void shader_opengl_set_int_array(
     glUniform1iv(location, (GLint)count, array);
 }
 
-static void shader_opengl_dispatch(Shader* shader, i16 x, i16 y, i16 z) {
+void shader_opengl_dispatch(Shader* shader, i16 x, i16 y, i16 z) {
     if (!shader || !shader->backend_data) {
         return;
     }
@@ -107,14 +104,4 @@ static void shader_opengl_dispatch(Shader* shader, i16 x, i16 y, i16 z) {
     );
     glDispatchCompute(x, y, z);
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
-}
-
-void shader_opengl_init(Shader* shader) {
-    shader->vt.shader_create = shader_opengl_create;
-    shader->vt.shader_destroy = shader_opengl_destroy;
-    shader->vt.shader_bind = shader_opengl_bind;
-    shader->vt.shader_unbind = shader_opengl_unbind;
-    shader->vt.shader_set_mat4 = shader_opengl_set_mat4;
-    shader->vt.shader_set_int_array = shader_opengl_set_int_array;
-    shader->vt.shader_dispatch = shader_opengl_dispatch;
 }

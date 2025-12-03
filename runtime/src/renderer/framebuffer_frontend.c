@@ -2,9 +2,7 @@
 #include <vara/core/platform/platform.h>
 
 #include "vara/renderer/framebuffer.h"
-#include "vara/renderer/renderer.h"
-
-extern void framebuffer_opengl_init(Framebuffer* buffer);
+#include "vara/renderer/internal/renderer_internal.h"
 
 Framebuffer* framebuffer_create(const FramebufferConfig* config) {
     Framebuffer* buffer = platform_allocate(sizeof(Framebuffer));
@@ -23,22 +21,8 @@ Framebuffer* framebuffer_create(const FramebufferConfig* config) {
     buffer->height = config->height;
     buffer->samples = config->samples;
 
-    const RendererInstance* instance = renderer_get_instance();
-    if (instance) {
-        switch (instance->renderer_type) {
-            case RENDERER_TYPE_OPENGL:
-                framebuffer_opengl_init(buffer);
-                break;
-            default:
-                ERROR(
-                    "Unsupported graphics type: %s",
-                    renderer_type_to_string(instance->renderer_type)
-                );
-                return NULL;
-        }
-    }
-
-    if (!buffer->vt.framebuffer_create(buffer, config)) {
+    const RendererBackend* backend = renderer_backend_get();
+    if (!backend->framebuffer.create(buffer, config)) {
         framebuffer_destroy(buffer);
         return NULL;
     }
@@ -47,8 +31,9 @@ Framebuffer* framebuffer_create(const FramebufferConfig* config) {
 }
 
 void framebuffer_destroy(Framebuffer* buffer) {
-    if (buffer && buffer->vt.framebuffer_destroy) {
-        buffer->vt.framebuffer_destroy(buffer);
+    if (buffer) {
+        const RendererBackend* backend = renderer_backend_get();
+        backend->framebuffer.destroy(buffer);
 
         if (buffer->attachments) {
             platform_free(buffer->attachments);
@@ -58,19 +43,22 @@ void framebuffer_destroy(Framebuffer* buffer) {
 }
 
 void framebuffer_bind(Framebuffer* buffer) {
-    if (buffer && buffer->vt.framebuffer_bind) {
-        buffer->vt.framebuffer_bind(buffer);
+    if (buffer) {
+        const RendererBackend* backend = renderer_backend_get();
+        backend->framebuffer.bind(buffer);
     }
 }
 
 void framebuffer_unbind(Framebuffer* buffer) {
-    if (buffer && buffer->vt.framebuffer_unbind) {
-        buffer->vt.framebuffer_unbind(buffer);
+    if (buffer) {
+        const RendererBackend* backend = renderer_backend_get();
+        backend->framebuffer.unbind(buffer);
     }
 }
 
 void framebuffer_resize(Framebuffer* buffer, const u32 width, const u32 height) {
-    if (buffer && buffer->vt.framebuffer_resize) {
-        buffer->vt.framebuffer_resize(buffer, width, height);
+    if (buffer) {
+        const RendererBackend* backend = renderer_backend_get();
+        backend->framebuffer.resize(buffer, width, height);
     }
 }
