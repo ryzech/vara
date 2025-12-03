@@ -3,18 +3,21 @@ function(generate_shader_headers TARGET SHADER_DIR)
     set(GENERATED_HEADERS "")
 
     foreach (SHADER ${SHADER_FILES})
-        get_filename_component(SHADER_NAME ${SHADER} NAME_WE)
+        get_filename_component(SHADER_NAME ${SHADER} NAME)
+        string(REPLACE ".glsl" "" SHADER_NAME ${SHADER_NAME})
         set(OUTPUT_HEADER ${SHADER_DIR}/${SHADER_NAME}.glsl.gen.h)
 
-        add_custom_command(
-                OUTPUT ${OUTPUT_HEADER}
-                COMMAND python3 ${CMAKE_SOURCE_DIR}/cmake/generate_shader_headers.py ${SHADER}
-                DEPENDS ${SHADER} ${CMAKE_SOURCE_DIR}/cmake/generate_shader_headers.py
-                COMMENT "Generating C header from ${SHADER_NAME}.glsl"
-                VERBATIM
-        )
+        if (EXISTS ${SHADER})
+            add_custom_command(
+                    OUTPUT ${OUTPUT_HEADER}
+                    COMMAND python3 ${CMAKE_SOURCE_DIR}/cmake/generate_shader_headers.py ${SHADER}
+                    DEPENDS ${SHADER} ${CMAKE_SOURCE_DIR}/cmake/generate_shader_headers.py
+                    COMMENT "Generating C header from ${SHADER_NAME}.glsl"
+                    VERBATIM
+            )
 
-        list(APPEND GENERATED_HEADERS ${OUTPUT_HEADER})
+            list(APPEND GENERATED_HEADERS ${OUTPUT_HEADER})
+        endif ()
     endforeach ()
 
     # Create a custom target that depends on all generated headers

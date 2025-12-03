@@ -4,14 +4,16 @@
 #include "vara/application/application.h"
 #include "vara/renderer/buffer.h"
 #include "vara/renderer/render_command.h"
-#include "vara/renderer/render_pass.h"
 #include "vara/renderer/renderer.h"
 #include "vara/renderer/shader.h"
 #include "vara/renderer/texture.h"
 #include "vara/renderer2d/renderer2d.h"
-#include "vara/shaders/renderer2d.glsl.gen.h"
+#include "vara/shaders/renderer2d_sprite.glsl.gen.h"
+#include "vara/shaders/renderer2d_text.glsl.gen.h"
 
 static Texture* default_texture;
+static Shader* sprite_shader;
+static Shader* text_shader;
 
 static void renderer2d_flush(Renderer2D* renderer) {
     if (renderer->vertex_count == 0) {
@@ -34,11 +36,12 @@ static void renderer2d_flush(Renderer2D* renderer) {
     RenderCommandBuffer* command = renderer_get_frame_command_buffer();
 
     render_cmd_shader_set_int_array(
-        command, renderer->shader, "uTextures", samplers, renderer->texture_count
+        command, sprite_shader, "uTextures", samplers, renderer->texture_count
     );
     render_cmd_draw_indexed(
-        command, renderer->shader, renderer->vertex_buffer, renderer->index_buffer
+        command, sprite_shader, renderer->vertex_buffer, renderer->index_buffer
     );
+    renderer->draw_calls++;
 
     renderer->vertex_count = 0;
     renderer->index_count = 0;
@@ -105,19 +108,30 @@ Renderer2D* renderer2d_create(const Renderer2DConfig* config) {
     };
     renderer->index_buffer = buffer_create(&index_buffer_config);
 
-    ShaderSource sources[] = {
-        {.stage = SHADER_STAGE_VERTEX, .source = renderer2d_vertex_source},
-        {.stage = SHADER_STAGE_FRAGMENT, .source = renderer2d_fragment_source},
+    ShaderSource sprite_sources[] = {
+        {.stage = SHADER_STAGE_VERTEX, .source = renderer2d_sprite_vertex_source},
+        {.stage = SHADER_STAGE_FRAGMENT, .source = renderer2d_sprite_fragment_source},
     };
-    const ShaderConfig shader_config = {
-        .name = "renderer2d_shader",
-        .stages = sources,
+    const ShaderConfig sprite_shader_config = {
+        .name = "renderer2d_sprite_shader",
+        .stages = sprite_sources,
         .stage_count = 2,
     };
-    renderer->shader = shader_create(&shader_config);
+    sprite_shader = shader_create(&sprite_shader_config);
+
+    ShaderSource text_sources[] = {
+        {.stage = SHADER_STAGE_VERTEX, .source = renderer2d_text_vertex_source},
+        {.stage = SHADER_STAGE_FRAGMENT, .source = renderer2d_text_fragment_source},
+    };
+    const ShaderConfig text_shader_config = {
+        .name = "renderer2d_text_shader",
+        .stages = text_sources,
+        .stage_count = 2,
+    };
+    text_shader = shader_create(&text_shader_config);
 
     // Set the default white texture if no texture is requested.
-    u8 white_pixels[4] = {255, 255, 255, 255};
+    u32 white_pixels = 0xffffffff;
     TextureConfig default_texture_config = {
         .width = 1,
         .height = 1,
@@ -125,7 +139,7 @@ Renderer2D* renderer2d_create(const Renderer2DConfig* config) {
         .filter = TEXTURE_FILTER_LINEAR,
     };
     default_texture = texture_create(&default_texture_config);
-    texture_set_data(default_texture, white_pixels, 4);
+    texture_set_data(default_texture, &white_pixels, sizeof(u32));
 
     return renderer;
 }
@@ -134,7 +148,8 @@ void renderer2d_destroy(Renderer2D* renderer) {
     if (renderer) {
         buffer_destroy(renderer->vertex_buffer);
         buffer_destroy(renderer->index_buffer);
-        shader_destroy(renderer->shader);
+        shader_destroy(sprite_shader);
+        shader_destroy(text_shader);
         texture_destroy(default_texture);
 
         platform_free(renderer->vertices);
@@ -149,8 +164,9 @@ void renderer2d_begin(Renderer2D* renderer) {
     const Matrix4 ortho = mat4_ortho(0.0f, (f32)size.x, (f32)size.y, 0.0f, -1.0f, 1.0f);
 
     RenderCommandBuffer* command = renderer_get_frame_command_buffer();
-    render_cmd_shader_set_mat4(command, renderer->shader, "uProjection", ortho);
+    render_cmd_shader_set_mat4(command, sprite_shader, "uProjection", ortho);
 
+    renderer->draw_calls = 0;
     renderer->vertex_count = 0;
     renderer->index_count = 0;
     renderer->texture_count = 1;
@@ -162,17 +178,12 @@ void renderer2d_end(Renderer2D* renderer) {
 }
 
 void renderer2d_draw_rect(Renderer2D* renderer, Rect rect, Vector4 color) {
-    renderer2d_draw_rect_texture(renderer, rect, default_texture, color);
+    renderer2d_draw_sprite(renderer, rect, default_texture, color);
 }
 
-void renderer2d_draw_rect_texture(Renderer2D* renderer, Rect rect, Texture* texture, Vector4 tint) {
+void renderer2d_draw_sprite(Renderer2D* renderer, Rect rect, Texture* texture, Vector4 tint) {
     if (!renderer || !texture) {
         return;
-    }
-
-    if (renderer->vertex_count + 4 > renderer->max_vertices
-        || renderer->index_count + 6 > renderer->max_indices) {
-        renderer2d_flush(renderer);
     }
 
     f32 tex_index = 0;
