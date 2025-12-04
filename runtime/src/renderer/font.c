@@ -15,36 +15,46 @@ Font* font_load(const char* path, const f32 font_size) {
     }
 
     if (fseek(font_file, 0, SEEK_END) != 0) {
+        fclose(font_file);
         ERROR("Failed to read font('%s') from file.", path);
         return NULL;
     }
 
     const size_t length = ftell(font_file);
     if (fseek(font_file, 0, SEEK_SET) != 0) {
+        fclose(font_file);
         ERROR("Failed to read font('%s') from file.", path);
         return NULL;
     }
 
-    unsigned char* file_buffer = platform_allocate(length);
+    u8* file_buffer = platform_allocate(length);
     const size_t read_length = fread(file_buffer, 1, length, font_file);
     if (read_length != length) {
+        fclose(font_file);
         ERROR("Failed to read font('%s') from file.", path);
         return NULL;
     }
+    fclose(font_file);
 
     Font* font = platform_allocate(sizeof(Font));
     font->size = font_size;
 
-    const i32 width = 512;
-    const i32 height = 512;
-    unsigned char* bitmap = platform_allocate(width * height);
-    stbtt_bakedchar char_data[95];
-    stbtt_BakeFontBitmap(file_buffer, 0, font_size, bitmap, width, height, 32, 95, char_data);
+    // Configurable bitmap size maybe?
+    const i32 width = 2048;
+    const i32 height = 2048;
+    u8* bitmap = platform_allocate(width * height);
+    stbtt_packedchar packed_char[95];
+
+    // Create bitmap - better method.
+    stbtt_pack_context context;
+    stbtt_PackBegin(&context, bitmap, width, height, 0, 1, NULL);
+    stbtt_PackFontRange(&context, file_buffer, 0, font_size, 32, 95, packed_char);
+    stbtt_PackEnd(&context);
 
     u32* pixels = platform_allocate(width * height * sizeof(u32));
     for (i32 i = 0; i < width * height; i++) {
         const u8 alpha = bitmap[i];
-        pixels[i] = (alpha << 24) | (255 << 16) | (255 << 8) | 255;
+        pixels[i] = alpha << 24 | alpha << 16 | alpha << 8 | alpha;
     }
 
     const TextureConfig font_texture_config = {
@@ -67,17 +77,17 @@ Font* font_load(const char* path, const f32 font_size) {
     font->line_gap = (f32)line_gap * scale;
 
     for (i32 i = 0; i < 95; i++) {
-        font->glyphs[i].uv_top_left.x = (f32)char_data[i].x0 / (f32)width;
-        font->glyphs[i].uv_top_left.y = (f32)char_data[i].y0 / (f32)height;
-        font->glyphs[i].uv_bottom_right.x = (f32)char_data[i].x1 / (f32)width;
-        font->glyphs[i].uv_bottom_right.y = (f32)char_data[i].y1 / (f32)height;
+        font->glyphs[i].uv_top_left.x = (f32)packed_char[i].x0 / (f32)width;
+        font->glyphs[i].uv_top_left.y = (f32)packed_char[i].y0 / (f32)height;
+        font->glyphs[i].uv_bottom_right.x = (f32)packed_char[i].x1 / (f32)width;
+        font->glyphs[i].uv_bottom_right.y = (f32)packed_char[i].y1 / (f32)height;
 
-        font->glyphs[i].size.x = (f32)char_data[i].x1 - (f32)char_data[i].x0;
-        font->glyphs[i].size.y = (f32)char_data[i].y1 - (f32)char_data[i].y0;
+        font->glyphs[i].size.x = (f32)packed_char[i].x1 - (f32)packed_char[i].x0;
+        font->glyphs[i].size.y = (f32)packed_char[i].y1 - (f32)packed_char[i].y0;
 
-        font->glyphs[i].bearing.x = char_data[i].xoff;
-        font->glyphs[i].bearing.y = char_data[i].yoff;
-        font->glyphs[i].advance = char_data[i].xadvance;
+        font->glyphs[i].bearing.x = packed_char[i].xoff;
+        font->glyphs[i].bearing.y = packed_char[i].yoff;
+        font->glyphs[i].advance = packed_char[i].xadvance;
     }
 
     platform_free(bitmap);
