@@ -7,6 +7,7 @@ set(RUNTIME_SOURCES src/application/application.c src/renderer/renderer_frontend
         src/renderer/texture_frontend.c
         src/vendor/stb_image.c
         src/renderer/internal/renderer_internal.c
+        src/vendor/stb_truetype.c
 )
 
 add_library(vara-runtime STATIC ${RUNTIME_SOURCES})
