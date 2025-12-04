@@ -13,6 +13,7 @@ typedef struct DrawCommand DrawCommand;
 struct Buffer;
 struct Shader;
 struct Texture;
+struct Font;
 
 struct Renderer2DConfig {
     u32 max_vertices;
@@ -54,3 +55,6 @@ void renderer2d_end(Renderer2D* renderer);
 
 void renderer2d_draw_rect(Renderer2D* renderer, Rect rect, Vector4 color);
 void renderer2d_draw_sprite(Renderer2D* renderer, Rect rect, struct Texture* texture, Vector4 tint);
+void renderer2d_draw_text(
+    Renderer2D* renderer, const char* text, struct Font* font, Vector2 position, Vector4 color
+);

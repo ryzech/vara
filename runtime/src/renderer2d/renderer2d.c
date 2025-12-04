@@ -8,6 +8,8 @@
 #include "vara/renderer/shader.h"
 #include "vara/renderer/texture.h"
 #include "vara/renderer2d/renderer2d.h"
+
+#include "vara/renderer/font.h"
 #include "vara/shaders/renderer2d_sprite.glsl.gen.h"
 #include "vara/shaders/renderer2d_text.glsl.gen.h"
 
@@ -47,6 +49,81 @@ static void renderer2d_flush(Renderer2D* renderer) {
     renderer->index_count = 0;
     renderer->texture_count = 1;
     renderer->textures[0] = renderer->textures[0];
+}
+
+static void renderer2d_add_quad(
+    Renderer2D* renderer,
+    Vector2 pos,
+    Vector2 size,
+    Vector2 uv0,
+    Vector2 uv1,
+    Texture* texture,
+    Vector4 color
+) {
+    if (!renderer || !texture) {
+        return;
+    }
+
+    f32 tex_index = 0;
+    b8 found = false;
+    for (u32 i = 0; i < renderer->texture_count; i++) {
+        if (renderer->textures[i] == texture) {
+            tex_index = (f32)i;
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        if (renderer->texture_count >= RENDERER2D_MAX_TEXTURES) {
+            renderer2d_flush(renderer);
+            tex_index = 0;
+        } else {
+            tex_index = (f32)renderer->texture_count;
+            renderer->textures[renderer->texture_count++] = texture;
+        }
+    }
+
+    u32 current_vertex_count = renderer->vertex_count;
+
+    const Vertex v0 = {
+        .position = vec2_to_vec3(pos),
+        .color = vec4_to_vec3(color),
+        .tex_coord = {uv0.x, uv0.y},
+        .tex_index = tex_index,
+    };
+    const Vertex v1 = {
+        .position = {pos.x + size.x, pos.y, 0.0f},
+        .color = vec4_to_vec3(color),
+        .tex_coord = {uv1.x, uv0.y},
+        .tex_index = tex_index,
+    };
+    const Vertex v2 = {
+        .position = {pos.x + size.x, pos.y + size.y, 0.0f},
+        .color = vec4_to_vec3(color),
+        .tex_coord = {uv1.x, uv1.y},
+        .tex_index = tex_index,
+    };
+    const Vertex v3 = {
+        .position = {pos.x, pos.y + size.y, 0.0f},
+        .color = vec4_to_vec3(color),
+        .tex_coord = {uv0.x, uv1.y},
+        .tex_index = tex_index,
+    };
+
+    renderer->vertices[renderer->vertex_count + 0] = v0;
+    renderer->vertices[renderer->vertex_count + 1] = v1;
+    renderer->vertices[renderer->vertex_count + 2] = v2;
+    renderer->vertices[renderer->vertex_count + 3] = v3;
+    renderer->vertex_count += 4;
+
+    renderer->indices[renderer->index_count + 0] = current_vertex_count + 0;
+    renderer->indices[renderer->index_count + 1] = current_vertex_count + 1;
+    renderer->indices[renderer->index_count + 2] = current_vertex_count + 2;
+    renderer->indices[renderer->index_count + 3] = current_vertex_count + 2;
+    renderer->indices[renderer->index_count + 4] = current_vertex_count + 3;
+    renderer->indices[renderer->index_count + 5] = current_vertex_count + 0;
+    renderer->index_count += 6;
 }
 
 Renderer2D* renderer2d_create(const Renderer2DConfig* config) {
@@ -182,68 +259,60 @@ void renderer2d_draw_rect(Renderer2D* renderer, Rect rect, Vector4 color) {
 }
 
 void renderer2d_draw_sprite(Renderer2D* renderer, Rect rect, Texture* texture, Vector4 tint) {
-    if (!renderer || !texture) {
+    renderer2d_add_quad(
+        renderer,
+        rect.position,
+        rect.size,
+        (Vector2){
+            0,
+            0,
+        },
+        (Vector2){
+            1,
+            1,
+        },
+        texture,
+        tint
+    );
+}
+
+void renderer2d_draw_text(
+    Renderer2D* renderer, const char* text, struct Font* font, Vector2 position, Vector4 color
+) {
+    if (!renderer || !font || !text) {
         return;
     }
 
-    f32 tex_index = 0;
-    b8 found = false;
-    for (u32 i = 0; i < renderer->texture_count; i++) {
-        if (renderer->textures[i] == texture) {
-            tex_index = (f32)i;
-            found = true;
-            break;
+    f32 x = position.x;
+    f32 y = position.y;
+
+    const char* ptr = text;
+    while (*ptr) {
+        char c = *ptr;
+        ptr++;
+
+        if (c < 32 || c > 126) {
+            continue;
         }
+
+        Glyph* glyph = &font->glyphs[c - 32];
+
+        Vector2 glyph_pos = {
+            x + glyph->bearing.x,
+            y + glyph->bearing.y,
+        };
+        Vector2 glyph_size = glyph->size;
+
+        renderer2d_add_quad(
+            renderer,
+            glyph_pos,
+            glyph_size,
+            glyph->uv_top_left,
+            glyph->uv_bottom_right,
+            font->atlas,
+            color
+        );
+
+        x += glyph->advance;
     }
-
-    if (!found) {
-        if (renderer->texture_count >= RENDERER2D_MAX_TEXTURES) {
-            renderer2d_flush(renderer);
-            tex_index = 0;
-        } else {
-            tex_index = (f32)renderer->texture_count;
-            renderer->textures[renderer->texture_count++] = texture;
-        }
-    }
-
-    u32 current_vertex_count = renderer->vertex_count;
-
-    const Vertex v0 = {
-        .position = vec2_to_vec3(rect.position),
-        .color = vec4_to_vec3(tint),
-        .tex_coord = {0.0f, 0.0f},
-        .tex_index = tex_index,
-    };
-    const Vertex v1 = {
-        .position = {rect.position.x + rect.size.x, rect.position.y, 0.0f},
-        .color = vec4_to_vec3(tint),
-        .tex_coord = {1.0f, 0.0f},
-        .tex_index = tex_index,
-    };
-    const Vertex v2 = {
-        .position = {rect.position.x + rect.size.x, rect.position.y + rect.size.y, 0.0f},
-        .color = vec4_to_vec3(tint),
-        .tex_coord = {1.0f, 1.0f},
-        .tex_index = tex_index,
-    };
-    const Vertex v3 = {
-        .position = {rect.position.x, rect.position.y + rect.size.y, 0.0f},
-        .color = vec4_to_vec3(tint),
-        .tex_coord = {0.0f, 1.0f},
-        .tex_index = tex_index,
-    };
-
-    renderer->vertices[renderer->vertex_count + 0] = v0;
-    renderer->vertices[renderer->vertex_count + 1] = v1;
-    renderer->vertices[renderer->vertex_count + 2] = v2;
-    renderer->vertices[renderer->vertex_count + 3] = v3;
-    renderer->vertex_count += 4;
-
-    renderer->indices[renderer->index_count + 0] = current_vertex_count + 0;
-    renderer->indices[renderer->index_count + 1] = current_vertex_count + 1;
-    renderer->indices[renderer->index_count + 2] = current_vertex_count + 2;
-    renderer->indices[renderer->index_count + 3] = current_vertex_count + 2;
-    renderer->indices[renderer->index_count + 4] = current_vertex_count + 3;
-    renderer->indices[renderer->index_count + 5] = current_vertex_count + 0;
-    renderer->index_count += 6;
 }
