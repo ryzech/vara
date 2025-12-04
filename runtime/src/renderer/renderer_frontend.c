@@ -7,6 +7,7 @@
 #include "vara/renderer/internal/renderer_internal.h"
 #include "vara/renderer/render_command.h"
 #include "vara/renderer/renderer.h"
+#include "vara/renderer2d/renderer2d.h"
 
 typedef struct RendererState RendererState;
 
@@ -37,6 +38,7 @@ b8 renderer_create(VaraWindow* window) {
 
     if (!renderer_state->backend) {
         FATAL("Failed to create RendererBackend.");
+        renderer_destroy();
         platform_free(renderer_state);
         return false;
     }
@@ -44,6 +46,18 @@ b8 renderer_create(VaraWindow* window) {
     renderer_state->frame_cmd_buffer = render_cmd_buffer_create();
     if (!renderer_state->frame_cmd_buffer) {
         FATAL("Failed to create the frames RenderCommandBuffer.");
+        renderer_destroy();
+        platform_free(renderer_state);
+        return false;
+    }
+
+    const Renderer2DConfig renderer_2d_config = {
+        .max_vertices = 4096,
+        .max_indices = 4096,
+    };
+    if (!renderer2d_create(&renderer_2d_config)) {
+        FATAL("Failed to create Renderer2D!");
+        renderer_destroy();
         platform_free(renderer_state);
         return false;
     }
@@ -53,6 +67,8 @@ b8 renderer_create(VaraWindow* window) {
 
 void renderer_destroy(void) {
     if (renderer_state) {
+        renderer2d_destroy();
+
         if (renderer_state->frame_cmd_buffer) {
             render_cmd_buffer_destroy(renderer_state->frame_cmd_buffer);
         }
@@ -91,9 +107,11 @@ RenderCommandBuffer* renderer_get_frame_command_buffer(void) {
 
 void renderer_begin_frame(void) {
     render_cmd_buffer_reset(renderer_get_frame_command_buffer());
+    renderer2d_begin();
 }
 
 void renderer_end_frame(void) {
+    renderer2d_end();
     renderer_execute_commands(renderer_get_frame_command_buffer());
     renderer_present();
 }

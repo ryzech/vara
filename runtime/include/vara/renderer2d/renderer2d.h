@@ -47,14 +47,12 @@ struct DrawCommand {
     f32 z_index;
 };
 
-Renderer2D* renderer2d_create(const Renderer2DConfig* config);
-void renderer2d_destroy(Renderer2D* renderer);
+b8 renderer2d_create(const Renderer2DConfig* config);
+void renderer2d_destroy(void);
 
-void renderer2d_begin(Renderer2D* renderer);
-void renderer2d_end(Renderer2D* renderer);
+void renderer2d_begin(void);
+void renderer2d_end(void);
 
-void renderer2d_draw_rect(Renderer2D* renderer, Rect rect, Vector4 color);
-void renderer2d_draw_sprite(Renderer2D* renderer, Rect rect, struct Texture* texture, Vector4 tint);
-void renderer2d_draw_text(
-    Renderer2D* renderer, const char* text, struct Font* font, Vector2 position, Vector4 color
-);
+void renderer2d_draw_rect(Rect rect, Vector4 color);
+void renderer2d_draw_sprite(Rect rect, struct Texture* texture, Vector4 tint);
+void renderer2d_draw_text(const char* text, struct Font* font, Vector2 position, Vector4 color);

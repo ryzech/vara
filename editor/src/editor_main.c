@@ -7,7 +7,6 @@
 #include <vara/renderer/render_pass.h>
 #include <vara/renderer2d/renderer2d.h>
 
-static Renderer2D* renderer;
 static RenderPass* ui_pass;
 
 void editor_init(void) {
@@ -17,12 +16,6 @@ void editor_init(void) {
         .clear = true,
     };
     ui_pass = render_pass_create(&ui_pass_config);
-
-    const Renderer2DConfig renderer2d_config = {
-        .max_vertices = 1024,
-        .max_indices = 1024,
-    };
-    renderer = renderer2d_create(&renderer2d_config);
 }
 
 void editor_update(f32 delta_time) {
@@ -31,7 +24,6 @@ void editor_update(f32 delta_time) {
     }
 
     render_pass_begin(ui_pass);
-    renderer2d_begin(renderer);
 
     const Rect rect = {
         .position = {100.0f, 100.0f},
@@ -41,15 +33,13 @@ void editor_update(f32 delta_time) {
     if (point_in_rect(input_get_mouse_position(), rect)) {
         color.y = 0.6f;
     }
-    renderer2d_draw_rect(renderer, rect, color);
+    renderer2d_draw_rect(rect, color);
 
-    renderer2d_end(renderer);
     render_pass_end(ui_pass);
 }
 
 void editor_shutdown(void) {
     INFO("Shutting down...");
-    renderer2d_destroy(renderer);
     render_pass_destroy(ui_pass);
 }
 

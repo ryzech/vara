@@ -13,11 +13,13 @@
 #include "vara/shaders/renderer2d_sprite.glsl.gen.h"
 #include "vara/shaders/renderer2d_text.glsl.gen.h"
 
+static Renderer2D* renderer;
+
 static Texture* default_texture;
 static Shader* sprite_shader;
 static Shader* text_shader;
 
-static void renderer2d_flush(Renderer2D* renderer) {
+static void renderer2d_flush(void) {
     if (renderer->vertex_count == 0) {
         return;
     }
@@ -52,13 +54,7 @@ static void renderer2d_flush(Renderer2D* renderer) {
 }
 
 static void renderer2d_add_quad(
-    Renderer2D* renderer,
-    Vector2 pos,
-    Vector2 size,
-    Vector2 uv0,
-    Vector2 uv1,
-    Texture* texture,
-    Vector4 color
+    Vector2 pos, Vector2 size, Vector2 uv0, Vector2 uv1, Texture* texture, Vector4 color
 ) {
     if (!renderer || !texture) {
         return;
@@ -76,7 +72,7 @@ static void renderer2d_add_quad(
 
     if (!found) {
         if (renderer->texture_count >= RENDERER2D_MAX_TEXTURES) {
-            renderer2d_flush(renderer);
+            renderer2d_flush();
             tex_index = 0;
         } else {
             tex_index = (f32)renderer->texture_count;
@@ -126,9 +122,13 @@ static void renderer2d_add_quad(
     renderer->index_count += 6;
 }
 
-Renderer2D* renderer2d_create(const Renderer2DConfig* config) {
-    Renderer2D* renderer = platform_allocate(sizeof(Renderer2D));
+b8 renderer2d_create(const Renderer2DConfig* config) {
+    renderer = platform_allocate(sizeof(Renderer2D));
     platform_zero_memory(renderer, sizeof(Renderer2D));
+
+    if (!renderer) {
+        return false;
+    }
 
     renderer->max_vertices = config->max_vertices;
     renderer->max_indices = config->max_indices;
@@ -218,10 +218,10 @@ Renderer2D* renderer2d_create(const Renderer2DConfig* config) {
     default_texture = texture_create(&default_texture_config);
     texture_set_data(default_texture, &white_pixels, sizeof(u32));
 
-    return renderer;
+    return true;
 }
 
-void renderer2d_destroy(Renderer2D* renderer) {
+void renderer2d_destroy(void) {
     if (renderer) {
         buffer_destroy(renderer->vertex_buffer);
         buffer_destroy(renderer->index_buffer);
@@ -235,7 +235,7 @@ void renderer2d_destroy(Renderer2D* renderer) {
     }
 }
 
-void renderer2d_begin(Renderer2D* renderer) {
+void renderer2d_begin(void) {
     VaraWindow* window = application_get_window();
     const Vector2i size = platform_window_get_size(window);
     const Matrix4 ortho = mat4_ortho(0.0f, (f32)size.x, (f32)size.y, 0.0f, -1.0f, 1.0f);
@@ -250,17 +250,16 @@ void renderer2d_begin(Renderer2D* renderer) {
     renderer->textures[0] = default_texture;
 }
 
-void renderer2d_end(Renderer2D* renderer) {
-    renderer2d_flush(renderer);
+void renderer2d_end() {
+    renderer2d_flush();
 }
 
-void renderer2d_draw_rect(Renderer2D* renderer, Rect rect, Vector4 color) {
-    renderer2d_draw_sprite(renderer, rect, default_texture, color);
+void renderer2d_draw_rect(Rect rect, Vector4 color) {
+    renderer2d_draw_sprite(rect, default_texture, color);
 }
 
-void renderer2d_draw_sprite(Renderer2D* renderer, Rect rect, Texture* texture, Vector4 tint) {
+void renderer2d_draw_sprite(Rect rect, Texture* texture, Vector4 tint) {
     renderer2d_add_quad(
-        renderer,
         rect.position,
         rect.size,
         (Vector2){
@@ -276,9 +275,7 @@ void renderer2d_draw_sprite(Renderer2D* renderer, Rect rect, Texture* texture, V
     );
 }
 
-void renderer2d_draw_text(
-    Renderer2D* renderer, const char* text, struct Font* font, Vector2 position, Vector4 color
-) {
+void renderer2d_draw_text(const char* text, struct Font* font, Vector2 position, Vector4 color) {
     if (!renderer || !font || !text) {
         return;
     }
@@ -304,13 +301,7 @@ void renderer2d_draw_text(
         Vector2 glyph_size = glyph->size;
 
         renderer2d_add_quad(
-            renderer,
-            glyph_pos,
-            glyph_size,
-            glyph->uv_top_left,
-            glyph->uv_bottom_right,
-            font->atlas,
-            color
+            glyph_pos, glyph_size, glyph->uv_top_left, glyph->uv_bottom_right, font->atlas, color
         );
 
         x += glyph->advance;
