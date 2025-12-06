@@ -62,6 +62,7 @@ Font* font_load(const char* path, const f32 font_size) {
         .height = height,
         .format = TEXTURE_FORMAT_RGBA,
         .filter = TEXTURE_FILTER_LINEAR,
+        .samples = 1,
     };
     font->atlas = texture_create(&font_texture_config);
     texture_set_data(font->atlas, pixels, width * height * sizeof(u32));

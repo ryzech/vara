@@ -11,6 +11,7 @@ Texture* texture_create(const TextureConfig* config) {
 
     texture->width = config->width;
     texture->height = config->height;
+    texture->samples = config->samples;
     texture->format = config->format;
     texture->filter = config->filter;
 

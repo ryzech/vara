@@ -27,12 +27,14 @@ enum TextureWrap {
 
 struct TextureConfig {
     u32 width, height;
+    u32 samples;
     TextureFormat format;
     TextureFilter filter;
 };
 
 struct Texture {
     u32 width, height;
+    u32 samples;
     void* backend_data;
     TextureFormat format;
     TextureFilter filter;

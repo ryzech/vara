@@ -47,7 +47,6 @@ b8 renderer_create(VaraWindow* window) {
     if (!renderer_state->frame_cmd_buffer) {
         FATAL("Failed to create the frames RenderCommandBuffer.");
         renderer_destroy();
-        platform_free(renderer_state);
         return false;
     }
 

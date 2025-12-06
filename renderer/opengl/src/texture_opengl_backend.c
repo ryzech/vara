@@ -52,25 +52,36 @@ b8 texture_opengl_create(Texture* texture, const TextureConfig* config) {
     GLint filter = texture_filter_to_gl(config->filter);
 
     glGenTextures(1, &texture_state->id);
-    glBindTexture(GL_TEXTURE_2D, texture_state->id);
 
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        internal,
-        (GLsizei)config->width,
-        (GLsizei)config->height,
-        0,
-        format,
-        GL_UNSIGNED_BYTE,
-        NULL
-    );
+    if (config->samples > 1) {
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture_state->id);
+        glTexImage2DMultisample(
+            GL_TEXTURE_2D_MULTISAMPLE,
+            config->samples,
+            internal,
+            config->width,
+            config->height,
+            GL_TRUE
+        );
+    } else {
+        glBindTexture(GL_TEXTURE_2D, texture_state->id);
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            internal,
+            (GLsizei)config->width,
+            (GLsizei)config->height,
+            0,
+            format,
+            GL_UNSIGNED_BYTE,
+            NULL
+        );
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    }
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -99,8 +110,10 @@ void texture_opengl_bind(Texture* texture, u32 slot) {
     OpenGLTextureState* texture_state = texture->backend_data;
     texture_state->slot = slot;
 
+    const GLenum target = texture->samples > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
+
     glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(GL_TEXTURE_2D, texture_state->id);
+    glBindTexture(target, texture_state->id);
 }
 
 void texture_opengl_unbind(Texture* texture) {
