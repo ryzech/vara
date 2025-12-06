@@ -2,11 +2,6 @@
 #include <vara/core/platform/platform.h>
 #include <vara/renderer/texture_opengl_backend.h>
 
-typedef struct OpenGLTextureState {
-    GLuint id;
-    GLuint slot;
-} OpenGLTextureState;
-
 static GLenum texture_format_to_gl(TextureFormat format) {
     switch (format) {
         case TEXTURE_FORMAT_R:
@@ -121,9 +116,9 @@ void texture_opengl_set_data(Texture* texture, void* data, size_t size) {
         return;
     }
 
-    OpenGLTextureState* texture_state = texture->backend_data;
+    const OpenGLTextureState* texture_state = texture->backend_data;
 
-    GLenum format = texture_format_to_gl(texture->format);
+    const GLenum format = texture_format_to_gl(texture->format);
 
     glBindTexture(GL_TEXTURE_2D, texture_state->id);
     glTexSubImage2D(

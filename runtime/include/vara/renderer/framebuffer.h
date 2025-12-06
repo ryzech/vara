@@ -9,6 +9,8 @@ typedef struct FramebufferAttachmentConfig FramebufferAttachmentConfig;
 typedef struct Framebuffer Framebuffer;
 typedef struct FramebufferConfig FramebufferConfig;
 
+struct Texture;
+
 enum FramebufferAttachmentType {
     FRAMEBUFFER_ATTACHMENT_COLOR,
     FRAMEBUFFER_ATTACHMENT_DEPTH,
@@ -38,6 +40,7 @@ struct FramebufferConfig {
 struct Framebuffer {
     const char* name;
     FramebufferAttachmentConfig* attachments;
+    struct Texture** attachment_textures;
     void* backend_data;
     u32 width, height;
     u32 attachment_count;
@@ -50,3 +53,5 @@ void framebuffer_destroy(Framebuffer* buffer);
 void framebuffer_bind(Framebuffer* buffer);
 void framebuffer_unbind(Framebuffer* buffer);
 void framebuffer_resize(Framebuffer* buffer, u32 width, u32 height);
+
+struct Texture* framebuffer_get_attachment(Framebuffer* buffer, const u32 index);

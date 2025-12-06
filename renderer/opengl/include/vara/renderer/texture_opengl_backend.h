@@ -3,6 +3,11 @@
 #include <vara/core/defines.h>
 #include <vara/renderer/texture.h>
 
+typedef struct OpenGLTextureState {
+    GLuint id;
+    GLuint slot;
+} OpenGLTextureState;
+
 b8 texture_opengl_create(Texture* texture, const TextureConfig* config);
 void texture_opengl_destroy(Texture* texture);
 void texture_opengl_bind(Texture* texture, u32 slot);

@@ -4,6 +4,8 @@
 #include <vara/core/platform/platform.h>
 #include <vara/renderer/render_pass.h>
 
+#include "vara/renderer/framebuffer_opengl_backend.h"
+
 typedef struct OpenGLRenderPassState {
     b8 active;
 } OpenGLRenderPassState;
@@ -42,6 +44,16 @@ void render_pass_opengl_begin(RenderPass* pass) {
         return;
     }
 
+    if (pass->target) {
+        framebuffer_opengl_bind(pass->target);
+    }
+
+    if (pass->clear) {
+        const Vector4 color = pass->clear_color;
+        glClearColor(color.x, color.y, color.z, color.w);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
     render_pass_state->active = true;
 }
 
@@ -57,6 +69,9 @@ void render_pass_opengl_end(RenderPass* pass) {
         return;
     }
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    if (pass->target) {
+        framebuffer_opengl_unbind(pass->target);
+    }
+
     render_pass_state->active = false;
 }

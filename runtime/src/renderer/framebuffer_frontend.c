@@ -20,6 +20,7 @@ Framebuffer* framebuffer_create(const FramebufferConfig* config) {
     buffer->width = config->width;
     buffer->height = config->height;
     buffer->samples = config->samples;
+    buffer->attachment_count = config->attachment_count;
 
     const RendererBackend* backend = renderer_backend_get();
     if (!backend->framebuffer.create(buffer, config)) {
@@ -61,4 +62,12 @@ void framebuffer_resize(Framebuffer* buffer, const u32 width, const u32 height) 
         const RendererBackend* backend = renderer_backend_get();
         backend->framebuffer.resize(buffer, width, height);
     }
+}
+
+Texture* framebuffer_get_attachment(Framebuffer* buffer, const u32 index) {
+    if (!buffer || !buffer->attachment_textures || index >= buffer->attachment_count) {
+        return NULL;
+    }
+
+    return buffer->attachment_textures[index];
 }

@@ -281,24 +281,24 @@ void renderer2d_draw_text(const char* text, struct Font* font, Vector2 position,
     }
 
     f32 x = position.x;
-    f32 y = position.y;
+    const f32 y = position.y;
 
     const char* ptr = text;
     while (*ptr) {
-        char c = *ptr;
+        const char c = *ptr;
         ptr++;
 
         if (c < 32 || c > 126) {
             continue;
         }
 
-        Glyph* glyph = &font->glyphs[c - 32];
+        const Glyph* glyph = &font->glyphs[c - 32];
 
-        Vector2 glyph_pos = {
+        const Vector2 glyph_pos = {
             x + glyph->bearing.x,
             y + glyph->bearing.y,
         };
-        Vector2 glyph_size = glyph->size;
+        const Vector2 glyph_size = glyph->size;
 
         renderer2d_add_quad(
             glyph_pos, glyph_size, glyph->uv_top_left, glyph->uv_bottom_right, font->atlas, color

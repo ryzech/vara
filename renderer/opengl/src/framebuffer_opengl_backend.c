@@ -2,7 +2,8 @@
 #include <vara/core/logger.h>
 #include <vara/core/platform/platform.h>
 
-#include <vara/renderer/framebuffer_opengl_backend.h>
+#include "vara/renderer/framebuffer_opengl_backend.h"
+#include "vara/renderer/texture_opengl_backend.h"
 
 typedef struct OpenGLFramebufferState {
     GLuint fbo;
@@ -12,6 +13,18 @@ typedef struct OpenGLFramebufferState {
     GLuint stencil_buffer;
     GLuint depth_stencil_buffer;
 } OpenGLFramebufferState;
+
+static TextureFormat fb_format_to_texture_format(FramebufferAttachmentFormat format) {
+    switch (format) {
+        case FRAMEBUFFER_FORMAT_RGBA8:
+            return TEXTURE_FORMAT_RGBA;
+        // Is there an actual depth texture format?
+        case FRAMEBUFFER_FORMAT_DEPTH24_STENCIL8:
+            return TEXTURE_FORMAT_R;
+        default:
+            return TEXTURE_FORMAT_RGBA;
+    }
+}
 
 static GLint format_to_gl_internal(FramebufferAttachmentFormat format) {
     switch (format) {
@@ -89,6 +102,8 @@ b8 framebuffer_opengl_create(Framebuffer* buffer, const FramebufferConfig* confi
         return false;
     }
 
+    buffer->attachment_textures = platform_allocate(sizeof(Texture*) * config->attachment_count);
+
     glGenFramebuffers(1, &buffer_state->fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, buffer_state->fbo);
 
@@ -133,6 +148,19 @@ b8 framebuffer_opengl_create(Framebuffer* buffer, const FramebufferConfig* confi
                 buffer_state->depth_stencil_buffer = texture;
                 break;
         }
+
+        Texture* texture_wrapper = platform_allocate(sizeof(Texture));
+        texture_wrapper->width = config->width;
+        texture_wrapper->height = config->height;
+        texture_wrapper->format = fb_format_to_texture_format(attachment->format);
+        texture_wrapper->filter = TEXTURE_FILTER_LINEAR;
+
+        OpenGLTextureState* texture_state = platform_allocate(sizeof(OpenGLTextureState));
+        texture_state->id = texture;
+        texture_state->slot = 0;
+        texture_wrapper->backend_data = texture_state;
+
+        buffer->attachment_textures[i] = texture_wrapper;
     }
 
     if (color_count > 0) {
@@ -193,6 +221,20 @@ void framebuffer_opengl_destroy(Framebuffer* buffer) {
         glDeleteFramebuffers(1, &buffer_state->fbo);
     }
 
+    if (buffer->attachment_textures) {
+        for (u32 i = 0; i < buffer->attachment_count; i++) {
+            Texture* texture = buffer->attachment_textures[i];
+            if (texture) {
+                if (texture->backend_data) {
+                    platform_free(texture->backend_data);
+                }
+                platform_free(texture);
+            }
+        }
+        platform_free(buffer->attachment_textures);
+        buffer->attachment_textures = NULL;
+    }
+
     platform_free(buffer_state);
     buffer->backend_data = NULL;
 }
@@ -205,6 +247,7 @@ void framebuffer_opengl_bind(Framebuffer* buffer) {
     OpenGLFramebufferState* buffer_state = buffer->backend_data;
 
     glBindFramebuffer(GL_FRAMEBUFFER, buffer_state->fbo);
+    glViewport(0, 0, buffer->width, buffer->height);
 }
 
 void framebuffer_opengl_unbind(Framebuffer* buffer) {
