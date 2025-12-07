@@ -12,6 +12,7 @@ typedef struct TextNode TextNode;
 struct UINode {
     Node base;
     Rect rect;
+    Vector4 color;
 };
 
 struct TextNode {
@@ -19,4 +20,4 @@ struct TextNode {
     char* text;
 };
 
-UINode* ui_node_create(Rect rect, const char* name);
+UINode* ui_node_create(Rect rect, Vector4 color, const char* name);

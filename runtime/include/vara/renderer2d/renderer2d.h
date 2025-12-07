@@ -20,12 +20,24 @@ struct Renderer2DConfig {
     u32 max_indices;
 };
 
+struct DrawCommand {
+    Vector4 color;
+    struct Shader* shader;
+    struct Texture* texture;
+    Vertex vertices[4];
+    u32 indices[6];
+    u32 vertex_count;
+    u32 index_count;
+    i32 z_index;
+    i32 submission_id;
+};
+
 struct Renderer2D {
     Vertex* vertices;
     struct Buffer* vertex_buffer;
     struct Buffer* index_buffer;
     struct Texture* textures[RENDERER2D_MAX_TEXTURES];
-    DrawCommand* commands[RENDERER2D_MAX_COMMANDS];
+    DrawCommand commands[RENDERER2D_MAX_COMMANDS];
     u32* indices;
     u32 vertex_count;
     u32 max_vertices;
@@ -33,18 +45,8 @@ struct Renderer2D {
     u32 max_indices;
     u32 texture_count;
     u32 command_count;
+    u32 submission_count;
     u32 draw_calls;
-};
-
-struct DrawCommand {
-    Vector4 color;
-    struct Shader* shader;
-    struct Texture* texture;
-    Vertex* vertices;
-    u32* indices;
-    u32 vertex_count;
-    u32 index_count;
-    f32 z_index;
 };
 
 b8 renderer2d_create(const Renderer2DConfig* config);
@@ -53,6 +55,6 @@ void renderer2d_destroy(void);
 void renderer2d_begin(void);
 void renderer2d_end(void);
 
-void renderer2d_draw_rect(Rect rect, Vector4 color);
-void renderer2d_draw_sprite(Rect rect, struct Texture* texture, Vector4 tint);
-void renderer2d_draw_text(const char* text, struct Font* font, Vector2 position, Vector4 color);
+void renderer2d_draw_rect(Rect rect, Vector4 color, i32 z_index);
+void renderer2d_draw_sprite(Rect rect, struct Texture* texture, Vector4 tint, i32 z_index);
+void renderer2d_draw_text(const char* text, struct Font* font, Vector2 position, Vector4 color, i32 z_index);

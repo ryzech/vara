@@ -33,7 +33,7 @@ void editor_update(f32 delta_time) {
     if (point_in_rect(input_get_mouse_position(), rect)) {
         color.y = 0.6f;
     }
-    renderer2d_draw_rect(rect, color);
+    renderer2d_draw_rect(rect, color, 0);
 
     render_pass_end(ui_pass);
 }

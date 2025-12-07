@@ -62,9 +62,29 @@ void node_remove_child(Node* parent, Node* child) {
 }
 
 void node_update_tree(Node* root, f32 delta) {
-    WARN("Not yet implemented.")
+    if (!root) {
+        return;
+    }
+
+    if (root->update) {
+        root->update(root, delta);
+    }
+
+    for (u32 i = 0; i < root->child_count; i++) {
+        node_update_tree(root->children[i], delta);
+    }
 }
 
 void node_draw_tree(Node* root) {
-    WARN("Not yet implemented.")
+    if (!root) {
+        return;
+    }
+
+    if (root->draw) {
+        root->draw(root);
+    }
+
+    for (u32 i = 0; i < root->child_count; i++) {
+        node_draw_tree(root->children[i]);
+    }
 }

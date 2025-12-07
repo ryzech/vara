@@ -19,7 +19,18 @@ static Texture* default_texture;
 static Shader* sprite_shader;
 static Shader* text_shader;
 
-static void renderer2d_flush(void) {
+static i32 compare_draw_commands(const void* a, const void* b) {
+    const DrawCommand* cmd_a = a;
+    const DrawCommand* cmd_b = b;
+
+    if (cmd_a->z_index != cmd_b->z_index) {
+        return cmd_b->z_index - cmd_a->z_index;
+    }
+
+    return (i32)cmd_b->submission_id - (i32)cmd_a->submission_id;
+}
+
+static void renderer2d_render_batch(void) {
     if (renderer->vertex_count == 0) {
         return;
     }
@@ -31,7 +42,7 @@ static void renderer2d_flush(void) {
         renderer->index_buffer, renderer->indices, sizeof(u32) * renderer->index_count, 0
     );
 
-    int samplers[16];
+    int samplers[RENDERER2D_MAX_TEXTURES];
     for (i32 i = 0; i < renderer->texture_count; i++) {
         texture_bind(renderer->textures[i], i);
         samplers[i] = i;
@@ -53,73 +64,143 @@ static void renderer2d_flush(void) {
     renderer->textures[0] = renderer->textures[0];
 }
 
+static void renderer2d_flush(void) {
+    if (renderer->command_count == 0) {
+        return;
+    }
+
+    qsort(renderer->commands, renderer->command_count, sizeof(DrawCommand), compare_draw_commands);
+
+    for (u32 c = 0; c < renderer->command_count; c++) {
+        const DrawCommand* cmd = &renderer->commands[c];
+
+        b8 batch_full = false;
+
+        f32 tex_slot = 0;
+        b8 found = false;
+
+        for (int i = 0; i < renderer->texture_count; i++) {
+            if (renderer->textures[i] == cmd->texture) {
+                tex_slot = (f32)i;
+                found = true;
+                break;
+            }
+        }
+
+        if (!found && renderer->texture_count >= RENDERER2D_MAX_TEXTURES) {
+            batch_full = true;
+        }
+
+        if (renderer->vertex_count + cmd->vertex_count > renderer->max_vertices
+            || renderer->index_count + cmd->index_count > renderer->max_indices) {
+            batch_full = true;
+        }
+
+        if (batch_full) {
+            renderer2d_render_batch();
+        }
+
+        if (!found) {
+            tex_slot = (f32)renderer->texture_count;
+            renderer->textures[renderer->texture_count++] = cmd->texture;
+        }
+
+        const u32 current_batch_vertex_count = renderer->vertex_count;
+
+        for (u32 i = 0; i < cmd->vertex_count; i++) {
+            Vertex vert = cmd->vertices[i];
+            vert.tex_index = tex_slot;
+            renderer->vertices[renderer->vertex_count++] = vert;
+        }
+
+        for (u32 i = 0; i < cmd->index_count; i++) {
+            renderer->indices[renderer->index_count++] =
+                cmd->indices[i] + current_batch_vertex_count;
+        }
+    }
+
+    renderer2d_render_batch();
+
+    renderer->command_count = 0;
+    renderer->submission_count = 0;
+}
+
+static void renderer2d_submit_command(
+    Shader* shader,
+    Texture* texture,
+    Vertex* vertices,
+    u32 vertex_count,
+    u32* indices,
+    u32 index_count,
+    i32 z_index
+) {
+    if (renderer->command_count >= RENDERER2D_MAX_COMMANDS) {
+        renderer2d_flush();
+
+        if (renderer->command_count >= RENDERER2D_MAX_COMMANDS) {
+            WARN("Command buffer overflow after flush. Dropping draw call.");
+            return;
+        }
+    }
+
+    DrawCommand* cmd = &renderer->commands[renderer->command_count];
+    platform_copy_memory(cmd->vertices, vertices, vertex_count * sizeof(Vertex));
+    platform_copy_memory(cmd->indices, indices, index_count * sizeof(u32));
+
+    cmd->shader = shader;
+    cmd->texture = texture;
+    cmd->vertex_count = vertex_count;
+    cmd->index_count = index_count;
+    cmd->z_index = z_index;
+    cmd->submission_id = renderer->submission_count++;
+
+    renderer->command_count++;
+}
+
 static void renderer2d_add_quad(
-    Vector2 pos, Vector2 size, Vector2 uv0, Vector2 uv1, Texture* texture, Vector4 color
+    Vector2 pos,
+    Vector2 size,
+    Vector2 uv0,
+    Vector2 uv1,
+    Texture* texture,
+    Vector4 color,
+    i32 z_index
 ) {
     if (!renderer || !texture) {
         return;
     }
 
-    f32 tex_index = 0;
-    b8 found = false;
-    for (u32 i = 0; i < renderer->texture_count; i++) {
-        if (renderer->textures[i] == texture) {
-            tex_index = (f32)i;
-            found = true;
-            break;
-        }
-    }
-
-    if (!found) {
-        if (renderer->texture_count >= RENDERER2D_MAX_TEXTURES) {
-            renderer2d_flush();
-            tex_index = 0;
-        } else {
-            tex_index = (f32)renderer->texture_count;
-            renderer->textures[renderer->texture_count++] = texture;
-        }
-    }
-
-    u32 current_vertex_count = renderer->vertex_count;
+    Vertex vertices[4];
 
     const Vertex v0 = {
         .position = vec2_to_vec3(pos),
         .color = vec4_to_vec3(color),
         .tex_coord = {uv0.x, uv0.y},
-        .tex_index = tex_index,
     };
     const Vertex v1 = {
         .position = {pos.x + size.x, pos.y, 0.0f},
         .color = vec4_to_vec3(color),
         .tex_coord = {uv1.x, uv0.y},
-        .tex_index = tex_index,
     };
     const Vertex v2 = {
         .position = {pos.x + size.x, pos.y + size.y, 0.0f},
         .color = vec4_to_vec3(color),
         .tex_coord = {uv1.x, uv1.y},
-        .tex_index = tex_index,
     };
     const Vertex v3 = {
         .position = {pos.x, pos.y + size.y, 0.0f},
         .color = vec4_to_vec3(color),
         .tex_coord = {uv0.x, uv1.y},
-        .tex_index = tex_index,
     };
 
-    renderer->vertices[renderer->vertex_count + 0] = v0;
-    renderer->vertices[renderer->vertex_count + 1] = v1;
-    renderer->vertices[renderer->vertex_count + 2] = v2;
-    renderer->vertices[renderer->vertex_count + 3] = v3;
-    renderer->vertex_count += 4;
+    vertices[0] = v0;
+    vertices[1] = v1;
+    vertices[2] = v2;
+    vertices[3] = v3;
 
-    renderer->indices[renderer->index_count + 0] = current_vertex_count + 0;
-    renderer->indices[renderer->index_count + 1] = current_vertex_count + 1;
-    renderer->indices[renderer->index_count + 2] = current_vertex_count + 2;
-    renderer->indices[renderer->index_count + 3] = current_vertex_count + 2;
-    renderer->indices[renderer->index_count + 4] = current_vertex_count + 3;
-    renderer->indices[renderer->index_count + 5] = current_vertex_count + 0;
-    renderer->index_count += 6;
+    u32 indices[6] = {0, 1, 2, 2, 3, 0};
+
+    renderer2d_submit_command(sprite_shader, texture, vertices, 4, indices, 6, z_index);
 }
 
 b8 renderer2d_create(const Renderer2DConfig* config) {
@@ -254,11 +335,11 @@ void renderer2d_end() {
     renderer2d_flush();
 }
 
-void renderer2d_draw_rect(Rect rect, Vector4 color) {
-    renderer2d_draw_sprite(rect, default_texture, color);
+void renderer2d_draw_rect(Rect rect, Vector4 color, i32 z_index) {
+    renderer2d_draw_sprite(rect, default_texture, color, z_index);
 }
 
-void renderer2d_draw_sprite(Rect rect, Texture* texture, Vector4 tint) {
+void renderer2d_draw_sprite(Rect rect, Texture* texture, Vector4 tint, i32 z_index) {
     renderer2d_add_quad(
         rect.position,
         rect.size,
@@ -271,11 +352,14 @@ void renderer2d_draw_sprite(Rect rect, Texture* texture, Vector4 tint) {
             1,
         },
         texture,
-        tint
+        tint,
+        z_index
     );
 }
 
-void renderer2d_draw_text(const char* text, struct Font* font, Vector2 position, Vector4 color) {
+void renderer2d_draw_text(
+    const char* text, struct Font* font, Vector2 position, Vector4 color, i32 z_index
+) {
     if (!renderer || !font || !text) {
         return;
     }
@@ -301,7 +385,13 @@ void renderer2d_draw_text(const char* text, struct Font* font, Vector2 position,
         const Vector2 glyph_size = glyph->size;
 
         renderer2d_add_quad(
-            glyph_pos, glyph_size, glyph->uv_top_left, glyph->uv_bottom_right, font->atlas, color
+            glyph_pos,
+            glyph_size,
+            glyph->uv_top_left,
+            glyph->uv_bottom_right,
+            font->atlas,
+            color,
+            z_index
         );
 
         x += glyph->advance;
