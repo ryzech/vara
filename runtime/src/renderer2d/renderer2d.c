@@ -358,7 +358,7 @@ void renderer2d_draw_sprite(Rect rect, Texture* texture, Vector4 tint, i32 z_ind
 }
 
 void renderer2d_draw_text(
-    const char* text, struct Font* font, Vector2 position, Vector4 color, i32 z_index
+    Vector2 position, const char* text, struct Font* font, Vector4 color, i32 z_index
 ) {
     if (!renderer || !font || !text) {
         return;

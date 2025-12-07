@@ -3,6 +3,8 @@
 #include <vara/core/platform/platform.h>
 
 #include "vara/renderer/font.h"
+
+#include "vara/core/math/vec2.h"
 #include "vara/renderer/texture.h"
 #include "vendor/stb/stb_truetype.h"
 
@@ -103,4 +105,33 @@ void font_destroy(Font* font) {
         texture_destroy(font->atlas);
         platform_free(font);
     }
+}
+
+Vector2 font_measure_text(Font* font, const char* text) {
+    if (!text || !font) {
+        return vec2_zero();
+    }
+
+    f32 total_width = 0.0f;
+    f32 max_height = 0.0f;
+
+    const char* ptr = text;
+    while (*ptr) {
+        const char c = *ptr;
+        ptr++;
+
+        if (c < 32 || c > 126) {
+            continue;
+        }
+
+        const Glyph* glyph = &font->glyphs[c - 32];
+
+        total_width += glyph->advance;
+        const f32 current_glyph_height = glyph->size.y + glyph->bearing.y;
+        if (current_glyph_height > max_height) {
+            max_height = current_glyph_height;
+        }
+    }
+
+    return (Vector2){total_width, max_height};
 }

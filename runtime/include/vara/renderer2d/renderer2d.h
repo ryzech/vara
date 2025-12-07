@@ -57,4 +57,6 @@ void renderer2d_end(void);
 
 void renderer2d_draw_rect(Rect rect, Vector4 color, i32 z_index);
 void renderer2d_draw_sprite(Rect rect, struct Texture* texture, Vector4 tint, i32 z_index);
-void renderer2d_draw_text(const char* text, struct Font* font, Vector2 position, Vector4 color, i32 z_index);
+void renderer2d_draw_text(
+    Vector2 position, const char* text, struct Font* font, Vector4 color, i32 z_index
+);

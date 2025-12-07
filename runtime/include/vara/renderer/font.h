@@ -29,3 +29,5 @@ struct Font {
 
 Font* font_load(const char* path, const f32 font_size);
 void font_destroy(Font* font);
+
+Vector2 font_measure_text(Font* font, const char* text);
