@@ -9,6 +9,7 @@ set(RUNTIME_SOURCES src/application/application.c src/renderer/renderer_frontend
         src/renderer/internal/renderer_internal.c
         src/vendor/stb_truetype.c
         src/renderer/font.c
+        src/scene/node.c
 )
 
 add_library(vara-runtime STATIC ${RUNTIME_SOURCES})

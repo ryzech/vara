@@ -46,8 +46,7 @@ void shader_opengl_bind(Shader* shader) {
         return;
     }
 
-    OpenGLShaderState* shader_state = shader->backend_data;
-    TRACE("Binding shader named('%s') in program(%d)", shader->name, shader_state->shader_program);
+    const OpenGLShaderState* shader_state = shader->backend_data;
     glUseProgram(shader_state->shader_program);
 }
 

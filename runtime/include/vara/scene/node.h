@@ -16,8 +16,10 @@ struct Node {
     char* name;
 };
 
-Node* node_create(size_t size, const char* name);
+Node* node_create(const size_t size, const char* name);
 void node_destroy(Node* node);
 
 void node_add_child(Node* parent, Node* child);
 void node_remove_child(Node* parent, Node* child);
+void node_update_tree(Node* root, f32 delta);
+void node_draw_tree(Node* root);

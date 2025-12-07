@@ -18,3 +18,5 @@ struct TextNode {
     UINode base;
     char* text;
 };
+
+UINode* ui_node_create(Rect rect, const char* name);
