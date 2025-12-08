@@ -13,11 +13,12 @@ struct Font;
 
 // This likely shouldn't have a color, and shouldn't really be rendered, but for testing
 // I will keep it this way.
-// TODO: transform type
+// TODO: make children positions relative to their parent
+// i.e. a parent with position 100, 100, it's child will be at 0, 0 relative to the parent
+// but 100, 100 globally
 struct UINode {
     Node base;
-    Rect rect;
-    Vector2 scale;
+    Transform2D transform;
     Vector4 color;
 };
 
@@ -27,7 +28,7 @@ struct TextNode {
     struct Font* font;
 };
 
-UINode* ui_node_create(Rect rect, Vector4 color, const char* name);
+UINode* ui_node_create(Transform2D transform, Vector4 color, const char* name);
 TextNode* text_node_create(
-    Rect rect, const char* text, struct Font* font, Vector2 scale, Vector4 color, const char* name
+    Transform2D transform, const char* text, struct Font* font, Vector4 color, const char* name
 );

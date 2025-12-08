@@ -54,6 +54,7 @@ struct BufferConfig {
     const void* data;
     BufferType type;
     BufferUsage usage;
+    u32 binding;
 };
 
 struct Buffer {
@@ -63,6 +64,7 @@ struct Buffer {
     void* backend_data;
     BufferType type;
     BufferUsage usage;
+    u32 binding;
 };
 
 Buffer* buffer_create(const BufferConfig* config);

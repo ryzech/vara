@@ -105,6 +105,10 @@ b8 buffer_opengl_create(Buffer* buffer, const BufferConfig* config) {
         usage_to_gl_usage(config->usage)
     );
 
+    if (config->type == BUFFER_TYPE_UNIFORM) {
+        glBindBufferBase(buffer_state->target, config->binding, buffer_state->id);
+    }
+
     if (config->type == BUFFER_TYPE_VERTEX && config->layout) {
         glGenVertexArrays(1, &buffer_state->vao);
         glBindVertexArray(buffer_state->vao);
@@ -194,8 +198,7 @@ void buffer_opengl_set_data(Buffer* buffer, const void* data, size_t size, size_
     }
     OpenGLBufferState* state = buffer->backend_data;
 
-    GLenum gl_type = type_to_gl_type(buffer->type);
     glBindBuffer(state->target, state->id);
-    glBufferSubData(gl_type, (GLsizeiptr)offset, (GLsizeiptr)size, data);
+    glBufferSubData(state->target, (GLsizeiptr)offset, (GLsizeiptr)size, data);
     glBindBuffer(state->target, 0);
 }

@@ -105,3 +105,11 @@ typedef struct Rect {
     Vector2 position;
     Vector2 size;
 } Rect;
+
+// Refactor this, move size out as another arg
+// Put rotation in here.
+typedef struct Transform2D {
+    Vector2 position;
+    Vector2 scale;
+    Vector2 size;
+} Transform2D;

@@ -12,6 +12,7 @@ Buffer* buffer_create(const BufferConfig* config) {
     buffer->type = config->type;
     buffer->usage = config->usage;
     buffer->size = config->size;
+    buffer->binding = config->binding;
 
     // Calculate element count.
     switch (config->type) {
