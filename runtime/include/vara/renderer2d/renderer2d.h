@@ -55,8 +55,19 @@ void renderer2d_destroy(void);
 void renderer2d_begin(void);
 void renderer2d_end(void);
 
-void renderer2d_draw_rect(Rect rect, Vector4 color, i32 z_index);
-void renderer2d_draw_sprite(Rect rect, struct Texture* texture, Vector4 tint, i32 z_index);
+void renderer2d_draw_rect(const Transform2D transform, Vector4 color, i32 z_index);
+void renderer2d_draw_rect_matrix(const Matrix4 matrix, Vector4 color, i32 z_index);
+
+void renderer2d_draw_sprite(
+    const Transform2D transform, struct Texture* texture, Vector4 tint, i32 z_index
+);
+void renderer2d_draw_sprite_matrix(
+    const Matrix4 matrix, struct Texture* texture, Vector4 tint, i32 z_index
+);
+
 void renderer2d_draw_text(
-    Vector2 position, const char* text, struct Font* font, Vector4 color, i32 z_index
+    const Transform2D transform, const char* text, struct Font* font, Vector4 color, i32 z_index
+);
+void renderer2d_draw_text_matrix(
+    const Matrix4 matrix, const char* text, struct Font* font, Vector4 color, i32 z_index
 );

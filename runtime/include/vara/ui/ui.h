@@ -6,7 +6,6 @@
 #include "vara/scene/node.h"
 
 typedef struct UINode UINode;
-
 typedef struct TextNode TextNode;
 
 struct Font;
@@ -18,7 +17,7 @@ struct Font;
 // but 100, 100 globally
 struct UINode {
     Node base;
-    Transform2D transform;
+    Transform2D local_transform;
     Vector4 color;
 };
 
@@ -28,7 +27,7 @@ struct TextNode {
     struct Font* font;
 };
 
-UINode* ui_node_create(Transform2D transform, Vector4 color, const char* name);
+UINode* ui_node_create(Rect rect, Vector4 color, const char* name);
 TextNode* text_node_create(
-    Transform2D transform, const char* text, struct Font* font, Vector4 color, const char* name
+    Vector2 position, const char* text, struct Font* font, Vector4 color, const char* name
 );

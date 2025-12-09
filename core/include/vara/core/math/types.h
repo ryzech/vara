@@ -95,7 +95,7 @@ typedef union matrix4_u {
 // TODO: 2d and 3d variants of this.
 typedef struct Vertex {
     Vector3 position;
-    Vector3 color;
+    Vector4 color;
     Vector2 tex_coord;
     f32 tex_index;
 } Vertex;
@@ -106,10 +106,9 @@ typedef struct Rect {
     Vector2 size;
 } Rect;
 
-// Refactor this, move size out as another arg
-// Put rotation in here.
 typedef struct Transform2D {
     Vector2 position;
-    Vector2 scale;
     Vector2 size;
+    Vector2 scale;
+    f32 rotation;
 } Transform2D;

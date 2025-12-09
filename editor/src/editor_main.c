@@ -25,15 +25,14 @@ void editor_update(f32 delta_time) {
 
     render_pass_begin(ui_pass);
 
-    const Rect rect = {
-        .position = {100.0f, 100.0f},
+    const Transform2D transform = {
+        .position = {50.0f, 50.0f},
         .size = {200.0f, 200.0f},
+        .scale = {1.0f, 1.0f},
+        .rotation = 0.0f,
     };
     Vector4 color = {0.1f, 0.5f, 0.4f, 1.0f};
-    if (point_in_rect(input_get_mouse_position(), rect)) {
-        color.y = 0.6f;
-    }
-    renderer2d_draw_rect(rect, color, 0);
+    renderer2d_draw_rect(transform, color, 0);
 
     render_pass_end(ui_pass);
 }

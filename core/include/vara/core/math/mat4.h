@@ -76,6 +76,68 @@ static Matrix4 mat4_ortho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f3
     return out;
 }
 
+static Matrix4 mat4_translation(const Vector3 position) {
+    Matrix4 out = mat4_identity();
+
+    out.elements[12] = position.x;
+    out.elements[13] = position.y;
+    out.elements[14] = position.z;
+
+    return out;
+}
+
+static Matrix4 mat4_scale(const Vector3 scale) {
+    Matrix4 out = mat4_identity();
+
+    out.elements[0] = scale.x;
+    out.elements[5] = scale.y;
+    out.elements[10] = scale.z;
+
+    return out;
+}
+
+static Matrix4 mat4_rotate_x(const f32 rotation) {
+    Matrix4 out = mat4_identity();
+
+    const f32 cos_value = cos(rotation);
+    const f32 sin_value = sin(rotation);
+
+    out.elements[5] = cos_value;
+    out.elements[6] = sin_value;
+    out.elements[9] = -sin_value;
+    out.elements[10] = cos_value;
+
+    return out;
+}
+
+static Matrix4 mat4_rotate_y(const f32 rotation) {
+    Matrix4 out = mat4_identity();
+
+    const f32 cos_value = cos(rotation);
+    const f32 sin_value = sin(rotation);
+
+    out.elements[0] = cos_value;
+    out.elements[2] = -sin_value;
+    out.elements[8] = sin_value;
+    out.elements[10] = cos_value;
+
+    return out;
+}
+
+static Matrix4 mat4_rotate_z(const f32 rotation) {
+    Matrix4 out = mat4_identity();
+
+    const f32 cos_value = cos(rotation);
+    const f32 sin_value = sin(rotation);
+
+    out.elements[0] = cos_value;
+    out.elements[1] = sin_value;
+    out.elements[4] = -sin_value;
+    out.elements[5] = cos_value;
+
+    return out;
+}
+
 static Matrix4 mat4_mul(Matrix4 a, Matrix4 b) {
     Matrix4 out = mat4_identity();
 
@@ -91,4 +153,15 @@ static Matrix4 mat4_mul(Matrix4 a, Matrix4 b) {
     }
 
     return out;
+}
+
+static Vector3 mat4_mul_vec3(const Matrix4 matrix, const Vector3 vec) {
+    return (Vector3){
+        .x = vec.x * matrix.elements[0] + vec.y * matrix.elements[4] + vec.z * matrix.elements[8]
+             + matrix.elements[12],
+        .y = vec.x * matrix.elements[1] + vec.y * matrix.elements[5] + vec.z * matrix.elements[9]
+             + matrix.elements[13],
+        .z = vec.x * matrix.elements[2] + vec.y * matrix.elements[6] + vec.z * matrix.elements[10]
+             + matrix.elements[14],
+    };
 }

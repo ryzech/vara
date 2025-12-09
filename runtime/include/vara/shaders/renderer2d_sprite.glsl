@@ -2,11 +2,11 @@
 
 #version 410
 layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aColor;
+layout (location = 1) in vec4 aColor;
 layout (location = 2) in vec2 aTexCoord;
 layout (location = 3) in float aTexIndex;
 
-out vec3 vColor;
+out vec4 vColor;
 out vec2 vTexCoord;
 out float vTexIndex;
 
@@ -22,7 +22,7 @@ void main() {
 #[fragment]
 
 #version 410
-in vec3 vColor;
+in vec4 vColor;
 in vec2 vTexCoord;
 in float vTexIndex;
 
@@ -40,5 +40,5 @@ void main() {
         discard;
     }
 
-    FragColor = texColor * vec4(vColor, 1.0);
+    FragColor = texColor * vColor;
 }

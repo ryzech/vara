@@ -2,6 +2,7 @@
 
 #include "vara/core/math/mat4.h"
 #include "vara/core/math/rect.h"
+#include "vara/core/math/transform2d.h"
 #include "vara/core/math/types.h"
 #include "vara/core/math/vec2.h"
 #include "vara/core/math/vec3.h"

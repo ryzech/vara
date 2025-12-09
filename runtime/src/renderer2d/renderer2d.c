@@ -157,39 +157,65 @@ static void renderer2d_submit_command(
     renderer->command_count++;
 }
 
-static void renderer2d_add_quad(
-    Vector2 pos,
-    Vector2 size,
-    Vector2 uv0,
-    Vector2 uv1,
+void renderer2d_add_quad(
+    const Matrix4* matrix,
+    const Rect local_rect,
+    const Vector2 uv0,
+    const Vector2 uv1,
     Texture* texture,
-    Vector4 color,
-    i32 z_index
+    const Vector4 color,
+    const i32 z_index
 ) {
     if (!renderer || !texture) {
         return;
     }
 
+    const Vector3 local_v0 = {
+        local_rect.position.x,
+        local_rect.position.y,
+        0.0f,
+    };
+    const Vector3 local_v1 = {
+        local_rect.position.x + local_rect.size.x,
+        local_rect.position.y,
+        0.0f,
+    };
+    const Vector3 local_v2 = {
+        local_rect.position.x + local_rect.size.x,
+        local_rect.position.y + local_rect.size.y,
+        0.0f,
+    };
+    const Vector3 local_v3 = {
+        local_rect.position.x,
+        local_rect.position.y + local_rect.size.y,
+        0.0f,
+    };
+
+    Vector3 final_pos0 = mat4_mul_vec3(*matrix, local_v0);
+    Vector3 final_pos1 = mat4_mul_vec3(*matrix, local_v1);
+    Vector3 final_pos2 = mat4_mul_vec3(*matrix, local_v2);
+    Vector3 final_pos3 = mat4_mul_vec3(*matrix, local_v3);
+
     Vertex vertices[4];
 
     const Vertex v0 = {
-        .position = vec2_to_vec3(pos),
-        .color = vec4_to_vec3(color),
+        .position = final_pos0,
+        .color = color,
         .tex_coord = {uv0.x, uv0.y},
     };
     const Vertex v1 = {
-        .position = {pos.x + size.x, pos.y, 0.0f},
-        .color = vec4_to_vec3(color),
+        .position = final_pos1,
+        .color = color,
         .tex_coord = {uv1.x, uv0.y},
     };
     const Vertex v2 = {
-        .position = {pos.x + size.x, pos.y + size.y, 0.0f},
-        .color = vec4_to_vec3(color),
+        .position = final_pos2,
+        .color = color,
         .tex_coord = {uv1.x, uv1.y},
     };
     const Vertex v3 = {
-        .position = {pos.x, pos.y + size.y, 0.0f},
-        .color = vec4_to_vec3(color),
+        .position = final_pos3,
+        .color = color,
         .tex_coord = {uv0.x, uv1.y},
     };
 
@@ -226,7 +252,7 @@ b8 renderer2d_create(const Renderer2DConfig* config) {
         },
         {
             .location = 1,
-            .type = VERTEX_ATTRIBUTE_FLOAT3,
+            .type = VERTEX_ATTRIBUTE_FLOAT4,
             .offset = offsetof(Vertex, color),
             .normalized = false,
         },
@@ -335,14 +361,52 @@ void renderer2d_end() {
     renderer2d_flush();
 }
 
-void renderer2d_draw_rect(Rect rect, Vector4 color, i32 z_index) {
-    renderer2d_draw_sprite(rect, default_texture, color, z_index);
+void renderer2d_draw_rect(const Transform2D transform, Vector4 color, i32 z_index) {
+    const Matrix4 translation_matrix = transform2d_to_mat4(transform);
+    renderer2d_draw_rect_matrix(translation_matrix, color, z_index);
 }
 
-void renderer2d_draw_sprite(Rect rect, Texture* texture, Vector4 tint, i32 z_index) {
+void renderer2d_draw_rect_matrix(const Matrix4 matrix, Vector4 color, i32 z_index) {
+    // Transform will multiply these values to the expected size.
+    const Rect rect = {
+        .position = vec2_zero(),
+        .size = vec2_one(),
+    };
     renderer2d_add_quad(
-        rect.position,
-        rect.size,
+        &matrix,
+        rect,
+        (Vector2){
+            0.0f,
+            0.0f,
+        },
+        (Vector2){
+            1.0f,
+            1.0f,
+        },
+        default_texture,
+        color,
+        z_index
+    );
+}
+
+void renderer2d_draw_sprite(
+    const Transform2D transform, Texture* texture, Vector4 tint, i32 z_index
+) {
+    const Matrix4 translation_matrix = transform2d_to_mat4(transform);
+    renderer2d_draw_sprite_matrix(translation_matrix, texture, tint, z_index);
+}
+
+void renderer2d_draw_sprite_matrix(
+    const Matrix4 matrix, Texture* texture, Vector4 tint, i32 z_index
+) {
+    // Transform will multiply these values to the expected size.
+    const Rect rect = {
+        .position = vec2_zero(),
+        .size = vec2_one(),
+    };
+    renderer2d_add_quad(
+        &matrix,
+        rect,
         (Vector2){
             0,
             0,
@@ -357,15 +421,23 @@ void renderer2d_draw_sprite(Rect rect, Texture* texture, Vector4 tint, i32 z_ind
     );
 }
 
+// TODO: figure out how to get the size auto-calculated, while letting you change it.
 void renderer2d_draw_text(
-    Vector2 position, const char* text, struct Font* font, Vector4 color, i32 z_index
+    const Transform2D transform, const char* text, struct Font* font, Vector4 color, i32 z_index
+) {
+    const Matrix4 translation_matrix = transform2d_to_mat4(transform);
+    renderer2d_draw_text_matrix(translation_matrix, text, font, color, z_index);
+}
+
+void renderer2d_draw_text_matrix(
+    const Matrix4 matrix, const char* text, struct Font* font, Vector4 color, i32 z_index
 ) {
     if (!renderer || !font || !text) {
         return;
     }
 
-    f32 x = position.x;
-    const f32 y = position.y;
+    f32 x = 0.0f;
+    const f32 y = 0.0f;
 
     const char* ptr = text;
     while (*ptr) {
@@ -378,20 +450,13 @@ void renderer2d_draw_text(
 
         const Glyph* glyph = &font->glyphs[c - 32];
 
-        const Vector2 glyph_pos = {
-            x + glyph->bearing.x,
-            y + glyph->bearing.y,
+        const Rect rect = {
+            .position = {x + glyph->bearing.x, y + glyph->bearing.y},
+            .size = glyph->size,
         };
-        const Vector2 glyph_size = glyph->size;
 
         renderer2d_add_quad(
-            glyph_pos,
-            glyph_size,
-            glyph->uv_top_left,
-            glyph->uv_bottom_right,
-            font->atlas,
-            color,
-            z_index
+            &matrix, rect, glyph->uv_top_left, glyph->uv_bottom_right, font->atlas, color, z_index
         );
 
         x += glyph->advance;
