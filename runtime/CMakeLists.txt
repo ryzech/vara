@@ -10,7 +10,7 @@ set(RUNTIME_SOURCES src/application/application.c src/renderer/renderer_frontend
         src/vendor/stb_truetype.c
         src/renderer/font.c
         src/scene/node.c
-        src/ui/ui.c
+        src/scene/scene.c
 )
 
 add_library(vara-runtime STATIC ${RUNTIME_SOURCES})
@@ -18,7 +18,7 @@ add_library(vara-runtime STATIC ${RUNTIME_SOURCES})
 target_include_directories(vara-runtime PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(vara-runtime PUBLIC ${FREETYPE_INCLUDE_DIRS})
 target_link_libraries(vara-runtime PRIVATE ${FREETYPE_LIBRARIES})
-target_link_libraries(vara-runtime PUBLIC vara-core)
+target_link_libraries(vara-runtime PUBLIC vara-core flecs::flecs_static)
 
 # Generate shader headers
 include(${CMAKE_SOURCE_DIR}/cmake/generate_shader.cmake)

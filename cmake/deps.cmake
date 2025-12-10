@@ -20,6 +20,16 @@ if (NOT Freetype_FOUND)
     FetchContent_MakeAvailable(freetype)
 endif ()
 
+find_package(flecs 4.1.3 QUIET)
+if (NOT flecs_FOUND)
+    FetchContent_Declare(
+            flecs
+            DOWNLOAD_EXTRACT_TIMESTAMP OFF
+            URL https://github.com/SanderMertens/flecs/archive/refs/tags/v4.1.3.zip
+    )
+    FetchContent_MakeAvailable(flecs)
+endif ()
+
 #find_package(shaderc 2025.4.1 QUIET)
 #if (NOT shaderc_FOUND)
 #    # Needed for libshaderc compilation!

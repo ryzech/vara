@@ -2,12 +2,16 @@
 #include <vara/core/defines.h>
 #include <vara/core/input/input.h>
 #include <vara/core/logger.h>
-#include <vara/core/math/math.h>
 #include <vara/core/platform/platform_window.h>
 #include <vara/renderer/render_pass.h>
 #include <vara/renderer2d/renderer2d.h>
+#include <vara/scene/scene.h>
+
+#include "vara/scene/node.h"
 
 static RenderPass* ui_pass;
+static Scene scene;
+static Node root;
 
 void editor_init(void) {
     const RenderPassConfig ui_pass_config = {
@@ -16,6 +20,9 @@ void editor_init(void) {
         .clear = true,
     };
     ui_pass = render_pass_create(&ui_pass_config);
+
+    scene = scene_create();
+    root = node_create(scene, "Root");
 }
 
 void editor_update(f32 delta_time) {
@@ -39,6 +46,8 @@ void editor_update(f32 delta_time) {
 
 void editor_shutdown(void) {
     INFO("Shutting down...");
+    node_destroy(root);
+    scene_destroy(scene);
     render_pass_destroy(ui_pass);
 }
 
