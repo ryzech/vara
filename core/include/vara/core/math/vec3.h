@@ -23,19 +23,19 @@ static Vector3i vec3i(i32 x, i32 y, i32 z) {
 
 // Conversion helpers
 
-static Vector3 vec2_to_vec3(const Vector2 vec) {
+static Vector3 vec2_to_vec3(const Vector2 vec, f32 value) {
     return (Vector3){
         vec.x,
         vec.y,
-        0.0f,
+        value,
     };
 }
 
-static Vector3i vec2i_to_vec3i(const Vector2i vec) {
+static Vector3i vec2i_to_vec3i(const Vector2i vec, f32 value) {
     return (Vector3i){
         vec.x,
         vec.y,
-        0,
+        value,
     };
 }
 

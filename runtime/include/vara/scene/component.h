@@ -6,7 +6,9 @@
 typedef struct TransformComponent TransformComponent;
 
 struct TransformComponent {
-    Matrix4 transform;
+    Vector3 translation;
+    Vector3 rotation;
+    Vector3 scale;
 };
 
 // Declare components so the type is accessible.

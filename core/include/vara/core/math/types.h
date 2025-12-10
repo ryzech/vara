@@ -105,10 +105,3 @@ typedef struct Rect {
     Vector2 position;
     Vector2 size;
 } Rect;
-
-typedef struct Transform2D {
-    Vector2 position;
-    Vector2 size;
-    Vector2 scale;
-    f32 rotation;
-} Transform2D;

@@ -361,9 +361,11 @@ void renderer2d_end() {
     renderer2d_flush();
 }
 
-void renderer2d_draw_rect(const Transform2D transform, Vector4 color, i32 z_index) {
-    const Matrix4 translation_matrix = transform2d_to_mat4(transform);
-    renderer2d_draw_rect_matrix(translation_matrix, color, z_index);
+void renderer2d_draw_rect(const Vector2 position, const Vector2 size, Vector4 color, i32 z_index) {
+    const Matrix4 transform = mat4_mul(
+        mat4_translation(vec2_to_vec3(position, 0.0f)), mat4_scale(vec2_to_vec3(size, 1.0f))
+    );
+    renderer2d_draw_rect_matrix(transform, color, z_index);
 }
 
 void renderer2d_draw_rect_matrix(const Matrix4 matrix, Vector4 color, i32 z_index) {
@@ -390,10 +392,12 @@ void renderer2d_draw_rect_matrix(const Matrix4 matrix, Vector4 color, i32 z_inde
 }
 
 void renderer2d_draw_sprite(
-    const Transform2D transform, Texture* texture, Vector4 tint, i32 z_index
+    const Vector2 position, const Vector2 size, Texture* texture, Vector4 tint, i32 z_index
 ) {
-    const Matrix4 translation_matrix = transform2d_to_mat4(transform);
-    renderer2d_draw_sprite_matrix(translation_matrix, texture, tint, z_index);
+    const Matrix4 transform = mat4_mul(
+        mat4_translation(vec2_to_vec3(position, 0.0f)), mat4_scale(vec2_to_vec3(size, 1.0f))
+    );
+    renderer2d_draw_sprite_matrix(transform, texture, tint, z_index);
 }
 
 void renderer2d_draw_sprite_matrix(
@@ -423,10 +427,17 @@ void renderer2d_draw_sprite_matrix(
 
 // TODO: figure out how to get the size auto-calculated, while letting you change it.
 void renderer2d_draw_text(
-    const Transform2D transform, const char* text, struct Font* font, Vector4 color, i32 z_index
+    const Vector2 position,
+    const Vector2 size,
+    const char* text,
+    struct Font* font,
+    Vector4 color,
+    i32 z_index
 ) {
-    const Matrix4 translation_matrix = transform2d_to_mat4(transform);
-    renderer2d_draw_text_matrix(translation_matrix, text, font, color, z_index);
+    const Matrix4 transform = mat4_mul(
+        mat4_translation(vec2_to_vec3(position, 0.0f)), mat4_scale(vec2_to_vec3(size, 1.0f))
+    );
+    renderer2d_draw_text_matrix(transform, text, font, color, z_index);
 }
 
 void renderer2d_draw_text_matrix(
