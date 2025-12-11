@@ -31,12 +31,7 @@ void editor_update(f32 delta_time) {
     }
 
     render_pass_begin(ui_pass);
-
-    const Vector4 color = {0.1f, 0.5f, 0.4f, 1.0f};
-    const Vector2 position = {100.0f, 100.0f};
-    const Vector2 size = {200.0f, 200.0f};
-    renderer2d_draw_rect(position, size, color, 0);
-
+    scene_update(scene, delta_time);
     render_pass_end(ui_pass);
 }
 

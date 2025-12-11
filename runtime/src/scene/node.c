@@ -1,8 +1,8 @@
 #include <vara/core/logger.h>
 
+#include "vara/scene/component.h"
 #include "vara/scene/node.h"
 #include "vara/scene/scene.h"
-#include "vara/scene/component.h"
 
 Node node_create(Scene scene, const char* name) {
     const ecs_entity_t entity_id = ecs_new(scene.world);
@@ -12,7 +12,16 @@ Node node_create(Scene scene, const char* name) {
     }
 
     // Have a wrapper function for adding/editing components.
-    ecs_add(scene.world, entity_id, TransformComponent);
+    TransformComponent default_transform = {
+        .scale = {1.0f, 1.0f, 1.0f},
+    };
+    ecs_set_id(
+        scene.world,
+        entity_id,
+        ecs_id(TransformComponent),
+        sizeof(TransformComponent),
+        &default_transform
+    );
 
     return (Node){
         .entity = entity_id,
