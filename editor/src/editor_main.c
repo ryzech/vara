@@ -4,10 +4,9 @@
 #include <vara/core/logger.h>
 #include <vara/core/platform/platform_window.h>
 #include <vara/renderer/render_pass.h>
-#include <vara/renderer2d/renderer2d.h>
+#include <vara/scene/component.h>
+#include <vara/scene/node.h>
 #include <vara/scene/scene.h>
-
-#include "vara/scene/node.h"
 
 static RenderPass* ui_pass;
 static Scene scene;
@@ -23,6 +22,20 @@ void editor_init(void) {
 
     scene = scene_create();
     root = node_create(scene, "Root");
+
+    const SpriteComponent square_sprite = {
+        .color = {0.5f, 0.5f, 0.5f, 1.0f},
+        .z_index = 0,
+    };
+    const TransformComponent square_transform = {
+        .translation = {100.0f, 100.0f, 1.0f},
+        .scale = {200.0f, 200.0f, 1.0f},
+    };
+    const Node colored_square = node_create(scene, "Square");
+    node_set_component(colored_square, TransformComponent, &square_transform);
+    node_set_component(colored_square, SpriteComponent, &square_sprite);
+
+    node_add_child(root, colored_square);
 }
 
 void editor_update(f32 delta_time) {

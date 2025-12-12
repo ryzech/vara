@@ -10,6 +10,7 @@ Scene scene_create(void) {
 
     // Likely should register elsewhere, or have a function that does this.
     ECS_COMPONENT_DEFINE(scene_world, TransformComponent);
+    ECS_COMPONENT_DEFINE(scene_world, WorldTransformComponent);
     ECS_COMPONENT_DEFINE(scene_world, SpriteComponent);
 
     return (Scene){
@@ -36,14 +37,17 @@ void scene_update(Scene scene, f32 delta) {
         const SpriteComponent* sprite = ecs_field(&sprite_iter, SpriteComponent, 1);
 
         for (i32 i = 0; i < sprite_iter.count; i++) {
-            const Vector3 scaled_size = {
-                .x = sprite->texture->width * transform->scale.x,
-                .y = sprite->texture->height * transform->scale.y,
-                transform->scale.z,
-            };
+            // How should we handle texture sizes?
             const Matrix4 matrix =
-                mat4_mul(mat4_translation(transform->translation), mat4_scale(scaled_size));
-            renderer2d_draw_sprite_matrix(matrix, sprite->texture, sprite->color, sprite->z_index);
+                mat4_mul(mat4_translation(transform->translation), mat4_scale(transform->scale));
+
+            if (sprite->texture != NULL) {
+                renderer2d_draw_sprite_matrix(
+                    matrix, sprite->texture, sprite->color, sprite->z_index
+                );
+            } else {
+                renderer2d_draw_rect_matrix(matrix, sprite->color, sprite->z_index);
+            }
         }
     }
 }
