@@ -12,6 +12,7 @@ Scene scene_create(void) {
     // Likely should register elsewhere, or have a function that does this.
     ECS_COMPONENT_DEFINE(scene_world, TransformComponent);
     ECS_COMPONENT_DEFINE(scene_world, WorldTransformComponent);
+    ECS_COMPONENT_DEFINE(scene_world, RectTransformComponent);
     ECS_COMPONENT_DEFINE(scene_world, SpriteComponent);
 
     // Run through nodes and update transform based on parent (if exists).

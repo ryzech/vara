@@ -5,12 +5,20 @@
 #include "vara/scene/node.h"
 #include "vara/scene/system/transform_system.h"
 
+static Matrix4 calculate_local_matrix(const TransformComponent* component) {
+    const Matrix4 translation = mat4_translation(component->translation);
+    const Matrix4 rotation = mat4_rotate(component->rotation);
+    const Matrix4 scale = mat4_scale(component->scale);
+
+    const Matrix4 translation_rotation = mat4_mul(translation, rotation);
+    const Matrix4 final = mat4_mul(translation_rotation, scale);
+
+    return final;
+}
+
 static void update_transform_hierarchy(Node node, const Matrix4* parent) {
     const TransformComponent* transform_component = node_get_component(node, TransformComponent);
-    // TODO: Handle rotation.
-    const Matrix4 local_matrix = mat4_mul(
-        mat4_translation(transform_component->translation), mat4_scale(transform_component->scale)
-    );
+    const Matrix4 local_matrix = calculate_local_matrix(transform_component);
 
     Matrix4 world_matrix;
     if (parent != NULL) {

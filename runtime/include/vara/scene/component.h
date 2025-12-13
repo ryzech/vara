@@ -5,6 +5,7 @@
 
 typedef struct TransformComponent TransformComponent;
 typedef struct WorldTransformComponent WorldTransformComponent;
+typedef struct RectTransformComponent RectTransformComponent;
 typedef struct SpriteComponent SpriteComponent;
 
 struct Texture;
@@ -21,6 +22,14 @@ struct WorldTransformComponent {
     Matrix4 matrix;
 };
 
+struct RectTransformComponent {
+    Vector2 anchor_min;
+    Vector2 anchor_max;
+    Vector2 offset_min;
+    Vector2 offset_max;
+    Rect rect;
+};
+
 struct SpriteComponent {
     struct Texture* texture;
     Vector4 color;
@@ -31,4 +40,5 @@ struct SpriteComponent {
 // Different than registering.
 ECS_COMPONENT_DECLARE(TransformComponent);
 ECS_COMPONENT_DECLARE(WorldTransformComponent);
+ECS_COMPONENT_DECLARE(RectTransformComponent);
 ECS_COMPONENT_DECLARE(SpriteComponent);

@@ -12,7 +12,7 @@ Node node_create(Scene scene, const char* name) {
     }
 
     // Have a wrapper function for adding/editing components.
-    TransformComponent default_transform = {
+    const TransformComponent default_transform = {
         .scale = {1.0f, 1.0f, 1.0f},
     };
     ecs_set_id(

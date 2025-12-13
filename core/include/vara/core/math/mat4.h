@@ -155,6 +155,16 @@ static Matrix4 mat4_mul(Matrix4 a, Matrix4 b) {
     return out;
 }
 
+static Matrix4 mat4_rotate(const Vector3 rotation) {
+    const Matrix4 rotated_x = mat4_rotate_x(rotation.x);
+    const Matrix4 rotated_y = mat4_rotate_y(rotation.x);
+    const Matrix4 rotated_z = mat4_rotate_z(rotation.z);
+    const Matrix4 rotated_xy = mat4_mul(rotated_x, rotated_y);
+    const Matrix4 out = mat4_mul(rotated_xy, rotated_z);
+
+    return out;
+}
+
 static Vector3 mat4_mul_vec3(const Matrix4 matrix, const Vector3 vec) {
     return (Vector3){
         .x = vec.x * matrix.elements[0] + vec.y * matrix.elements[4] + vec.z * matrix.elements[8]
