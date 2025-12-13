@@ -4,6 +4,7 @@
 #include "vara/renderer2d/renderer2d.h"
 #include "vara/scene/component.h"
 #include "vara/scene/scene.h"
+#include "vara/scene/system/transform_system.h"
 
 Scene scene_create(void) {
     ecs_world_t* scene_world = ecs_init();
@@ -12,6 +13,18 @@ Scene scene_create(void) {
     ECS_COMPONENT_DEFINE(scene_world, TransformComponent);
     ECS_COMPONENT_DEFINE(scene_world, WorldTransformComponent);
     ECS_COMPONENT_DEFINE(scene_world, SpriteComponent);
+
+    // Run through nodes and update transform based on parent (if exists).
+    ecs_system(
+        scene_world,
+        {.entity = ecs_entity(
+             scene_world, {.name = "TransformSystem", .add = ecs_ids(ecs_dependson(EcsOnUpdate))}
+         ),
+         .query.terms =
+             {{.id = ecs_id(TransformComponent)},
+              {.id = ecs_pair(EcsChildOf, EcsWildcard), .oper = EcsNot}},
+         .callback = TransformSystem}
+    );
 
     return (Scene){
         .world = scene_world,
@@ -29,24 +42,28 @@ void scene_update(Scene scene, f32 delta) {
     ecs_progress(world, delta);
 
     const ecs_query_t* sprites = ecs_query(
-        world, {.terms = {{.id = ecs_id(TransformComponent)}, {.id = ecs_id(SpriteComponent)}}}
+        world, {.terms = {{.id = ecs_id(WorldTransformComponent)}, {.id = ecs_id(SpriteComponent)}}}
     );
     ecs_iter_t sprite_iter = ecs_query_iter(world, sprites);
     while (ecs_query_next(&sprite_iter)) {
-        const TransformComponent* transform = ecs_field(&sprite_iter, TransformComponent, 0);
+        const WorldTransformComponent* transform =
+            ecs_field(&sprite_iter, WorldTransformComponent, 0);
         const SpriteComponent* sprite = ecs_field(&sprite_iter, SpriteComponent, 1);
 
         for (i32 i = 0; i < sprite_iter.count; i++) {
-            // How should we handle texture sizes?
-            const Matrix4 matrix =
-                mat4_mul(mat4_translation(transform->translation), mat4_scale(transform->scale));
-
+            WorldTransformComponent transform_component = transform[i];
+            SpriteComponent sprite_component = sprite[i];
             if (sprite->texture != NULL) {
                 renderer2d_draw_sprite_matrix(
-                    matrix, sprite->texture, sprite->color, sprite->z_index
+                    transform_component.matrix,
+                    sprite_component.texture,
+                    sprite_component.color,
+                    sprite_component.z_index
                 );
             } else {
-                renderer2d_draw_rect_matrix(matrix, sprite->color, sprite->z_index);
+                renderer2d_draw_rect_matrix(
+                    transform_component.matrix, sprite_component.color, sprite_component.z_index
+                );
             }
         }
     }

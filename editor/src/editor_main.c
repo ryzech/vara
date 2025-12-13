@@ -28,7 +28,7 @@ void editor_init(void) {
         .z_index = 0,
     };
     const TransformComponent square_transform = {
-        .translation = {100.0f, 100.0f, 1.0f},
+        .translation = {100.0f, 100.0f, 0.0f},
         .scale = {200.0f, 200.0f, 1.0f},
     };
     const Node colored_square = node_create(scene, "Square");
@@ -67,7 +67,7 @@ void application_init(ApplicationConfig* config) {
     };
 
     config->name = window_config.name;
-    config->level = LOG_LEVEL_DEBUG;
+    config->level = LOG_LEVEL_TRACE;
     config->window_config = &window_config;
     config->renderer_type = window_config.renderer_type;
 

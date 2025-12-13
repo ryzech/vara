@@ -29,10 +29,10 @@ Node node_create(Scene scene, const char* name) {
     };
 }
 
-Node node_of(Scene scene, ecs_entity_t entity_id) {
+Node node_of(ecs_world_t* world, ecs_entity_t entity_id) {
     return (Node){
         .entity = entity_id,
-        .world = scene.world,
+        .world = world,
     };
 }
 
@@ -62,6 +62,14 @@ void node_remove_child(Node parent, Node child) {
     }
 
     ecs_remove_pair(child.world, child.entity, EcsChildOf, parent.entity);
+}
+
+b8 node_has_parent(Node node) {
+    if (!node_exists(node)) {
+        return false;
+    }
+
+    return ecs_has_pair(node.world, node.entity, EcsChildOf, EcsWildcard);
 }
 
 const char* node_get_name(Node node) {

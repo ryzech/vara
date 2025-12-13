@@ -13,12 +13,14 @@ struct Node {
 };
 
 Node node_create(struct Scene scene, const char* name);
-Node node_of(struct Scene Scene, ecs_entity_t entity_id);
+Node node_of(ecs_world_t* world, ecs_entity_t entity_id);
 void node_destroy(Node node);
 
 b8 node_exists(Node node);
 void node_add_child(Node parent, Node child);
 void node_remove_child(Node parent, Node child);
+
+b8 node_has_parent(Node node);
 
 const char* node_get_name(Node node);
 
