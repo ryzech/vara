@@ -23,8 +23,21 @@ Scene scene_create(void) {
          ),
          .query.terms =
              {{.id = ecs_id(TransformComponent)},
+              {.id = ecs_id(RectTransformComponent), .oper = EcsNot},
               {.id = ecs_pair(EcsChildOf, EcsWildcard), .oper = EcsNot}},
          .callback = TransformSystem}
+    );
+
+    ecs_system(
+        scene_world,
+        {.entity = ecs_entity(
+             scene_world,
+             {.name = "RectTransformSystem", .add = ecs_ids(ecs_dependson(EcsOnUpdate))}
+         ),
+         .query.terms =
+             {{.id = ecs_id(RectTransformComponent)},
+              {.id = ecs_pair(EcsChildOf, EcsWildcard), .oper = EcsNot}},
+         .callback = RectTransformSystem}
     );
 
     return (Scene){

@@ -22,19 +22,27 @@ void editor_init(void) {
 
     scene = scene_create();
     root = node_create(scene, "Root");
+    const RectTransformComponent root_rect = {
+        .anchor_min = {0.0f, 0.0f},
+        .anchor_max = {1.0f, 1.0f},
+        .offset_min = {0.0f, 0.0f},
+        .offset_max = {0.0f, 0.0f},
+    };
+    node_set_component(root, RectTransformComponent, &root_rect);
 
     const SpriteComponent square_sprite = {
         .color = {0.5f, 0.5f, 0.5f, 1.0f},
         .z_index = 0,
     };
-    const TransformComponent square_transform = {
-        .translation = {100.0f, 100.0f, 0.0f},
-        .scale = {200.0f, 200.0f, 1.0f},
+    const RectTransformComponent square_rect = {
+        .anchor_min = {1.0f, 1.0f},
+        .anchor_max = {1.0f, 1.0f},
+        .offset_min = {-135.0f, -135.0f},
+        .offset_max = {-10.0f, -10.0f},
     };
     const Node colored_square = node_create(scene, "Square");
-    node_set_component(colored_square, TransformComponent, &square_transform);
+    node_set_component(colored_square, RectTransformComponent, &square_rect);
     node_set_component(colored_square, SpriteComponent, &square_sprite);
-
     node_add_child(root, colored_square);
 }
 
