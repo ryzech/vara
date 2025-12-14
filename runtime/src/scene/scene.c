@@ -6,6 +6,11 @@
 #include "vara/scene/scene.h"
 #include "vara/scene/system/transform_system.h"
 
+ECS_COMPONENT_DECLARE(TransformComponent);
+ECS_COMPONENT_DECLARE(WorldTransformComponent);
+ECS_COMPONENT_DECLARE(RectTransformComponent);
+ECS_COMPONENT_DECLARE(SpriteComponent);
+
 Scene scene_create(void) {
     ecs_world_t* scene_world = ecs_init();
 

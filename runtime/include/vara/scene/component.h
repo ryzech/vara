@@ -38,7 +38,7 @@ struct SpriteComponent {
 
 // Declare components so the type is accessible.
 // Different than registering.
-ECS_COMPONENT_DECLARE(TransformComponent);
-ECS_COMPONENT_DECLARE(WorldTransformComponent);
-ECS_COMPONENT_DECLARE(RectTransformComponent);
-ECS_COMPONENT_DECLARE(SpriteComponent);
+extern ECS_COMPONENT_DECLARE(TransformComponent);
+extern ECS_COMPONENT_DECLARE(WorldTransformComponent);
+extern ECS_COMPONENT_DECLARE(RectTransformComponent);
+extern ECS_COMPONENT_DECLARE(SpriteComponent);
