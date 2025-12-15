@@ -2,15 +2,12 @@
 #include <vara/core/defines.h>
 #include <vara/core/input/input.h>
 #include <vara/core/logger.h>
-#include <vara/core/platform/platform_window.h>
 #include <vara/renderer/render_pass.h>
-#include <vara/scene/component.h>
-#include <vara/scene/node.h>
-#include <vara/scene/scene.h>
+
+#include "editor/editor_panel.h"
+#include "editor/editor_ui.h"
 
 static RenderPass* ui_pass;
-static Scene scene;
-static Node root;
 
 void editor_init(void) {
     const RenderPassConfig ui_pass_config = {
@@ -20,30 +17,7 @@ void editor_init(void) {
     };
     ui_pass = render_pass_create(&ui_pass_config);
 
-    scene = scene_create();
-    root = node_create(scene, "Root");
-    const RectTransformComponent root_rect = {
-        .anchor_min = {0.0f, 0.0f},
-        .anchor_max = {1.0f, 1.0f},
-        .offset_min = {0.0f, 0.0f},
-        .offset_max = {0.0f, 0.0f},
-    };
-    node_set_component(root, RectTransformComponent, &root_rect);
-
-    const SpriteComponent square_sprite = {
-        .color = {0.5f, 0.5f, 0.5f, 1.0f},
-        .z_index = 0,
-    };
-    const RectTransformComponent square_rect = {
-        .anchor_min = {1.0f, 1.0f},
-        .anchor_max = {1.0f, 1.0f},
-        .offset_min = {-135.0f, -135.0f},
-        .offset_max = {-10.0f, -10.0f},
-    };
-    const Node colored_square = node_create(scene, "Square");
-    node_set_component(colored_square, RectTransformComponent, &square_rect);
-    node_set_component(colored_square, SpriteComponent, &square_sprite);
-    node_add_child(root, colored_square);
+    editor_ui_create();
 }
 
 void editor_update(f32 delta_time) {
@@ -51,15 +25,17 @@ void editor_update(f32 delta_time) {
         application_exit();
     }
 
+    editor_ui_update(delta_time);
     render_pass_begin(ui_pass);
-    scene_update(scene, delta_time);
+
+    editor_ui_draw();
+
     render_pass_end(ui_pass);
 }
 
 void editor_shutdown(void) {
     INFO("Shutting down...");
-    node_destroy(root);
-    scene_destroy(scene);
+    editor_ui_destroy();
     render_pass_destroy(ui_pass);
 }
 
