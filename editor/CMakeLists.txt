@@ -1,5 +1,6 @@
 set(EDITOR_SOURCES src/editor_main.c
-        src/ui/editor_ui.c)
+        src/ui/editor_ui.c
+        src/ui/editor_panel.c)
 
 add_executable(vara-editor ${EDITOR_SOURCES})
 

@@ -1,7 +1,9 @@
 #include <vara/application/application.h>
 #include <vara/core/defines.h>
+#include <vara/core/event/event.h>
 #include <vara/core/input/input.h>
 #include <vara/core/logger.h>
+#include <vara/core/math/math.h>
 #include <vara/renderer/render_pass.h>
 
 #include "editor/editor_panel.h"
@@ -9,7 +11,17 @@
 
 static RenderPass* ui_pass;
 
+static b8 on_window_resize(i16 event_code, void* sender, const EventData* event) {
+    const i32 width = event->i32[0];
+    const i32 height = event->i32[1];
+    const Vector2 size = {width, height};
+
+    editor_ui_set_bounds(vec2_zero(), size);
+    return false;
+}
+
 void editor_init(void) {
+    event_register(EVENT_WINDOW_RESIZE, on_window_resize);
     const RenderPassConfig ui_pass_config = {
         .name = "ui_pass",
         .target = NULL,

@@ -6,3 +6,4 @@
 u64 string_length(const char* string);
 char* string_duplicate(const char* string);
 void string_free(const char* string);
+b8 strings_equal(const char* a, const char* b);

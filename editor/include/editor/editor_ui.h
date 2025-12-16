@@ -5,22 +5,24 @@
 typedef struct Editor Editor;
 
 struct Panel;
-struct PanelConfig;
+struct PanelType;
 
 struct Editor {
-    struct Panel* panels;
-    u32 panel_count;
-    u32 max_panels;
-
-    struct Panel* focused_panel;
-    struct Panel* hovered_panel;
+    struct Panel* root;
+    struct PanelType* registered_types;
+    u32 type_count;
+    u32 max_types;
 };
 
 b8 editor_ui_create(void);
 void editor_ui_destroy(void);
 
+void editor_ui_set_bounds(Vector2 min, Vector2 max);
 void editor_ui_update(f32 delta);
 void editor_ui_draw(void);
 
-struct Panel* editor_panel_register(struct PanelConfig config);
-void editor_panel_remove(const char* id);
+b8 editor_panel_register_type(struct PanelType type);
+struct PanelType* editor_panel_get_type(const char* id);
+
+struct Panel* editor_add_panel(struct PanelType* type);
+struct Panel* editor_get_root(void);

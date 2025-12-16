@@ -1,6 +1,7 @@
-#include "vara/core/util/string.h"
+#include <string.h>
 
 #include "vara/core/platform/platform.h"
+#include "vara/core/util/string.h"
 
 u64 string_length(const char* string) {
     if (!string) {
@@ -31,4 +32,13 @@ void string_free(const char* string) {
         return;
     }
     platform_free((char*)string);
+}
+
+b8 strings_equal(const char* a, const char* b) {
+    if (!a || !b) {
+        return true;
+    }
+
+    // TODO: don't use std string method.
+    return strncmp(a, b, U32_MAX) == 0;
 }
