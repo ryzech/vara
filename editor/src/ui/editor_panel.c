@@ -7,7 +7,7 @@ Panel* panel_create(PanelType* type) {
     Panel* panel = platform_allocate(sizeof(Panel));
     platform_zero_memory(panel, sizeof(Panel));
 
-    panel->split = false;
+    panel->node_type = NODE_LEAF;
     panel->type = type;
 
     if (type->data_size > 0) {
@@ -33,7 +33,7 @@ void panel_destroy(Panel* panel) {
         return;
     }
 
-    if (panel->split) {
+    if (panel->node_type == NODE_SPLIT) {
         panel_destroy(panel->children[0]);
         panel_destroy(panel->children[1]);
     } else {
@@ -48,7 +48,7 @@ void panel_destroy(Panel* panel) {
     platform_free(panel);
 }
 
-Panel* panel_add(Panel* target, PanelType* type, b8 vertical) {
+Panel* panel_add(Panel* target, PanelType* type, PanelSplitDirection direction) {
     if (!target) {
         return NULL;
     }
@@ -58,7 +58,7 @@ Panel* panel_add(Panel* target, PanelType* type, b8 vertical) {
         return NULL;
     }
 
-    if (target->split) {
+    if (target->node_type == NODE_SPLIT) {
         panel_destroy(new_panel);
         return NULL;
     }
@@ -70,13 +70,12 @@ Panel* panel_add(Panel* target, PanelType* type, b8 vertical) {
     }
 
     moved_panel->data = target->data;
-    moved_panel->focused = target->focused;
     moved_panel->bounds = target->bounds;
 
     target->data = NULL;
-    target->type = editor_panel_get_type("SplitPanel");
-    target->split = true;
-    target->split_vertical = vertical;
+    target->type = NULL;
+    target->node_type = NODE_SPLIT;
+    target->direction = direction;
     target->split_ratio = 0.5f;
 
     target->children[0] = moved_panel;
@@ -84,7 +83,7 @@ Panel* panel_add(Panel* target, PanelType* type, b8 vertical) {
     moved_panel->parent = target;
     new_panel->parent = target;
 
-    panel_calculate(target);
+    panel_calculate(target, target->bounds);
     return new_panel;
 }
 
@@ -103,6 +102,7 @@ void panel_remove(Panel* panel) {
 
     Panel* grandparent = parent->parent;
     sibling->parent = grandparent;
+    sibling->bounds = parent->bounds;
 
     if (grandparent) {
         if (grandparent->children[0] == parent) {
@@ -110,55 +110,50 @@ void panel_remove(Panel* panel) {
         } else {
             grandparent->children[1] = sibling;
         }
+        panel_calculate(grandparent, grandparent->bounds);
     }
 
-    platform_free(parent);
+    if (parent->children[0] == sibling) {
+        parent->children[0] = NULL;
+    } else {
+        parent->children[1] = NULL;
+    }
+
+    panel_destroy(parent);
 }
 
-void panel_calculate(Panel* panel) {
-    if (!panel || !panel->split) {
+void panel_calculate(Panel* panel, PanelBounds bounds) {
+    if (!panel) {
+        return;
+    }
+
+    panel->bounds = bounds;
+    if (panel->node_type == NODE_LEAF) {
         return;
     }
 
     Panel* child_a = panel->children[0];
     Panel* child_b = panel->children[1];
 
-    if (!child_a && !child_b) {
-        return;
-    }
-
     if (!child_a || !child_b) {
-        Panel* child = child_a ? child_a : child_b;
-        child->bounds = panel->bounds;
-        if (child->split) {
-            panel_calculate(child);
-        }
         return;
     }
 
     PanelBounds child_a_bounds = panel->bounds;
     PanelBounds child_b_bounds = panel->bounds;
 
-    if (panel->split_vertical) {
+    if (panel->direction == SPLIT_VERTICAL) {
         const f32 height = panel->bounds.max.y - panel->bounds.min.y;
         const f32 split_height = panel->bounds.min.y + height * panel->split_ratio;
-        child_a_bounds.max.y = split_height;
-        child_b_bounds.min.y = split_height;
+        child_a_bounds.max.y = split_height - 4 / 2;
+        child_b_bounds.min.y = split_height + 4 / 2;
     } else {
         const f32 width = panel->bounds.max.x - panel->bounds.min.x;
         const f32 split_width = panel->bounds.min.x + width * panel->split_ratio;
-        child_a_bounds.max.x = split_width;
-        child_b_bounds.min.x = split_width;
+        child_a_bounds.max.x = split_width - 4 / 2;
+        child_b_bounds.min.x = split_width + 4 / 2;
     }
 
-    child_a->bounds = child_a_bounds;
-    child_b->bounds = child_b_bounds;
-
-    if (child_a->split) {
-        panel_calculate(child_a);
-    }
-
-    if (child_b->split) {
-        panel_calculate(child_b);
-    }
+    panel_calculate(child_a, child_a_bounds);
+    panel_calculate(child_b, child_b_bounds);
 }

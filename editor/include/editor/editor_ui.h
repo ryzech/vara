@@ -3,12 +3,18 @@
 #include <vara/core/defines.h>
 
 typedef struct Editor Editor;
+typedef struct EditorTheme EditorTheme;
 
 struct Panel;
 struct PanelType;
 
+struct EditorTheme {
+    Vector4 panel_background_color;
+};
+
 struct Editor {
     struct Panel* root;
+    EditorTheme theme;
     struct PanelType* registered_types;
     u32 type_count;
     u32 max_types;

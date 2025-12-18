@@ -24,18 +24,27 @@ b8 editor_ui_create(void) {
     editor->registered_types = platform_allocate(sizeof(PanelType) * editor->max_types);
     platform_zero_memory(editor->registered_types, sizeof(PanelType) * editor->max_types);
 
-    const PanelType split_type = {
-        .id = "SplitPanel",
+    const PanelType test_type = {
+        .id = "TestPanel",
     };
-    editor_panel_register_type(split_type);
+    editor_panel_register_type(test_type);
 
-    PanelType* split_panel = editor_panel_get_type("SplitPanel");
-    editor->root = panel_create(split_panel);
-    editor->root->split = true;
+    editor->root = platform_allocate(sizeof(Panel));
+    platform_zero_memory(editor->root, sizeof(Panel));
+    editor->root->node_type = NODE_SPLIT;
+    editor->root->direction = SPLIT_HORIZONTAL;
     editor->root->split_ratio = 0.5f;
+
+    PanelType* test_panel = editor_panel_get_type("TestPanel");
+    editor->root->children[0] = panel_create(test_panel);
+    editor->root->children[0]->parent = editor->root;
+    editor->root->children[1] = panel_create(test_panel);
+    editor->root->children[1]->parent = editor->root;
 
     const Vector2i window_size = platform_window_get_size(application_get_window());
     editor_ui_set_bounds(vec2_zero(), (Vector2){window_size.x, window_size.y});
+
+    panel_add(editor->root->children[1], test_panel, SPLIT_VERTICAL);
 
     return true;
 }
@@ -55,9 +64,11 @@ void editor_ui_set_bounds(Vector2 min, Vector2 max) {
         return;
     }
 
-    editor->root->bounds.min = min;
-    editor->root->bounds.max = max;
-    panel_calculate(editor->root);
+    const PanelBounds bounds = {
+        .min = min,
+        .max = max,
+    };
+    panel_calculate(editor->root, bounds);
 }
 
 void editor_ui_update(f32 delta) {
@@ -71,7 +82,7 @@ static void editor_panel_draw(Panel* panel) {
         return;
     }
 
-    if (panel->split) {
+    if (panel->node_type == NODE_SPLIT) {
         editor_panel_draw(panel->children[0]);
         editor_panel_draw(panel->children[1]);
     } else {
@@ -106,7 +117,7 @@ b8 editor_panel_register_type(PanelType type) {
         editor->max_types *= 2;
         void* resized_capacity = platform_allocate(sizeof(PanelType) * editor->max_types);
         platform_copy_memory(
-            resized_capacity, editor->registered_types, sizeof(Panel) * editor->max_types
+            resized_capacity, editor->registered_types, sizeof(PanelType) * editor->type_count
         );
         platform_free(editor->registered_types);
         editor->registered_types = resized_capacity;
