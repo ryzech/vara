@@ -7,6 +7,16 @@
 typedef struct VaraWindowState VaraWindowState;
 typedef struct VaraWindow VaraWindow;
 typedef struct VaraWindowConfig VaraWindowConfig;
+typedef enum CursorType CursorType;
+
+enum CursorType {
+    CURSOR_NORMAL,
+    CURSOR_HAND,
+    CURSOR_HORIZONTAL_RESIZE,
+    CURSOR_VERTICAL_RESIZE,
+    CURSOR_BEAM,
+    CURSOR_CROSSHAIR
+};
 
 /** */
 struct VaraWindow {
@@ -46,6 +56,7 @@ void platform_window_destroy(VaraWindow* window);
 void platform_window_set_title(VaraWindow* window, const char* title);
 void platform_window_set_size(VaraWindow* window, u32 width, u32 height);
 void platform_window_set_position(VaraWindow* window, i32 x, i32 y);
+void platform_window_set_cursor(VaraWindow* window, CursorType cursor);
 Vector2i platform_window_get_size(VaraWindow* window);
 Vector2i platform_window_get_position(VaraWindow* window);
 void* platform_window_get_native_handle(const VaraWindow* window);

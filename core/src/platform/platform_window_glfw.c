@@ -9,6 +9,13 @@
 #include "vara/core/platform/platform_graphics_types.h"
 #include "vara/core/platform/platform_window.h"
 
+static GLFWcursor* default_cursor;
+static GLFWcursor* hand_cursor;
+static GLFWcursor* horizontal_cursor;
+static GLFWcursor* vertical_cursor;
+static GLFWcursor* beam_cursor;
+static GLFWcursor* crosshair_cursor;
+
 struct VaraWindowState {
     GLFWwindow* window;
 };
@@ -361,6 +368,15 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
     glfwSetWindowSizeCallback(glfw_window, glfw_resize_callback);
     glfwSetWindowCloseCallback(glfw_window, glfw_close_callback);
 
+    // TODO: need to update these when switching away from glfw, as GLFW does not support some
+    // macos cursors like move resize.
+    default_cursor = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+    hand_cursor = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
+    horizontal_cursor = glfwCreateStandardCursor(GLFW_RESIZE_EW_CURSOR);
+    vertical_cursor = glfwCreateStandardCursor(GLFW_RESIZE_NS_CURSOR);
+    beam_cursor = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
+    crosshair_cursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
+
     return window;
 }
 
@@ -382,6 +398,30 @@ void platform_window_destroy(VaraWindow* window) {
 
 void platform_window_set_title(VaraWindow* window, const char* title) {
     glfwSetWindowTitle(window->platform_state->window, title);
+}
+
+void platform_window_set_cursor(VaraWindow* window, CursorType cursor) {
+    GLFWwindow* handle = window->platform_state->window;
+    switch (cursor) {
+        case CURSOR_NORMAL:
+            glfwSetCursor(handle, default_cursor);
+            break;
+        case CURSOR_HAND:
+            glfwSetCursor(handle, hand_cursor);
+            break;
+        case CURSOR_HORIZONTAL_RESIZE:
+            glfwSetCursor(handle, horizontal_cursor);
+            break;
+        case CURSOR_VERTICAL_RESIZE:
+            glfwSetCursor(handle, vertical_cursor);
+            break;
+        case CURSOR_BEAM:
+            glfwSetCursor(handle, beam_cursor);
+            break;
+        case CURSOR_CROSSHAIR:
+            glfwSetCursor(handle, crosshair_cursor);
+            break;
+    }
 }
 
 Vector2i platform_window_get_size(VaraWindow* window) {

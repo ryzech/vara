@@ -1,4 +1,5 @@
 #include <vara/application/application.h>
+#include <vara/core/input/input.h>
 #include <vara/core/logger.h>
 #include <vara/core/math/math.h>
 #include <vara/core/platform/platform.h>
@@ -75,6 +76,11 @@ void editor_ui_update(f32 delta) {
     if (!editor) {
         return;
     }
+
+    Panel* hovered_panel = editor_get_hovered_panel();
+    if (hovered_panel) {
+        editor->hovered = hovered_panel;
+    }
 }
 
 static void editor_panel_draw(Panel* panel) {
@@ -90,7 +96,12 @@ static void editor_panel_draw(Panel* panel) {
             panel->bounds.max.x - panel->bounds.min.x,
             panel->bounds.max.y - panel->bounds.min.y,
         };
-        const Vector4 background = {0.25f, 0.25f, 0.25f, 1.0f};
+        Vector4 background;
+        if (panel == editor->hovered) {
+            background = (Vector4){0.30f, 0.30f, 0.30f, 1.0f};
+        } else {
+            background = (Vector4){0.25f, 0.25f, 0.25f, 1.0f};
+        }
         renderer2d_draw_rect(panel->bounds.min, size, background, 0);
         if (panel->type) {
             if (panel->type->draw) {
@@ -138,6 +149,36 @@ PanelType* editor_panel_get_type(const char* id) {
 
 Panel* editor_add_panel(PanelType* type) {
     return NULL;
+}
+
+static Panel* find_hovered_panel(Panel* panel) {
+    if (!panel) {
+        return NULL;
+    }
+
+    const Vector2 mouse = input_get_mouse_position();
+    if (mouse.x < panel->bounds.min.x || mouse.x > panel->bounds.max.x
+        || mouse.y < panel->bounds.min.y || mouse.y > panel->bounds.max.y) {
+        return NULL;
+    }
+
+    if (panel->node_type == NODE_LEAF) {
+        return panel;
+    }
+
+    Panel* first_child = find_hovered_panel(panel->children[0]);
+    if (first_child) {
+        return first_child;
+    }
+    return find_hovered_panel(panel->children[1]);
+}
+
+Panel* editor_get_hovered_panel(void) {
+    if (!editor || !editor->root) {
+        return NULL;
+    }
+
+    return find_hovered_panel(editor->root);
 }
 
 Panel* editor_get_root(void) {

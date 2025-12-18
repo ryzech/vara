@@ -7,13 +7,17 @@ typedef struct EditorTheme EditorTheme;
 
 struct Panel;
 struct PanelType;
+struct Font;
 
 struct EditorTheme {
     Vector4 panel_background_color;
+    struct Font* default_font;
 };
 
 struct Editor {
     struct Panel* root;
+    // Should each panel store this as a boolean?
+    struct Panel* hovered;
     EditorTheme theme;
     struct PanelType* registered_types;
     u32 type_count;
@@ -31,4 +35,5 @@ b8 editor_panel_register_type(struct PanelType type);
 struct PanelType* editor_panel_get_type(const char* id);
 
 struct Panel* editor_add_panel(struct PanelType* type);
+struct Panel* editor_get_hovered_panel(void);
 struct Panel* editor_get_root(void);
