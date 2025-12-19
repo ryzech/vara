@@ -48,7 +48,7 @@ void panel_destroy(Panel* panel) {
     platform_free(panel);
 }
 
-Panel* panel_add(Panel* target, PanelType* type, PanelSplitDirection direction) {
+Panel* panel_add(Panel* target, PanelType* type, SplitDirection direction) {
     if (!target) {
         return NULL;
     }
@@ -122,6 +122,28 @@ void panel_remove(Panel* panel) {
     panel_destroy(parent);
 }
 
+SplitInfo panel_get_split(Panel* panel) {
+    SplitInfo info = {0};
+    if (!panel || panel->node_type != NODE_SPLIT) {
+        return info;
+    }
+
+    info.direction = panel->direction;
+    if (panel->direction == SPLIT_VERTICAL) {
+        const f32 height = panel->bounds.max.y - panel->bounds.min.y;
+        const f32 split_height = panel->bounds.min.y + height * panel->split_ratio;
+        info.bounds.min = (Vector2){panel->bounds.min.x, split_height - 2.0f};
+        info.bounds.max = (Vector2){panel->bounds.max.x, split_height + 2.0f};
+    } else {
+        const f32 width = panel->bounds.max.x - panel->bounds.min.x;
+        const f32 split_width = panel->bounds.min.x + width * panel->split_ratio;
+        info.bounds.min = (Vector2){split_width - 2.0f, panel->bounds.min.y};
+        info.bounds.max = (Vector2){split_width + 2.0f, panel->bounds.max.y};
+    }
+
+    return info;
+}
+
 void panel_calculate(Panel* panel, PanelBounds bounds) {
     if (!panel) {
         return;
@@ -135,23 +157,16 @@ void panel_calculate(Panel* panel, PanelBounds bounds) {
     Panel* child_a = panel->children[0];
     Panel* child_b = panel->children[1];
 
-    if (!child_a || !child_b) {
-        return;
-    }
-
     PanelBounds child_a_bounds = panel->bounds;
     PanelBounds child_b_bounds = panel->bounds;
+    const SplitInfo info = panel_get_split(panel);
 
     if (panel->direction == SPLIT_VERTICAL) {
-        const f32 height = panel->bounds.max.y - panel->bounds.min.y;
-        const f32 split_height = panel->bounds.min.y + height * panel->split_ratio;
-        child_a_bounds.max.y = split_height - 4 / 2;
-        child_b_bounds.min.y = split_height + 4 / 2;
+        child_a_bounds.max.y = info.bounds.min.y;
+        child_b_bounds.min.y = info.bounds.max.y;
     } else {
-        const f32 width = panel->bounds.max.x - panel->bounds.min.x;
-        const f32 split_width = panel->bounds.min.x + width * panel->split_ratio;
-        child_a_bounds.max.x = split_width - 4 / 2;
-        child_b_bounds.min.x = split_width + 4 / 2;
+        child_a_bounds.max.x = info.bounds.min.x;
+        child_b_bounds.min.x = info.bounds.max.x;
     }
 
     panel_calculate(child_a, child_a_bounds);

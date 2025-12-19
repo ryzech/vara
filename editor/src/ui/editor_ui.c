@@ -77,9 +77,21 @@ void editor_ui_update(f32 delta) {
         return;
     }
 
-    Panel* hovered_panel = editor_get_hovered_panel();
-    if (hovered_panel) {
-        editor->hovered = hovered_panel;
+    Panel* hovered_split = editor_get_hovered_split();
+    editor->hovered_split = hovered_split;
+    if (hovered_split) {
+        if (hovered_split->direction == SPLIT_VERTICAL) {
+            platform_window_set_cursor(application_get_window(), CURSOR_VERTICAL_RESIZE);
+        } else {
+            platform_window_set_cursor(application_get_window(), CURSOR_HORIZONTAL_RESIZE);
+        }
+    }
+
+    if (!hovered_split) {
+        platform_window_set_cursor(application_get_window(), CURSOR_NORMAL);
+        editor->hovered_panel = editor_get_hovered_panel();
+    } else {
+        editor->hovered_panel = NULL;
     }
 }
 
@@ -97,7 +109,7 @@ static void editor_panel_draw(Panel* panel) {
             panel->bounds.max.y - panel->bounds.min.y,
         };
         Vector4 background;
-        if (panel == editor->hovered) {
+        if (panel == editor->hovered_panel) {
             background = (Vector4){0.30f, 0.30f, 0.30f, 1.0f};
         } else {
             background = (Vector4){0.25f, 0.25f, 0.25f, 1.0f};
@@ -179,6 +191,38 @@ Panel* editor_get_hovered_panel(void) {
     }
 
     return find_hovered_panel(editor->root);
+}
+
+static Panel* find_hovered_split(Panel* panel) {
+    if (!panel || panel->node_type != NODE_SPLIT) {
+        return NULL;
+    }
+
+    const Vector2 mouse = input_get_mouse_position();
+    if (mouse.x < panel->bounds.min.x || mouse.x > panel->bounds.max.x
+        || mouse.y < panel->bounds.min.y || mouse.y > panel->bounds.max.y) {
+        return NULL;
+    }
+
+    const SplitInfo info = panel_get_split(panel);
+    if (mouse.x >= info.bounds.min.x && mouse.x <= info.bounds.max.x && mouse.y >= info.bounds.min.y
+        && mouse.y <= info.bounds.max.y) {
+        return panel;
+    }
+
+    Panel* first_child = find_hovered_split(panel->children[0]);
+    if (first_child) {
+        return first_child;
+    }
+    return find_hovered_split(panel->children[1]);
+}
+
+Panel* editor_get_hovered_split(void) {
+    if (!editor || !editor->root) {
+        return NULL;
+    }
+
+    return find_hovered_split(editor->root);
 }
 
 Panel* editor_get_root(void) {

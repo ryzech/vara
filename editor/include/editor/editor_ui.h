@@ -17,7 +17,8 @@ struct EditorTheme {
 struct Editor {
     struct Panel* root;
     // Should each panel store this as a boolean?
-    struct Panel* hovered;
+    struct Panel* hovered_panel;
+    struct Panel* hovered_split;
     EditorTheme theme;
     struct PanelType* registered_types;
     u32 type_count;
@@ -36,4 +37,5 @@ struct PanelType* editor_panel_get_type(const char* id);
 
 struct Panel* editor_add_panel(struct PanelType* type);
 struct Panel* editor_get_hovered_panel(void);
+struct Panel* editor_get_hovered_split(void);
 struct Panel* editor_get_root(void);

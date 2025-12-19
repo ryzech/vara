@@ -6,7 +6,9 @@ typedef struct Panel Panel;
 typedef struct PanelBounds PanelBounds;
 typedef struct PanelType PanelType;
 typedef enum PanelNodeType PanelNodeType;
-typedef enum PanelSplitDirection PanelSplitDirection;
+
+typedef struct SplitInfo SplitInfo;
+typedef enum SplitDirection SplitDirection;
 
 struct PanelBounds {
     Vector2 min, max;
@@ -28,9 +30,14 @@ enum PanelNodeType {
     NODE_SPLIT
 };
 
-enum PanelSplitDirection {
+enum SplitDirection {
     SPLIT_HORIZONTAL,
     SPLIT_VERTICAL
+};
+
+struct SplitInfo {
+    PanelBounds bounds;
+    SplitDirection direction;
 };
 
 struct Panel {
@@ -41,13 +48,14 @@ struct Panel {
 
     Panel* parent;
     Panel* children[2];
-    PanelSplitDirection direction;
+    SplitDirection direction;
     f32 split_ratio;
 };
 
 Panel* panel_create(PanelType* type);
 void panel_destroy(Panel* panel);
 
-Panel* panel_add(Panel* target, PanelType* type, PanelSplitDirection direction);
+Panel* panel_add(Panel* target, PanelType* type, SplitDirection direction);
+SplitInfo panel_get_split(Panel* panel);
 void panel_remove(Panel* panel);
 void panel_calculate(Panel* panel, PanelBounds bounds);
