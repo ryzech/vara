@@ -57,5 +57,6 @@ void panel_destroy(Panel* panel);
 
 Panel* panel_add(Panel* target, PanelType* type, SplitDirection direction);
 SplitInfo panel_get_split(Panel* panel);
+void panel_set_split_ratio(Panel* panel, f32 split_ratio);
 void panel_remove(Panel* panel);
 void panel_calculate(Panel* panel, PanelBounds bounds);

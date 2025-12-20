@@ -1,3 +1,4 @@
+#include <vara/core/math/math.h>
 #include <vara/core/platform/platform.h>
 
 #include "editor/editor_panel.h"
@@ -128,20 +129,30 @@ SplitInfo panel_get_split(Panel* panel) {
         return info;
     }
 
+    // Move to use theme values.
+    const f32 panel_padding = 2.0f * 0.5f;
     info.direction = panel->direction;
     if (panel->direction == SPLIT_VERTICAL) {
         const f32 height = panel->bounds.max.y - panel->bounds.min.y;
         const f32 split_height = panel->bounds.min.y + height * panel->split_ratio;
-        info.bounds.min = (Vector2){panel->bounds.min.x, split_height - 2.0f};
-        info.bounds.max = (Vector2){panel->bounds.max.x, split_height + 2.0f};
+        info.bounds.min = (Vector2){panel->bounds.min.x, split_height - panel_padding};
+        info.bounds.max = (Vector2){panel->bounds.max.x, split_height + panel_padding};
     } else {
         const f32 width = panel->bounds.max.x - panel->bounds.min.x;
         const f32 split_width = panel->bounds.min.x + width * panel->split_ratio;
-        info.bounds.min = (Vector2){split_width - 2.0f, panel->bounds.min.y};
-        info.bounds.max = (Vector2){split_width + 2.0f, panel->bounds.max.y};
+        info.bounds.min = (Vector2){split_width - panel_padding, panel->bounds.min.y};
+        info.bounds.max = (Vector2){split_width + panel_padding, panel->bounds.max.y};
     }
 
     return info;
+}
+
+void panel_set_split_ratio(Panel* panel, f32 split_ratio) {
+    if (!panel || panel->node_type != NODE_SPLIT) {
+        return;
+    }
+
+    panel->split_ratio = fminf(0.9f, fmaxf(split_ratio, 0.1f));
 }
 
 void panel_calculate(Panel* panel, PanelBounds bounds) {

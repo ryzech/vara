@@ -12,6 +12,7 @@ struct Font;
 struct EditorTheme {
     Vector4 panel_background_color;
     struct Font* default_font;
+    f32 panel_padding;
 };
 
 struct Editor {
@@ -19,6 +20,7 @@ struct Editor {
     // Should each panel store this as a boolean?
     struct Panel* hovered_panel;
     struct Panel* hovered_split;
+    struct Panel* resizing_split;
     EditorTheme theme;
     struct PanelType* registered_types;
     u32 type_count;

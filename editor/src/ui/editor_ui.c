@@ -79,15 +79,39 @@ void editor_ui_update(f32 delta) {
 
     Panel* hovered_split = editor_get_hovered_split();
     editor->hovered_split = hovered_split;
-    if (hovered_split) {
+    if (hovered_split && !editor->resizing_split) {
         if (hovered_split->direction == SPLIT_VERTICAL) {
             platform_window_set_cursor(application_get_window(), CURSOR_VERTICAL_RESIZE);
         } else {
             platform_window_set_cursor(application_get_window(), CURSOR_HORIZONTAL_RESIZE);
         }
+
+        if (input_is_mouse_down(MOUSE_BUTTON_LEFT)) {
+            editor->resizing_split = editor->hovered_split;
+        }
     }
 
-    if (!hovered_split) {
+    if (input_is_mouse_down(MOUSE_BUTTON_LEFT) && editor->resizing_split) {
+        const Vector2 mouse = input_get_mouse_position();
+        f32 resize_ratio;
+        if (editor->resizing_split->direction == SPLIT_VERTICAL) {
+            const f32 height =
+                editor->resizing_split->bounds.max.y - editor->resizing_split->bounds.min.y;
+            const f32 split_height = mouse.y - editor->resizing_split->bounds.min.y;
+            resize_ratio = split_height / height;
+        } else {
+            const f32 width =
+                editor->resizing_split->bounds.max.x - editor->resizing_split->bounds.min.x;
+            const f32 split_width = mouse.x - editor->resizing_split->bounds.min.x;
+            resize_ratio = split_width / width;
+        }
+        panel_set_split_ratio(editor->resizing_split, resize_ratio);
+        panel_calculate(editor->resizing_split, editor->resizing_split->bounds);
+    } else {
+        editor->resizing_split = NULL;
+    }
+
+    if (!hovered_split && !editor->resizing_split) {
         platform_window_set_cursor(application_get_window(), CURSOR_NORMAL);
         editor->hovered_panel = editor_get_hovered_panel();
     } else {
