@@ -11,13 +11,11 @@
 
 #include "vara/renderer/font.h"
 #include "vara/shaders/renderer2d_sprite.glsl.gen.h"
-#include "vara/shaders/renderer2d_text.glsl.gen.h"
 
 static Renderer2D* renderer;
 
 static Texture* default_texture;
 static Shader* sprite_shader;
-static Shader* text_shader;
 
 static i32 compare_draw_commands(const void* a, const void* b) {
     const DrawCommand* cmd_a = a;
@@ -42,17 +40,11 @@ static void renderer2d_render_batch(void) {
         renderer->index_buffer, renderer->indices, sizeof(u32) * renderer->index_count, 0
     );
 
-    int samplers[RENDERER2D_MAX_TEXTURES];
     for (i32 i = 0; i < renderer->texture_count; i++) {
         texture_bind(renderer->textures[i], i);
-        samplers[i] = i;
     }
 
     RenderCommandBuffer* command = renderer_get_frame_command_buffer();
-
-    render_cmd_shader_set_int_array(
-        command, sprite_shader, "uTextures", samplers, renderer->texture_count
-    );
     render_cmd_draw_indexed(
         command, sprite_shader, renderer->vertex_buffer, renderer->index_buffer
     );
@@ -157,78 +149,6 @@ static void renderer2d_submit_command(
     renderer->command_count++;
 }
 
-void renderer2d_add_quad(
-    const Matrix4* matrix,
-    const Rect local_rect,
-    const Vector2 uv0,
-    const Vector2 uv1,
-    Texture* texture,
-    const Vector4 color,
-    const i32 z_index
-) {
-    if (!renderer || !texture) {
-        return;
-    }
-
-    const Vector3 local_v0 = {
-        local_rect.position.x,
-        local_rect.position.y,
-        0.0f,
-    };
-    const Vector3 local_v1 = {
-        local_rect.position.x + local_rect.size.x,
-        local_rect.position.y,
-        0.0f,
-    };
-    const Vector3 local_v2 = {
-        local_rect.position.x + local_rect.size.x,
-        local_rect.position.y + local_rect.size.y,
-        0.0f,
-    };
-    const Vector3 local_v3 = {
-        local_rect.position.x,
-        local_rect.position.y + local_rect.size.y,
-        0.0f,
-    };
-
-    Vector3 final_pos0 = mat4_mul_vec3(*matrix, local_v0);
-    Vector3 final_pos1 = mat4_mul_vec3(*matrix, local_v1);
-    Vector3 final_pos2 = mat4_mul_vec3(*matrix, local_v2);
-    Vector3 final_pos3 = mat4_mul_vec3(*matrix, local_v3);
-
-    Vertex vertices[4];
-
-    const Vertex v0 = {
-        .position = final_pos0,
-        .color = color,
-        .tex_coord = {uv0.x, uv0.y},
-    };
-    const Vertex v1 = {
-        .position = final_pos1,
-        .color = color,
-        .tex_coord = {uv1.x, uv0.y},
-    };
-    const Vertex v2 = {
-        .position = final_pos2,
-        .color = color,
-        .tex_coord = {uv1.x, uv1.y},
-    };
-    const Vertex v3 = {
-        .position = final_pos3,
-        .color = color,
-        .tex_coord = {uv0.x, uv1.y},
-    };
-
-    vertices[0] = v0;
-    vertices[1] = v1;
-    vertices[2] = v2;
-    vertices[3] = v3;
-
-    u32 indices[6] = {0, 1, 2, 2, 3, 0};
-
-    renderer2d_submit_command(sprite_shader, texture, vertices, 4, indices, 6, z_index);
-}
-
 b8 renderer2d_create(const Renderer2DConfig* config) {
     renderer = platform_allocate(sizeof(Renderer2D));
     platform_zero_memory(renderer, sizeof(Renderer2D));
@@ -264,7 +184,7 @@ b8 renderer2d_create(const Renderer2DConfig* config) {
         },
         {
             .location = 3,
-            .type = VERTEX_ATTRIBUTE_FLOAT,
+            .type = VERTEX_ATTRIBUTE_INT,
             .offset = offsetof(Vertex, tex_index),
             .normalized = false,
         },
@@ -303,17 +223,6 @@ b8 renderer2d_create(const Renderer2DConfig* config) {
     };
     sprite_shader = shader_create(&sprite_shader_config);
 
-    ShaderSource text_sources[] = {
-        {.stage = SHADER_STAGE_VERTEX, .source = renderer2d_text_vertex_source},
-        {.stage = SHADER_STAGE_FRAGMENT, .source = renderer2d_text_fragment_source},
-    };
-    const ShaderConfig text_shader_config = {
-        .name = "renderer2d_text_shader",
-        .stages = text_sources,
-        .stage_count = 2,
-    };
-    text_shader = shader_create(&text_shader_config);
-
     // Set the default white texture if no texture is requested.
     u32 white_pixels = 0xffffffff;
     TextureConfig default_texture_config = {
@@ -325,6 +234,15 @@ b8 renderer2d_create(const Renderer2DConfig* config) {
     default_texture = texture_create(&default_texture_config);
     texture_set_data(default_texture, &white_pixels, sizeof(u32));
 
+    int samplers[RENDERER2D_MAX_TEXTURES];
+    for (i32 i = 0; i < renderer->texture_count; i++) {
+        samplers[i] = i;
+    }
+    RenderCommandBuffer* command = renderer_get_frame_command_buffer();
+    render_cmd_shader_set_int_array(
+        command, sprite_shader, "uTextures", samplers, renderer->texture_count
+    );
+
     return true;
 }
 
@@ -333,7 +251,6 @@ void renderer2d_destroy(void) {
         buffer_destroy(renderer->vertex_buffer);
         buffer_destroy(renderer->index_buffer);
         shader_destroy(sprite_shader);
-        shader_destroy(text_shader);
         texture_destroy(default_texture);
 
         platform_free(renderer->vertices);
@@ -369,26 +286,20 @@ void renderer2d_draw_rect(const Vector2 position, const Vector2 size, Vector4 co
 }
 
 void renderer2d_draw_rect_matrix(const Matrix4 matrix, Vector4 color, i32 z_index) {
-    // Transform will multiply these values to the expected size.
-    const Rect rect = {
-        .position = vec2_zero(),
-        .size = vec2_one(),
-    };
-    renderer2d_add_quad(
-        &matrix,
-        rect,
-        (Vector2){
-            0.0f,
-            0.0f,
-        },
-        (Vector2){
-            1.0f,
-            1.0f,
-        },
+    Geometry2D quad = geometry_generate_quad(vec2_one(), vec2_zero(), vec2_one(), color);
+    geometry_transform(&quad, &matrix);
+
+    renderer2d_submit_command(
+        sprite_shader,
         default_texture,
-        color,
+        quad.vertices,
+        quad.vertex_count,
+        quad.indices,
+        quad.index_count,
         z_index
     );
+
+    geometry_destroy(&quad);
 }
 
 void renderer2d_draw_sprite(
@@ -403,26 +314,20 @@ void renderer2d_draw_sprite(
 void renderer2d_draw_sprite_matrix(
     const Matrix4 matrix, Texture* texture, Vector4 tint, i32 z_index
 ) {
-    // Transform will multiply these values to the expected size.
-    const Rect rect = {
-        .position = vec2_zero(),
-        .size = vec2_one(),
-    };
-    renderer2d_add_quad(
-        &matrix,
-        rect,
-        (Vector2){
-            0,
-            0,
-        },
-        (Vector2){
-            1,
-            1,
-        },
+    Geometry2D quad = geometry_generate_quad(vec2_one(), vec2_zero(), vec2_one(), tint);
+    geometry_transform(&quad, &matrix);
+
+    renderer2d_submit_command(
+        sprite_shader,
         texture,
-        tint,
+        quad.vertices,
+        quad.vertex_count,
+        quad.indices,
+        quad.index_count,
         z_index
     );
+
+    geometry_destroy(&quad);
 }
 
 // TODO: figure out how to get the size auto-calculated, while letting you change it.
@@ -466,9 +371,21 @@ void renderer2d_draw_text_matrix(
             .size = glyph->size,
         };
 
-        renderer2d_add_quad(
-            &matrix, rect, glyph->uv_top_left, glyph->uv_bottom_right, font->atlas, color, z_index
+        Geometry2D quad =
+            geometry_generate_quad(rect.size, glyph->uv_top_left, glyph->uv_bottom_right, color);
+        geometry_transform(&quad, &matrix);
+
+        renderer2d_submit_command(
+            sprite_shader,
+            font->atlas,
+            quad.vertices,
+            quad.vertex_count,
+            quad.indices,
+            quad.index_count,
+            z_index
         );
+
+        geometry_destroy(&quad);
 
         x += glyph->advance;
     }

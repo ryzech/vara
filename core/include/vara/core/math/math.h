@@ -1,5 +1,6 @@
 #pragma once
 
+#include "vara/core/math/geometry.h"
 #include "vara/core/math/mat4.h"
 #include "vara/core/math/rect.h"
 #include "vara/core/math/types.h"

@@ -92,7 +92,7 @@ typedef union matrix4_u {
     f32 elements[16];
 } Matrix4;
 
-// TODO: 2d and 3d variants of this.
+// TODO: packed color.
 typedef struct Vertex {
     Vector3 position;
     Vector4 color;
@@ -100,7 +100,6 @@ typedef struct Vertex {
     f32 tex_index;
 } Vertex;
 
-// TODO: 2d and 3d variants of this.
 typedef struct Rect {
     Vector2 position;
     Vector2 size;
