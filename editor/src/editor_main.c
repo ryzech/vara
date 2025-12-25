@@ -24,13 +24,14 @@ void editor_init(void) {
     event_register(EVENT_WINDOW_RESIZE, on_window_resize);
 
     Renderer* renderer = application_get_renderer();
+    RenderContext* render_context = application_get_render_context();
     const RenderPassConfig ui_pass_config = {
         .name = "ui_pass",
         .target = NULL,
         .clear = true,
     };
     ui_pass = render_pass_create(renderer, &ui_pass_config);
-    editor_ui_create();
+    editor_ui_create(render_context);
 }
 
 void editor_update(f32 delta_time) {

@@ -8,6 +8,7 @@ typedef struct EditorTheme EditorTheme;
 struct Panel;
 struct PanelType;
 struct Font;
+struct RenderContext;
 
 struct EditorTheme {
     Vector4 panel_background_color;
@@ -25,9 +26,10 @@ struct Editor {
     struct PanelType* registered_types;
     u32 type_count;
     u32 max_types;
+    struct RenderContext* context;
 };
 
-b8 editor_ui_create(void);
+b8 editor_ui_create(struct RenderContext* render_context);
 void editor_ui_destroy(void);
 
 void editor_ui_set_bounds(Vector2 min, Vector2 max);

@@ -5,6 +5,7 @@
 
 #include "vara/application/application.h"
 #include "vara/renderer/internal/renderer_internal.h"
+#include "vara/renderer/render_context.h"
 
 typedef struct ApplicationState ApplicationState;
 
@@ -14,6 +15,7 @@ struct ApplicationState {
     f64 last_time;
     b8 is_running;
     Renderer* renderer;
+    RenderContext* render_context;
 };
 
 static ApplicationState application_state;
@@ -62,6 +64,8 @@ int application_main(int argc, char** argv) {
             platform_destroy();
             return EXIT_FAILURE;
         }
+
+        application_state.render_context = render_context_create(application_state.renderer);
     }
 
     if (application_state.config.app.on_init) {
@@ -92,7 +96,13 @@ int application_main(int argc, char** argv) {
             if (application_state.renderer) {
                 renderer_begin_frame(application_state.renderer);
             }
+            if (application_state.render_context) {
+                render_context_begin_frame(application_state.render_context);
+            }
             application_state.config.app.on_update(delta_time);
+            if (application_state.render_context) {
+                render_context_end_frame(application_state.render_context);
+            }
             if (application_state.renderer) {
                 renderer_end_frame(application_state.renderer);
             }
@@ -106,6 +116,10 @@ int application_main(int argc, char** argv) {
     if (application_state.window) {
         platform_poll_events();
         platform_window_destroy(application_state.window);
+    }
+
+    if (application_state.render_context) {
+        render_context_destroy(application_state.render_context);
     }
 
     if (application_state.renderer) {
@@ -126,6 +140,10 @@ VaraWindow* application_get_window(void) {
 
 Renderer* application_get_renderer(void) {
     return application_state.renderer;
+}
+
+RenderContext* application_get_render_context(void) {
+    return application_state.render_context;
 }
 
 void application_exit(void) {

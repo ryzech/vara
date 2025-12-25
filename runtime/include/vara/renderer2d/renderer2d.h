@@ -51,23 +51,31 @@ struct Renderer2D {
     u32 draw_calls;
 };
 
-b8 renderer2d_create(struct Renderer* backend, const Renderer2DConfig* config);
-void renderer2d_destroy(void);
+Renderer2D* renderer2d_create(struct Renderer* backend, const Renderer2DConfig* config);
+void renderer2d_destroy(Renderer2D* r2d);
 
-void renderer2d_begin(struct Renderer* backend);
-void renderer2d_end(void);
+void renderer2d_begin(Renderer2D* r2d);
+void renderer2d_end(Renderer2D* r2d);
 
-void renderer2d_draw_rect(const Vector2 position, const Vector2 size, Vector4 color, i32 z_index);
-void renderer2d_draw_rect_matrix(const Matrix4 matrix, Vector4 color, i32 z_index);
+void renderer2d_draw_rect(
+    Renderer2D* r2d, const Vector2 position, const Vector2 size, Vector4 color, i32 z_index
+);
+void renderer2d_draw_rect_matrix(Renderer2D* r2d, const Matrix4 matrix, Vector4 color, i32 z_index);
 
 void renderer2d_draw_sprite(
-    const Vector2 position, const Vector2 size, struct Texture* texture, Vector4 tint, i32 z_index
+    Renderer2D* r2d,
+    const Vector2 position,
+    const Vector2 size,
+    struct Texture* texture,
+    Vector4 tint,
+    i32 z_index
 );
 void renderer2d_draw_sprite_matrix(
-    const Matrix4 matrix, struct Texture* texture, Vector4 tint, i32 z_index
+    Renderer2D* r2d, const Matrix4 matrix, struct Texture* texture, Vector4 tint, i32 z_index
 );
 
 void renderer2d_draw_text(
+    Renderer2D* r2d,
     const Vector2 position,
     const Vector2 size,
     const char* text,
@@ -76,5 +84,10 @@ void renderer2d_draw_text(
     i32 z_index
 );
 void renderer2d_draw_text_matrix(
-    const Matrix4 matrix, const char* text, struct Font* font, Vector4 color, i32 z_index
+    Renderer2D* r2d,
+    const Matrix4 matrix,
+    const char* text,
+    struct Font* font,
+    Vector4 color,
+    i32 z_index
 );

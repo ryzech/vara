@@ -7,7 +7,6 @@
 #include "vara/renderer/internal/renderer_internal.h"
 #include "vara/renderer/render_command.h"
 #include "vara/renderer/renderer.h"
-#include "vara/renderer2d/renderer2d.h"
 
 Renderer* renderer_create(VaraWindow* window) {
     Renderer* renderer = platform_allocate(sizeof(Renderer));
@@ -33,23 +32,11 @@ Renderer* renderer_create(VaraWindow* window) {
         return NULL;
     }
 
-    const Renderer2DConfig renderer_2d_config = {
-        .max_vertices = 4096,
-        .max_indices = 4096,
-    };
-    if (!renderer2d_create(renderer, &renderer_2d_config)) {
-        FATAL("Failed to create Renderer2D!");
-        renderer_destroy(renderer);
-        return NULL;
-    }
-
     return renderer;
 }
 
 void renderer_destroy(Renderer* renderer) {
     if (renderer) {
-        renderer2d_destroy();
-
         if (renderer->command_buffer) {
             render_cmd_buffer_destroy(renderer->command_buffer);
         }
@@ -89,11 +76,9 @@ RenderCommandBuffer* renderer_get_frame_command_buffer(Renderer* renderer) {
 
 void renderer_begin_frame(Renderer* renderer) {
     render_cmd_buffer_reset(renderer_get_frame_command_buffer(renderer));
-    renderer2d_begin(renderer);
 }
 
 void renderer_end_frame(Renderer* renderer) {
-    renderer2d_end();
     renderer_execute_commands(renderer, renderer_get_frame_command_buffer(renderer));
     renderer_present(renderer);
 }

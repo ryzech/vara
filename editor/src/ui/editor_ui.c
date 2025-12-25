@@ -11,7 +11,7 @@
 
 static Editor* editor;
 
-b8 editor_ui_create(void) {
+b8 editor_ui_create(RenderContext* render_context) {
     editor = platform_allocate(sizeof(Editor));
     platform_zero_memory(editor, sizeof(Editor));
 
@@ -19,6 +19,8 @@ b8 editor_ui_create(void) {
         FATAL("Failed to create Editor Context!");
         return false;
     }
+
+    editor->context = render_context;
 
     // Start with 64 type capacity.
     editor->max_types = 64;
@@ -138,7 +140,7 @@ static void editor_panel_draw(Panel* panel) {
         } else {
             background = (Vector4){0.25f, 0.25f, 0.25f, 1.0f};
         }
-        renderer2d_draw_rect(panel->bounds.min, size, background, 0);
+        renderer2d_draw_rect(editor->context->r2d, panel->bounds.min, size, background, 0);
         if (panel->type) {
             if (panel->type->draw) {
                 panel->type->draw(panel);

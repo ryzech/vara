@@ -1,5 +1,6 @@
 #include <vara/core/math/math.h>
 
+#include "vara/renderer/render_context.h"
 #include "vara/renderer/texture.h"
 #include "vara/renderer2d/renderer2d.h"
 #include "vara/scene/component.h"
@@ -11,7 +12,7 @@ ECS_COMPONENT_DECLARE(WorldTransformComponent);
 ECS_COMPONENT_DECLARE(RectTransformComponent);
 ECS_COMPONENT_DECLARE(SpriteComponent);
 
-Scene scene_create(void) {
+Scene scene_create(RenderContext* render_context) {
     ecs_world_t* scene_world = ecs_init();
 
     // Likely should register elsewhere, or have a function that does this.
@@ -47,6 +48,7 @@ Scene scene_create(void) {
 
     return (Scene){
         .world = scene_world,
+        .render_context = render_context,
     };
 }
 
@@ -74,6 +76,7 @@ void scene_update(Scene scene, f32 delta) {
             SpriteComponent sprite_component = sprite[i];
             if (sprite->texture != NULL) {
                 renderer2d_draw_sprite_matrix(
+                    scene.render_context->r2d,
                     transform_component.matrix,
                     sprite_component.texture,
                     sprite_component.color,
@@ -81,7 +84,10 @@ void scene_update(Scene scene, f32 delta) {
                 );
             } else {
                 renderer2d_draw_rect_matrix(
-                    transform_component.matrix, sprite_component.color, sprite_component.z_index
+                    scene.render_context->r2d,
+                    transform_component.matrix,
+                    sprite_component.color,
+                    sprite_component.z_index
                 );
             }
         }

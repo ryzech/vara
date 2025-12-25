@@ -4,6 +4,7 @@
 #include <vara/core/logger.h>
 #include <vara/core/platform/platform_window.h>
 
+#include "vara/renderer/render_context.h"
 #include "vara/renderer/renderer.h"
 
 typedef struct Application Application;
@@ -28,6 +29,7 @@ int application_main(int argc, char** argv);
 
 VaraWindow* application_get_window(void);
 Renderer* application_get_renderer(void);
+RenderContext* application_get_render_context(void);
 void application_exit(void);
 
 void application_init(ApplicationConfig* config);
