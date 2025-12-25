@@ -10,6 +10,8 @@ typedef struct Framebuffer Framebuffer;
 typedef struct FramebufferConfig FramebufferConfig;
 
 struct Texture;
+struct Renderer;
+struct RendererBackend;
 
 enum FramebufferAttachmentType {
     FRAMEBUFFER_ATTACHMENT_COLOR,
@@ -45,9 +47,10 @@ struct Framebuffer {
     u32 width, height;
     u32 attachment_count;
     u16 samples;
+    struct RendererBackend* backend;
 };
 
-Framebuffer* framebuffer_create(const FramebufferConfig* config);
+Framebuffer* framebuffer_create(struct Renderer* renderer, const FramebufferConfig* config);
 void framebuffer_destroy(Framebuffer* buffer);
 
 void framebuffer_bind(Framebuffer* buffer);

@@ -4,8 +4,9 @@
 
 #include "vara/renderer/buffer.h"
 #include "vara/renderer/internal/renderer_internal.h"
+#include "vara/renderer/renderer.h"
 
-Buffer* buffer_create(const BufferConfig* config) {
+Buffer* buffer_create(Renderer* renderer, const BufferConfig* config) {
     Buffer* buffer = platform_allocate(sizeof(Buffer));
     platform_zero_memory(buffer, sizeof(Buffer));
 
@@ -42,8 +43,10 @@ Buffer* buffer_create(const BufferConfig* config) {
         }
     }
 
-    const RendererBackend* backend = renderer_backend_get();
-    if (!backend->buffer.create(buffer, config)) {
+    RendererBackend* backend = renderer_backend_get(renderer);
+    buffer->backend = backend;
+
+    if (!buffer->backend->buffer.create(buffer, config)) {
         buffer_destroy(buffer);
         return NULL;
     }
@@ -53,8 +56,7 @@ Buffer* buffer_create(const BufferConfig* config) {
 
 void buffer_destroy(Buffer* buffer) {
     if (buffer) {
-        const RendererBackend* backend = renderer_backend_get();
-        backend->buffer.destroy(buffer);
+        buffer->backend->buffer.destroy(buffer);
 
         if (buffer->layout.attributes) {
             platform_free(buffer->layout.attributes);
@@ -65,15 +67,13 @@ void buffer_destroy(Buffer* buffer) {
 
 void buffer_bind(Buffer* buffer) {
     if (buffer) {
-        const RendererBackend* backend = renderer_backend_get();
-        backend->buffer.bind(buffer);
+        buffer->backend->buffer.bind(buffer);
     }
 }
 
 void buffer_unbind(Buffer* buffer) {
     if (buffer) {
-        const RendererBackend* backend = renderer_backend_get();
-        backend->buffer.unbind(buffer);
+        buffer->backend->buffer.unbind(buffer);
     }
 }
 
@@ -88,7 +88,5 @@ void buffer_set_data(Buffer* buffer, const void* data, size_t size, size_t offse
 
     buffer->element_count =
         size / (buffer->type == BUFFER_TYPE_INDEX ? sizeof(u32) : buffer->layout.stride);
-
-    const RendererBackend* backend = renderer_backend_get();
-    backend->buffer.set_data(buffer, data, size, offset);
+    buffer->backend->buffer.set_data(buffer, data, size, offset);
 }

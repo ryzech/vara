@@ -9,6 +9,9 @@ typedef struct ShaderSource ShaderSource;
 typedef struct ShaderConfig ShaderConfig;
 typedef struct Shader Shader;
 
+struct Renderer;
+struct RendererBackend;
+
 enum ShaderStage {
     SHADER_STAGE_VERTEX,
     SHADER_STAGE_FRAGMENT,
@@ -30,9 +33,10 @@ struct ShaderConfig {
 struct Shader {
     const char* name;
     void* backend_data;
+    struct RendererBackend* backend;
 };
 
-Shader* shader_create(const ShaderConfig* config);
+Shader* shader_create(struct Renderer* renderer, const ShaderConfig* config);
 void shader_destroy(Shader* shader);
 
 void shader_bind(Shader* shader);

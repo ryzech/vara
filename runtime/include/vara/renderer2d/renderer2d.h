@@ -14,6 +14,7 @@ struct Buffer;
 struct Shader;
 struct Texture;
 struct Font;
+struct Renderer;
 
 struct Renderer2DConfig {
     u32 max_vertices;
@@ -33,6 +34,7 @@ struct DrawCommand {
 };
 
 struct Renderer2D {
+    struct Renderer* renderer;
     Vertex* vertices;
     struct Buffer* vertex_buffer;
     struct Buffer* index_buffer;
@@ -49,10 +51,10 @@ struct Renderer2D {
     u32 draw_calls;
 };
 
-b8 renderer2d_create(const Renderer2DConfig* config);
+b8 renderer2d_create(struct Renderer* backend, const Renderer2DConfig* config);
 void renderer2d_destroy(void);
 
-void renderer2d_begin(void);
+void renderer2d_begin(struct Renderer* backend);
 void renderer2d_end(void);
 
 void renderer2d_draw_rect(const Vector2 position, const Vector2 size, Vector4 color, i32 z_index);

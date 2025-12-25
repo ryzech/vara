@@ -56,6 +56,7 @@ static b8 on_window_resize(i16 event_code, void* sender, const EventData* event)
 void sandbox_init(void) {
     event_register(EVENT_WINDOW_RESIZE, on_window_resize);
 
+    Renderer* renderer = application_get_renderer();
     Vertex vertices[] = {
         {.position = vec3(0.0f, 0.5f, 0.0f)},
         {.position = vec3(-0.5f, -0.5f, 0.0f)},
@@ -77,7 +78,7 @@ void sandbox_init(void) {
         .data = vertices,
         .size = sizeof(vertices)
     };
-    vertex_buffer = buffer_create(&vertex_buffer_config);
+    vertex_buffer = buffer_create(renderer, &vertex_buffer_config);
 
     const BufferConfig index_buffer_config = {
         .type = BUFFER_TYPE_INDEX,
@@ -85,7 +86,7 @@ void sandbox_init(void) {
         .data = indices,
         .size = sizeof(indices)
     };
-    index_buffer = buffer_create(&index_buffer_config);
+    index_buffer = buffer_create(renderer, &index_buffer_config);
 
     ShaderSource sources[] = {
         {
@@ -103,7 +104,7 @@ void sandbox_init(void) {
         .stages = sources,
         .stage_count = 2,
     };
-    shader = shader_create(&shader_config);
+    shader = shader_create(renderer, &shader_config);
 
     const RenderPassConfig pass_config = {
         .name = "main_pass",
@@ -111,7 +112,7 @@ void sandbox_init(void) {
         .clear = true,
         .clear_color = (Vector4){0.1f, 0.1f, 0.1f, 1.0f},
     };
-    render_pass = render_pass_create(&pass_config);
+    render_pass = render_pass_create(renderer, &pass_config);
 
     camera = camera_create();
     camera_update(
@@ -169,16 +170,16 @@ void sandbox_update(f32 delta_time) {
         camera_move(camera, delta);
     }
 
-    RenderCommandBuffer* buffer = renderer_get_frame_command_buffer();
-
-    render_pass_begin(render_pass);
+    Renderer* renderer = application_get_renderer();
+    RenderCommandBuffer* buffer = renderer_get_frame_command_buffer(renderer);
+    render_pass_begin(renderer, render_pass);
     {
         render_cmd_shader_set_mat4(
             buffer, shader, "uTransform", camera_get_view_projection(camera)
         );
         render_cmd_draw_indexed(buffer, shader, vertex_buffer, index_buffer);
     }
-    render_pass_end(render_pass);
+    render_pass_end(renderer, render_pass);
 }
 
 void sandbox_shutdown() {

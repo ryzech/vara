@@ -44,7 +44,7 @@ static void renderer2d_render_batch(void) {
         texture_bind(renderer->textures[i], i);
     }
 
-    RenderCommandBuffer* command = renderer_get_frame_command_buffer();
+    RenderCommandBuffer* command = renderer_get_frame_command_buffer(renderer->renderer);
     render_cmd_draw_indexed(
         command, sprite_shader, renderer->vertex_buffer, renderer->index_buffer
     );
@@ -149,7 +149,7 @@ static void renderer2d_submit_command(
     renderer->command_count++;
 }
 
-b8 renderer2d_create(const Renderer2DConfig* config) {
+b8 renderer2d_create(Renderer* backend, const Renderer2DConfig* config) {
     renderer = platform_allocate(sizeof(Renderer2D));
     platform_zero_memory(renderer, sizeof(Renderer2D));
 
@@ -157,6 +157,7 @@ b8 renderer2d_create(const Renderer2DConfig* config) {
         return false;
     }
 
+    renderer->renderer = backend;
     renderer->max_vertices = config->max_vertices;
     renderer->max_indices = config->max_indices;
 
@@ -202,7 +203,7 @@ b8 renderer2d_create(const Renderer2DConfig* config) {
         .data = NULL,
         .size = sizeof(Vertex) * renderer->max_vertices,
     };
-    renderer->vertex_buffer = buffer_create(&vertex_buffer_config);
+    renderer->vertex_buffer = buffer_create(renderer->renderer, &vertex_buffer_config);
 
     const BufferConfig index_buffer_config = {
         .type = BUFFER_TYPE_INDEX,
@@ -210,7 +211,7 @@ b8 renderer2d_create(const Renderer2DConfig* config) {
         .data = NULL,
         .size = sizeof(u32) * renderer->max_indices,
     };
-    renderer->index_buffer = buffer_create(&index_buffer_config);
+    renderer->index_buffer = buffer_create(renderer->renderer, &index_buffer_config);
 
     ShaderSource sprite_sources[] = {
         {.stage = SHADER_STAGE_VERTEX, .source = renderer2d_sprite_vertex_source},
@@ -221,7 +222,7 @@ b8 renderer2d_create(const Renderer2DConfig* config) {
         .stages = sprite_sources,
         .stage_count = 2,
     };
-    sprite_shader = shader_create(&sprite_shader_config);
+    sprite_shader = shader_create(renderer->renderer, &sprite_shader_config);
 
     // Set the default white texture if no texture is requested.
     u32 white_pixels = 0xffffffff;
@@ -231,14 +232,14 @@ b8 renderer2d_create(const Renderer2DConfig* config) {
         .format = TEXTURE_FORMAT_RGBA,
         .filter = TEXTURE_FILTER_LINEAR,
     };
-    default_texture = texture_create(&default_texture_config);
+    default_texture = texture_create(renderer->renderer, &default_texture_config);
     texture_set_data(default_texture, &white_pixels, sizeof(u32));
 
     int samplers[RENDERER2D_MAX_TEXTURES];
     for (i32 i = 0; i < renderer->texture_count; i++) {
         samplers[i] = i;
     }
-    RenderCommandBuffer* command = renderer_get_frame_command_buffer();
+    RenderCommandBuffer* command = renderer_get_frame_command_buffer(renderer->renderer);
     render_cmd_shader_set_int_array(
         command, sprite_shader, "uTextures", samplers, renderer->texture_count
     );
@@ -259,12 +260,13 @@ void renderer2d_destroy(void) {
     }
 }
 
-void renderer2d_begin(void) {
+void renderer2d_begin(Renderer* backend) {
     VaraWindow* window = application_get_window();
     const Vector2i size = platform_window_get_size(window);
     const Matrix4 ortho = mat4_ortho(0.0f, (f32)size.x, (f32)size.y, 0.0f, -1.0f, 1.0f);
 
-    RenderCommandBuffer* command = renderer_get_frame_command_buffer();
+    renderer->renderer = backend;
+    RenderCommandBuffer* command = renderer_get_frame_command_buffer(renderer->renderer);
     render_cmd_shader_set_mat4(command, sprite_shader, "uProjection", ortho);
 
     renderer->draw_calls = 0;

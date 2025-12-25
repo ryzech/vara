@@ -22,13 +22,14 @@ static b8 on_window_resize(i16 event_code, void* sender, const EventData* event)
 
 void editor_init(void) {
     event_register(EVENT_WINDOW_RESIZE, on_window_resize);
+
+    Renderer* renderer = application_get_renderer();
     const RenderPassConfig ui_pass_config = {
         .name = "ui_pass",
         .target = NULL,
         .clear = true,
     };
-    ui_pass = render_pass_create(&ui_pass_config);
-
+    ui_pass = render_pass_create(renderer, &ui_pass_config);
     editor_ui_create();
 }
 
@@ -37,12 +38,13 @@ void editor_update(f32 delta_time) {
         application_exit();
     }
 
+    Renderer* renderer = application_get_renderer();
     editor_ui_update(delta_time);
-    render_pass_begin(ui_pass);
+    render_pass_begin(renderer, ui_pass);
 
     editor_ui_draw();
 
-    render_pass_end(ui_pass);
+    render_pass_end(renderer, ui_pass);
 }
 
 void editor_shutdown(void) {

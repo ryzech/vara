@@ -13,6 +13,7 @@ struct ApplicationState {
     VaraWindow* window;
     f64 last_time;
     b8 is_running;
+    Renderer* renderer;
 };
 
 static ApplicationState application_state;
@@ -22,8 +23,8 @@ static b8 application_on_window_resize(i16 event_code, void* sender, const Event
     const i32 height = event->i32[1];
     const Vector2i size = {width, height};
 
-    if (renderer_backend_get()) {
-        renderer_on_window_resize(size);
+    if (application_state.renderer) {
+        renderer_on_window_resize(application_state.renderer, size);
     }
 
     return false;
@@ -54,7 +55,8 @@ int application_main(int argc, char** argv) {
     }
 
     if (application_state.config.renderer_type != RENDERER_TYPE_NONE) {
-        if (!renderer_create(application_state.window)) {
+        application_state.renderer = renderer_create(application_state.window);
+        if (!application_state.renderer) {
             ERROR("Failed to create renderer!");
             platform_window_destroy(application_state.window);
             platform_destroy();
@@ -87,12 +89,12 @@ int application_main(int argc, char** argv) {
 
         input_system_update();
         if (application_state.config.app.on_update) {
-            if (renderer_backend_get()) {
-                renderer_begin_frame();
+            if (application_state.renderer) {
+                renderer_begin_frame(application_state.renderer);
             }
             application_state.config.app.on_update(delta_time);
-            if (renderer_backend_get()) {
-                renderer_end_frame();
+            if (application_state.renderer) {
+                renderer_end_frame(application_state.renderer);
             }
         }
     }
@@ -106,8 +108,8 @@ int application_main(int argc, char** argv) {
         platform_window_destroy(application_state.window);
     }
 
-    if (renderer_backend_get()) {
-        renderer_destroy();
+    if (application_state.renderer) {
+        renderer_destroy(application_state.renderer);
     }
 
     input_system_destroy();
@@ -120,6 +122,10 @@ int application_main(int argc, char** argv) {
 
 VaraWindow* application_get_window(void) {
     return application_state.window;
+}
+
+Renderer* application_get_renderer(void) {
+    return application_state.renderer;
 }
 
 void application_exit(void) {

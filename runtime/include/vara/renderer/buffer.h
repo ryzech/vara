@@ -11,6 +11,9 @@ typedef struct VertexLayout VertexLayout;
 typedef struct BufferConfig BufferConfig;
 typedef struct Buffer Buffer;
 
+struct Renderer;
+struct RendererBackend;
+
 enum BufferType {
     BUFFER_TYPE_VERTEX,
     BUFFER_TYPE_INDEX,
@@ -65,9 +68,10 @@ struct Buffer {
     BufferType type;
     BufferUsage usage;
     u32 binding;
+    struct RendererBackend* backend;
 };
 
-Buffer* buffer_create(const BufferConfig* config);
+Buffer* buffer_create(struct Renderer* renderer, const BufferConfig* config);
 void buffer_destroy(Buffer* buffer);
 
 void buffer_bind(Buffer* buffer);

@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <vara/core/logger.h>
+#include <vara/core/math/math.h>
 #include <vara/core/platform/platform.h>
 
 #include "vara/renderer/font.h"
-
-#include "vara/core/math/vec2.h"
+#include "vara/renderer/renderer.h"
 #include "vara/renderer/texture.h"
 #include "vendor/stb/stb_truetype.h"
 
-Font* font_load(const char* path, const f32 font_size) {
+Font* font_load(Renderer* renderer, const char* path, const f32 font_size) {
     // TODO: better file loading, likely need a VFS
     FILE* font_file = fopen(path, "rb");
     if (!font_file) {
@@ -66,7 +66,7 @@ Font* font_load(const char* path, const f32 font_size) {
         .filter = TEXTURE_FILTER_LINEAR,
         .samples = 1,
     };
-    font->atlas = texture_create(&font_texture_config);
+    font->atlas = texture_create(renderer, &font_texture_config);
     texture_set_data(font->atlas, pixels, width * height * sizeof(u32));
 
     stbtt_fontinfo info;

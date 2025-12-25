@@ -2,10 +2,11 @@
 #include <vara/core/platform/platform.h>
 
 #include "vara/renderer/internal/renderer_internal.h"
+#include "vara/renderer/renderer.h"
 #include "vara/renderer/texture.h"
 #include "vendor/stb/stb_image.h"
 
-Texture* texture_create(const TextureConfig* config) {
+Texture* texture_create(Renderer* renderer, const TextureConfig* config) {
     Texture* texture = platform_allocate(sizeof(Texture));
     platform_zero_memory(texture, sizeof(Texture));
 
@@ -15,8 +16,10 @@ Texture* texture_create(const TextureConfig* config) {
     texture->format = config->format;
     texture->filter = config->filter;
 
-    const RendererBackend* backend = renderer_backend_get();
-    if (!backend->texture.create(texture, config)) {
+    RendererBackend* backend = renderer_backend_get(renderer);
+    texture->backend = backend;
+
+    if (!texture->backend->texture.create(texture, config)) {
         texture_destroy(texture);
         return NULL;
     }
@@ -24,7 +27,7 @@ Texture* texture_create(const TextureConfig* config) {
     return texture;
 }
 
-Texture* texture_load_file(const TextureConfig* config, const char* file) {
+Texture* texture_load_file(Renderer* renderer, const TextureConfig* config, const char* file) {
     if (!file) {
         return NULL;
     }
@@ -56,7 +59,7 @@ Texture* texture_load_file(const TextureConfig* config, const char* file) {
         .height = (u32)height,
     };
 
-    Texture* texture = texture_create(&new_config);
+    Texture* texture = texture_create(renderer, &new_config);
     texture_set_data(texture, data, width * height * channels);
     stbi_image_free(data);
 
@@ -65,23 +68,20 @@ Texture* texture_load_file(const TextureConfig* config, const char* file) {
 
 void texture_destroy(Texture* texture) {
     if (texture) {
-        const RendererBackend* backend = renderer_backend_get();
-        backend->texture.destroy(texture);
+        texture->backend->texture.destroy(texture);
         platform_free(texture);
     }
 }
 
 void texture_bind(Texture* texture, u32 slot) {
     if (texture) {
-        const RendererBackend* backend = renderer_backend_get();
-        backend->texture.bind(texture, slot);
+        texture->backend->texture.bind(texture, slot);
     }
 }
 
 void texture_unbind(Texture* texture) {
     if (texture) {
-        const RendererBackend* backend = renderer_backend_get();
-        backend->texture.unbind(texture);
+        texture->backend->texture.unbind(texture);
     }
 }
 
@@ -90,14 +90,12 @@ void texture_set_data(Texture* texture, void* data, size_t size) {
         return;
     }
 
-    const RendererBackend* backend = renderer_backend_get();
-    backend->texture.set_data(texture, data, size);
+    texture->backend->texture.set_data(texture, data, size);
 }
 
 u32 texture_get_id(Texture* texture) {
     if (texture) {
-        const RendererBackend* backend = renderer_backend_get();
-        return backend->texture.get_id(texture);
+        return texture->backend->texture.get_id(texture);
     }
 
     return 0;

@@ -7,7 +7,7 @@
 #include "vara/renderer/render_pass.h"
 #include "vara/renderer/renderer.h"
 
-RenderPass* render_pass_create(const RenderPassConfig* config) {
+RenderPass* render_pass_create(Renderer* renderer, const RenderPassConfig* config) {
     RenderPass* pass = platform_allocate(sizeof(RenderPass));
     platform_zero_memory(pass, sizeof(RenderPass));
 
@@ -16,8 +16,10 @@ RenderPass* render_pass_create(const RenderPassConfig* config) {
     pass->clear = config->clear;
     pass->clear_color = config->clear_color;
 
-    const RendererBackend* backend = renderer_backend_get();
-    if (!backend->render_pass.create(pass, config)) {
+    RendererBackend* backend = renderer_backend_get(renderer);
+    pass->backend = backend;
+
+    if (!pass->backend->render_pass.create(pass, config)) {
         ERROR("Failed to create render pass named('%s')", config->name);
         render_pass_destroy(pass);
         return NULL;
@@ -28,16 +30,15 @@ RenderPass* render_pass_create(const RenderPassConfig* config) {
 
 void render_pass_destroy(RenderPass* pass) {
     if (pass) {
-        const RendererBackend* backend = renderer_backend_get();
-        backend->render_pass.destroy(pass);
+        pass->backend->render_pass.destroy(pass);
         platform_free(pass);
     }
 }
 
-void render_pass_begin(RenderPass* pass) {
-    render_cmd_begin_pass(renderer_get_frame_command_buffer(), pass);
+void render_pass_begin(Renderer* renderer, RenderPass* pass) {
+    render_cmd_begin_pass(renderer_get_frame_command_buffer(renderer), pass);
 }
 
-void render_pass_end(RenderPass* pass) {
-    render_cmd_end_pass(renderer_get_frame_command_buffer(), pass);
+void render_pass_end(Renderer* renderer, RenderPass* pass) {
+    render_cmd_end_pass(renderer_get_frame_command_buffer(renderer), pass);
 }

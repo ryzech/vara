@@ -9,136 +9,119 @@
 #include "vara/renderer/renderer.h"
 #include "vara/renderer2d/renderer2d.h"
 
-typedef struct RendererState RendererState;
-
-struct RendererState {
-    RendererBackend* backend;
-    RenderCommandBuffer* frame_cmd_buffer;
-    VaraWindow* main_window;
-};
-
-static RendererState* renderer_state;
-
-b8 renderer_create(VaraWindow* window) {
-    if (renderer_state) {
-        ERROR("Renderer('%s') is already initialized!", renderer_state->backend->name);
-        return false;
+Renderer* renderer_create(VaraWindow* window) {
+    Renderer* renderer = platform_allocate(sizeof(Renderer));
+    platform_zero_memory(renderer, sizeof(Renderer));
+    if (!renderer) {
+        FATAL("Failed to allocate Renderer.");
+        return NULL;
     }
 
-    renderer_state = platform_allocate(sizeof(RendererState));
-    platform_zero_memory(renderer_state, sizeof(RendererState));
-    if (!renderer_state) {
-        FATAL("Failed to allocate RendererState.");
-        return false;
-    }
+    renderer->window = window;
+    renderer->backend = renderer_backend_create(window);
 
-    renderer_state->main_window = window;
-    renderer_state->backend = renderer_backend_create(window);
-    renderer_backend_set(renderer_state->backend);
-
-    if (!renderer_state->backend) {
+    if (!renderer->backend) {
         FATAL("Failed to create RendererBackend.");
-        renderer_destroy();
-        platform_free(renderer_state);
-        return false;
+        renderer_destroy(renderer);
+        return NULL;
     }
 
-    renderer_state->frame_cmd_buffer = render_cmd_buffer_create();
-    if (!renderer_state->frame_cmd_buffer) {
+    renderer->command_buffer = render_cmd_buffer_create();
+    if (!renderer->command_buffer) {
         FATAL("Failed to create the frames RenderCommandBuffer.");
-        renderer_destroy();
-        return false;
+        renderer_destroy(renderer);
+        return NULL;
     }
 
     const Renderer2DConfig renderer_2d_config = {
         .max_vertices = 4096,
         .max_indices = 4096,
     };
-    if (!renderer2d_create(&renderer_2d_config)) {
+    if (!renderer2d_create(renderer, &renderer_2d_config)) {
         FATAL("Failed to create Renderer2D!");
-        renderer_destroy();
-        platform_free(renderer_state);
-        return false;
+        renderer_destroy(renderer);
+        return NULL;
     }
 
-    return true;
+    return renderer;
 }
 
-void renderer_destroy(void) {
-    if (renderer_state) {
+void renderer_destroy(Renderer* renderer) {
+    if (renderer) {
         renderer2d_destroy();
 
-        if (renderer_state->frame_cmd_buffer) {
-            render_cmd_buffer_destroy(renderer_state->frame_cmd_buffer);
+        if (renderer->command_buffer) {
+            render_cmd_buffer_destroy(renderer->command_buffer);
         }
 
-        if (renderer_state->backend) {
-            renderer_backend_destroy(renderer_state->backend);
+        if (renderer->backend) {
+            renderer_backend_destroy(renderer->backend);
         }
 
-        platform_free(renderer_state);
+        platform_free(renderer);
     }
 }
 
-void renderer_on_window_resize(Vector2i new_size) {
-    if (renderer_state) {
-        const RendererBackend* backend = renderer_state->backend;
+void renderer_on_window_resize(Renderer* renderer, Vector2i new_size) {
+    if (renderer) {
+        const RendererBackend* backend = renderer->backend;
         if (backend->renderer.set_viewport) {
             backend->renderer.set_viewport(new_size);
         }
     }
 }
 
-PlatformRendererType renderer_get_renderer_type(void) {
-    if (renderer_state) {
-        return renderer_state->backend->type;
+PlatformRendererType renderer_get_renderer_type(Renderer* renderer) {
+    if (renderer) {
+        return renderer->backend->type;
     }
 
     return RENDERER_TYPE_NONE;
 }
 
-RenderCommandBuffer* renderer_get_frame_command_buffer(void) {
-    if (!renderer_state->frame_cmd_buffer) {
-        renderer_state->frame_cmd_buffer = render_cmd_buffer_create();
+RenderCommandBuffer* renderer_get_frame_command_buffer(Renderer* renderer) {
+    if (!renderer->command_buffer) {
+        renderer->command_buffer = render_cmd_buffer_create();
     }
-    return renderer_state->frame_cmd_buffer;
+
+    return renderer->command_buffer;
 }
 
-void renderer_begin_frame(void) {
-    render_cmd_buffer_reset(renderer_get_frame_command_buffer());
-    renderer2d_begin();
+void renderer_begin_frame(Renderer* renderer) {
+    render_cmd_buffer_reset(renderer_get_frame_command_buffer(renderer));
+    renderer2d_begin(renderer);
 }
 
-void renderer_end_frame(void) {
+void renderer_end_frame(Renderer* renderer) {
     renderer2d_end();
-    renderer_execute_commands(renderer_get_frame_command_buffer());
-    renderer_present();
+    renderer_execute_commands(renderer, renderer_get_frame_command_buffer(renderer));
+    renderer_present(renderer);
 }
 
-void renderer_clear(void) {
-    if (renderer_state) {
-        const RendererBackend* backend = renderer_state->backend;
+void renderer_clear(Renderer* renderer) {
+    if (renderer) {
+        const RendererBackend* backend = renderer->backend;
         backend->renderer.clear();
     }
 }
 
-void renderer_clear_color(const Vector4 color) {
-    if (renderer_state) {
-        const RendererBackend* backend = renderer_state->backend;
+void renderer_clear_color(Renderer* renderer, const Vector4 color) {
+    if (renderer) {
+        const RendererBackend* backend = renderer->backend;
         backend->renderer.clear_color(color);
     }
 }
 
-void renderer_execute_commands(RenderCommandBuffer* buffer) {
-    if (renderer_state) {
-        const RendererBackend* backend = renderer_state->backend;
+void renderer_execute_commands(Renderer* renderer, RenderCommandBuffer* buffer) {
+    if (renderer) {
+        const RendererBackend* backend = renderer->backend;
         backend->renderer.submit(buffer);
     }
 }
 
-void renderer_present(void) {
-    if (renderer_state) {
-        const RendererBackend* backend = renderer_state->backend;
+void renderer_present(Renderer* renderer) {
+    if (renderer) {
+        const RendererBackend* backend = renderer->backend;
         backend->renderer.present();
     }
 }

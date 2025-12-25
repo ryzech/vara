@@ -10,6 +10,8 @@ typedef struct RenderPassConfig RenderPassConfig;
 // Redeclaration's so we don't have to include header.
 struct Framebuffer;
 struct RenderCommandBuffer;
+struct Renderer;
+struct RendererBackend;
 
 struct RenderPassConfig {
     Vector4 clear_color;
@@ -25,10 +27,11 @@ struct RenderPass {
     struct Framebuffer* target;
     void* backend_data;
     b8 clear;
+    struct RendererBackend* backend;
 };
 
-RenderPass* render_pass_create(const RenderPassConfig* config);
+RenderPass* render_pass_create(struct Renderer* renderer, const RenderPassConfig* config);
 void render_pass_destroy(RenderPass* pass);
 
-void render_pass_begin(RenderPass* pass);
-void render_pass_end(RenderPass* pass);
+void render_pass_begin(struct Renderer* renderer, RenderPass* pass);
+void render_pass_end(struct Renderer* renderer, RenderPass* pass);

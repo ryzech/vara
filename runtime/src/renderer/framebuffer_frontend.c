@@ -3,8 +3,9 @@
 
 #include "vara/renderer/framebuffer.h"
 #include "vara/renderer/internal/renderer_internal.h"
+#include "vara/renderer/renderer.h"
 
-Framebuffer* framebuffer_create(const FramebufferConfig* config) {
+Framebuffer* framebuffer_create(Renderer* renderer, const FramebufferConfig* config) {
     Framebuffer* buffer = platform_allocate(sizeof(Framebuffer));
     platform_zero_memory(buffer, sizeof(Framebuffer));
 
@@ -22,8 +23,10 @@ Framebuffer* framebuffer_create(const FramebufferConfig* config) {
     buffer->samples = config->samples;
     buffer->attachment_count = config->attachment_count;
 
-    const RendererBackend* backend = renderer_backend_get();
-    if (!backend->framebuffer.create(buffer, config)) {
+    RendererBackend* backend = renderer_backend_get(renderer);
+    buffer->backend = backend;
+
+    if (!buffer->backend->framebuffer.create(buffer, config)) {
         framebuffer_destroy(buffer);
         return NULL;
     }
@@ -33,8 +36,7 @@ Framebuffer* framebuffer_create(const FramebufferConfig* config) {
 
 void framebuffer_destroy(Framebuffer* buffer) {
     if (buffer) {
-        const RendererBackend* backend = renderer_backend_get();
-        backend->framebuffer.destroy(buffer);
+        buffer->backend->framebuffer.destroy(buffer);
 
         if (buffer->attachments) {
             platform_free(buffer->attachments);
@@ -45,22 +47,19 @@ void framebuffer_destroy(Framebuffer* buffer) {
 
 void framebuffer_bind(Framebuffer* buffer) {
     if (buffer) {
-        const RendererBackend* backend = renderer_backend_get();
-        backend->framebuffer.bind(buffer);
+        buffer->backend->framebuffer.bind(buffer);
     }
 }
 
 void framebuffer_unbind(Framebuffer* buffer) {
     if (buffer) {
-        const RendererBackend* backend = renderer_backend_get();
-        backend->framebuffer.unbind(buffer);
+        buffer->backend->framebuffer.unbind(buffer);
     }
 }
 
 void framebuffer_resize(Framebuffer* buffer, const u32 width, const u32 height) {
     if (buffer) {
-        const RendererBackend* backend = renderer_backend_get();
-        backend->framebuffer.resize(buffer, width, height);
+        buffer->backend->framebuffer.resize(buffer, width, height);
     }
 }
 

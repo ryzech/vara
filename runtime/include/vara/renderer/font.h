@@ -8,6 +8,7 @@ typedef struct Font Font;
 
 // Forward declaration.
 struct Texture;
+struct Renderer;
 
 struct Glyph {
     Vector2 uv_top_left;
@@ -27,7 +28,7 @@ struct Font {
     f32 line_gap;
 };
 
-Font* font_load(const char* path, const f32 font_size);
+Font* font_load(struct Renderer* renderer, const char* path, const f32 font_size);
 void font_destroy(Font* font);
 
 Vector2 font_measure_text(Font* font, const char* text);

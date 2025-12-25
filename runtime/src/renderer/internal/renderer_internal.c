@@ -3,10 +3,9 @@
 #include <vara/core/platform/platform_window.h>
 
 #include "vara/renderer/internal/renderer_internal.h"
+#include "vara/renderer/renderer.h"
 
 extern void renderer_opengl_init(RendererBackend* backend, VaraWindow* window);
-
-static RendererBackend* current_backend;
 
 RendererBackend* renderer_backend_create(VaraWindow* window) {
     RendererBackend* backend = platform_allocate(sizeof(RendererBackend));
@@ -37,14 +36,10 @@ void renderer_backend_destroy(RendererBackend* backend) {
     }
 }
 
-RendererBackend* renderer_backend_get(void) {
-    if (current_backend) {
-        return current_backend;
+RendererBackend* renderer_backend_get(Renderer* renderer) {
+    if (renderer->backend) {
+        return renderer->backend;
     }
 
     return NULL;
-}
-
-void renderer_backend_set(RendererBackend* backend) {
-    current_backend = backend;
 }

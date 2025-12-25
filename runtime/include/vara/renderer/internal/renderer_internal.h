@@ -14,6 +14,7 @@ typedef struct RendererBackend RendererBackend;
 typedef struct RendererBackendVT RendererBackendVT;
 
 struct VaraWindow;
+struct Renderer;
 
 struct RendererBackendVT {
     b8 (*create)(void);
@@ -40,5 +41,4 @@ struct RendererBackend {
 RendererBackend* renderer_backend_create(struct VaraWindow* window);
 void renderer_backend_destroy(RendererBackend* backend);
 
-RendererBackend* renderer_backend_get(void);
-void renderer_backend_set(RendererBackend* backend);
+RendererBackend* renderer_backend_get(struct Renderer* renderer);

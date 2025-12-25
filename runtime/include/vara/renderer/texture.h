@@ -8,6 +8,9 @@ typedef enum TextureWrap TextureWrap;
 typedef struct TextureConfig TextureConfig;
 typedef struct Texture Texture;
 
+struct Renderer;
+struct RendererBackend;
+
 enum TextureFormat {
     TEXTURE_FORMAT_R,
     TEXTURE_FORMAT_RGB,
@@ -38,10 +41,13 @@ struct Texture {
     void* backend_data;
     TextureFormat format;
     TextureFilter filter;
+    struct RendererBackend* backend;
 };
 
-Texture* texture_create(const TextureConfig* config);
-Texture* texture_load_file(const TextureConfig* config, const char* file);
+Texture* texture_create(struct Renderer* renderer, const TextureConfig* config);
+Texture* texture_load_file(
+    struct Renderer* renderer, const TextureConfig* config, const char* file
+);
 void texture_destroy(Texture* texture);
 
 void texture_bind(Texture* texture, u32 slot);
