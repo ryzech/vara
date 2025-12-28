@@ -30,6 +30,7 @@ struct RenderPass {
     struct RenderPacket* packets;
     u32 packet_count;
     u32 packet_capacity;
+    struct RenderCommandBuffer* command_buffer;
     struct RendererBackend* backend;
     void* backend_data;
 };
@@ -37,5 +38,6 @@ struct RenderPass {
 RenderPass* render_pass_create(struct Renderer* renderer, const RenderPassConfig* config);
 void render_pass_destroy(RenderPass* pass);
 
-void render_pass_begin(struct Renderer* renderer, RenderPass* pass);
+void render_pass_begin(RenderPass* pass);
 void render_pass_end(struct Renderer* renderer, RenderPass* pass);
+void render_pass_submit(RenderPass* pass, struct RenderPacket* packet);

@@ -10,6 +10,7 @@
 #include <vara/core/platform/platform_graphics_types.h>
 #include <vara/core/platform/platform_window.h>
 #include <vara/renderer/buffer.h>
+#include <vara/renderer/render_packet.h>
 #include <vara/renderer/render_pass.h>
 #include <vara/renderer/shader.h>
 
@@ -171,13 +172,21 @@ void sandbox_update(f32 delta_time) {
     }
 
     Renderer* renderer = application_get_renderer();
-    RenderCommandBuffer* buffer = renderer_get_frame_command_buffer(renderer);
-    render_pass_begin(renderer, render_pass);
+    render_pass_begin(render_pass);
     {
+        RenderPacket packet = {
+            .shader = shader,
+            .vertex_buffer = vertex_buffer,
+            .index_buffer = index_buffer,
+            .model = mat4_identity(),
+            .index_count = 3,
+            .first_index = 0,
+        };
+        // Handle this elsewhere.
         render_cmd_shader_set_mat4(
-            buffer, shader, "uTransform", camera_get_view_projection(camera)
+            render_pass->command_buffer, shader, "uTransform", camera_get_view_projection(camera)
         );
-        render_cmd_draw_indexed(buffer, shader, vertex_buffer, index_buffer);
+        render_pass_submit(render_pass, &packet);
     }
     render_pass_end(renderer, render_pass);
 }
