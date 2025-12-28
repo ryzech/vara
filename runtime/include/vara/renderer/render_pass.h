@@ -12,6 +12,7 @@ struct Framebuffer;
 struct RenderCommandBuffer;
 struct Renderer;
 struct RendererBackend;
+struct RenderPacket;
 
 struct RenderPassConfig {
     Vector4 clear_color;
@@ -22,12 +23,15 @@ struct RenderPassConfig {
 };
 
 struct RenderPass {
-    Vector4 clear_color;
     const char* name;
     struct Framebuffer* target;
-    void* backend_data;
     b8 clear;
+    Vector4 clear_color;
+    struct RenderPacket* packets;
+    u32 packet_count;
+    u32 packet_capacity;
     struct RendererBackend* backend;
+    void* backend_data;
 };
 
 RenderPass* render_pass_create(struct Renderer* renderer, const RenderPassConfig* config);

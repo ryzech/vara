@@ -2,7 +2,6 @@
 #include <vara/core/defines.h>
 #include <vara/core/logger.h>
 #include <vara/core/math/types.h>
-#include <vara/core/platform/platform.h>
 #include <vara/core/platform/platform_window.h>
 #include <vara/renderer/internal/renderer_internal.h>
 
@@ -20,9 +19,8 @@ static OpenGLRendererState renderer_state;
 
 static b8 renderer_opengl_create(void) {
     gladLoadGL((GLADloadfunc)platform_window_get_proc_address);
-    glEnable(GL_DEBUG_OUTPUT);
-    // Should likely move this into config somewhere, or be pass specific?
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
     DEBUG("Loaded OpenGL: %s | %s", glGetString(GL_VERSION), glGetString(GL_RENDERER));
     return true;
 }
@@ -37,6 +35,7 @@ static void renderer_opengl_clear_color(Vector4 color) {
     glClearColor(color.x, color.y, color.z, color.w);
 }
 
+// Should likely just make this a RENDER_CMD instead of an immediate function.
 static void renderer_opengl_set_viewport(Vector2i viewport_size) {
     // Calculate scaled size (framebuffer size).
     // Should be the same regardless of window, so we query the main window.
@@ -67,10 +66,9 @@ static void renderer_opengl_submit(const RenderCommandBuffer* buffer) {
             }
             case RENDER_CMD_DRAW_INDEXED: {
                 const RenderCmdDrawIndexed* draw_indexed = (RenderCmdDrawIndexed*)cmd;
-                // Doesn't feel like we should be calling these apis here.
-                shader_bind(draw_indexed->shader);
-                buffer_bind(draw_indexed->vertex);
-                buffer_bind(draw_indexed->index);
+                shader_opengl_bind(draw_indexed->shader);
+                buffer_opengl_bind(draw_indexed->vertex);
+                buffer_opengl_bind(draw_indexed->index);
                 glDrawElements(
                     GL_TRIANGLES, (GLsizei)draw_indexed->index->element_count, GL_UNSIGNED_INT, NULL
                 );
@@ -78,14 +76,14 @@ static void renderer_opengl_submit(const RenderCommandBuffer* buffer) {
             }
             case RENDER_CMD_SET_SHADER_MAT4: {
                 const RenderCmdSetShaderMat4* set_mat4 = (RenderCmdSetShaderMat4*)cmd;
-                shader_bind(set_mat4->shader);
-                shader_set_mat4(set_mat4->shader, set_mat4->name, set_mat4->matrix);
+                shader_opengl_bind(set_mat4->shader);
+                shader_opengl_set_mat4(set_mat4->shader, set_mat4->name, set_mat4->matrix);
                 break;
             }
             case RENDER_CMD_SET_SHADER_INT_ARRAY: {
                 const RenderCmdSetShaderIntArray* set_int_array = (RenderCmdSetShaderIntArray*)cmd;
-                shader_bind(set_int_array->shader);
-                shader_set_int_array(
+                shader_opengl_bind(set_int_array->shader);
+                shader_opengl_set_int_array(
                     set_int_array->shader,
                     set_int_array->name,
                     set_int_array->array,
