@@ -9,23 +9,23 @@
 #include <vara/core/platform/platform.h>
 #include <vara/core/platform/platform_graphics_types.h>
 #include <vara/core/platform/platform_window.h>
+#include <vara/material/material.h>
 #include <vara/renderer/buffer.h>
 #include <vara/renderer/render_packet.h>
 #include <vara/renderer/render_pass.h>
 #include <vara/renderer/shader.h>
 
-#include "vara/renderer/render_command.h"
-
 const char* vertex_src = "#version 330 core\n"
                          "layout (location = 0) in vec3 aPos;\n"
                          "layout (location = 1) in vec3 aColor;\n"
-                         "uniform mat4 uTransform;\n"
+                         "uniform mat4 uModel;\n"
+                         "uniform mat4 uViewProj;\n"
                          "out vec3 vPosition;\n"
                          "out vec3 vColor;\n"
                          "void main() {\n"
                          "    vPosition = aPos;\n"
                          "    vColor = aColor;\n"
-                         "    gl_Position = uTransform * vec4(aPos, 1.0);\n"
+                         "    gl_Position = uModel * uViewProj * vec4(aPos, 1.0);\n"
                          "}\n";
 
 const char* fragment_src = "#version 330 core\n"
@@ -174,18 +174,17 @@ void sandbox_update(f32 delta_time) {
     Renderer* renderer = application_get_renderer();
     render_pass_begin(render_pass);
     {
-        RenderPacket packet = {
+        Material material = {
             .shader = shader,
+            .model = mat4_identity(),
+            .view_projection = camera_get_view_projection(camera),
+        };
+        RenderPacket packet = {
+            .material = &material,
             .vertex_buffer = vertex_buffer,
             .index_buffer = index_buffer,
-            .model = mat4_identity(),
             .index_count = 3,
-            .first_index = 0,
         };
-        // Handle this elsewhere.
-        render_cmd_shader_set_mat4(
-            render_pass->command_buffer, shader, "uTransform", camera_get_view_projection(camera)
-        );
         render_pass_submit(render_pass, &packet);
     }
     render_pass_end(renderer, render_pass);

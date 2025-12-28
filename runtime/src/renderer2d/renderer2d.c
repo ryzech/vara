@@ -39,7 +39,10 @@ static void renderer2d_render_batch(Renderer2D* r2d) {
     }
 
     RenderCommandBuffer* command = renderer_get_frame_command_buffer(r2d->renderer);
-    render_cmd_draw_indexed(command, sprite_shader, r2d->vertex_buffer, r2d->index_buffer);
+    render_cmd_bind_shader(command, sprite_shader);
+    render_cmd_bind_buffer(command, r2d->vertex_buffer);
+    render_cmd_bind_buffer(command, r2d->index_buffer);
+    render_cmd_draw_indexed(command, r2d->index_count, 0);
     r2d->draw_calls++;
 
     r2d->vertex_count = 0;
@@ -232,6 +235,7 @@ Renderer2D* renderer2d_create(Renderer* backend, const Renderer2DConfig* config)
         samplers[i] = i;
     }
     RenderCommandBuffer* command = renderer_get_frame_command_buffer(r2d->renderer);
+    render_cmd_bind_shader(command, sprite_shader);
     render_cmd_shader_set_int_array(
         command, sprite_shader, "uTextures", samplers, r2d->texture_count
     );
@@ -258,6 +262,7 @@ void renderer2d_begin(Renderer2D* r2d) {
     const Matrix4 ortho = mat4_ortho(0.0f, (f32)size.x, (f32)size.y, 0.0f, -1.0f, 1.0f);
 
     RenderCommandBuffer* command = renderer_get_frame_command_buffer(r2d->renderer);
+    render_cmd_bind_shader(command, sprite_shader);
     render_cmd_shader_set_mat4(command, sprite_shader, "uProjection", ortho);
 
     r2d->draw_calls = 0;

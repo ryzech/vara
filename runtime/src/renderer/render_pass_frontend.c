@@ -1,6 +1,7 @@
 #include <vara/core/logger.h>
 #include <vara/core/platform/platform.h>
 
+#include "vara/material/material.h"
 #include "vara/renderer/internal/renderer_internal.h"
 #include "vara/renderer/render_command.h"
 #include "vara/renderer/render_packet.h"
@@ -11,9 +12,18 @@ static void render_pass_build_commands(RenderPass* pass) {
     RenderCommandBuffer* buffer = pass->command_buffer;
     for (u32 i = 0; i < pass->packet_count; i++) {
         const RenderPacket* packet = &pass->packets[i];
-        render_cmd_draw_indexed(
-            buffer, packet->shader, packet->vertex_buffer, packet->index_buffer
+        const Material* material = packet->material;
+
+        render_cmd_bind_shader(buffer, material->shader);
+        render_cmd_shader_set_mat4(
+            buffer, material->shader, "uViewProj", material->view_projection
         );
+        render_cmd_shader_set_mat4(buffer, material->shader, "uModel", material->model);
+
+        render_cmd_bind_buffer(buffer, packet->vertex_buffer);
+        render_cmd_bind_buffer(buffer, packet->index_buffer);
+
+        render_cmd_draw_indexed(buffer, packet->index_count, packet->first_index);
     }
 }
 

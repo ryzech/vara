@@ -5,17 +5,13 @@
 
 typedef struct RenderPacket RenderPacket;
 
-struct Shader;
 struct Buffer;
-struct Texture;
+struct Material;
 
 struct RenderPacket {
-    struct Shader* shader;
+    struct Material* material;
     struct Buffer* vertex_buffer;
     struct Buffer* index_buffer;
-    struct Texture* textures[16];
-    u32 texture_count;
-    Matrix4 model;
     u32 index_count;
     u32 first_index;
     u64 sort_key;

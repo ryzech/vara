@@ -41,7 +41,7 @@ void editor_update(f32 delta_time) {
 
     Renderer* renderer = application_get_renderer();
     editor_ui_update(delta_time);
-    render_pass_begin(renderer, ui_pass);
+    render_pass_begin(ui_pass);
 
     editor_ui_draw();
 

@@ -8,6 +8,8 @@ typedef struct RenderCommandHeader RenderCommandHeader;
 typedef struct RenderCommandBuffer RenderCommandBuffer;
 typedef struct RenderCmdBeginPass RenderCmdBeginPass;
 typedef struct RenderCmdEndPass RenderCmdEndPass;
+typedef struct RenderCmdBindShader RenderCmdBindShader;
+typedef struct RenderCmdBindBuffer RenderCmdBindBuffer;
 typedef struct RenderCmdDrawIndexed RenderCmdDrawIndexed;
 typedef struct RenderCmdSetShaderMat4 RenderCmdSetShaderMat4;
 typedef struct RenderCmdSetShaderIntArray RenderCmdSetShaderIntArray;
@@ -18,6 +20,8 @@ struct RenderPass;
 
 enum RenderCommandType {
     RENDER_CMD_BEGIN_PASS,
+    RENDER_CMD_BIND_SHADER,
+    RENDER_CMD_BIND_BUFFER,
     RENDER_CMD_DRAW,
     RENDER_CMD_DRAW_INDEXED,
     RENDER_CMD_SET_SHADER_MAT4,
@@ -48,9 +52,18 @@ struct RenderCmdEndPass {
 
 struct RenderCmdDrawIndexed {
     RenderCommandHeader header;
+    u32 index_count;
+    u32 first_index;
+};
+
+struct RenderCmdBindShader {
+    RenderCommandHeader header;
     struct Shader* shader;
-    struct Buffer* vertex;
-    struct Buffer* index;
+};
+
+struct RenderCmdBindBuffer {
+    RenderCommandHeader header;
+    struct Buffer* buffer;
 };
 
 struct RenderCmdSetShaderMat4 {
@@ -74,6 +87,8 @@ void render_cmd_buffer_reset(RenderCommandBuffer* buffer);
 
 void render_cmd_begin_pass(RenderCommandBuffer* buffer, struct RenderPass* pass);
 void render_cmd_end_pass(RenderCommandBuffer* buffer, struct RenderPass* pass);
+void render_cmd_bind_shader(RenderCommandBuffer* buffer, struct Shader* shader);
+void render_cmd_bind_buffer(RenderCommandBuffer* buffer, struct Buffer* input);
 void render_cmd_shader_set_mat4(
     RenderCommandBuffer* buffer, struct Shader* shader, const char* name, Matrix4 matrix
 );
@@ -84,6 +99,4 @@ void render_cmd_shader_set_int_array(
     const i32* array,
     u32 count
 );
-void render_cmd_draw_indexed(
-    RenderCommandBuffer* buffer, struct Shader* shader, struct Buffer* vertex, struct Buffer* index
-);
+void render_cmd_draw_indexed(RenderCommandBuffer* buffer, u32 index_count, u32 first_index);

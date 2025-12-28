@@ -64,25 +64,30 @@ static void renderer_opengl_submit(const RenderCommandBuffer* buffer) {
                 render_pass_opengl_end(end_pass->pass);
                 break;
             }
+            case RENDER_CMD_BIND_SHADER: {
+                const RenderCmdBindShader* bind_shader = (RenderCmdBindShader*)cmd;
+                shader_opengl_bind(bind_shader->shader);
+                break;
+            }
+            case RENDER_CMD_BIND_BUFFER: {
+                const RenderCmdBindBuffer* bind_buffer = (RenderCmdBindBuffer*)cmd;
+                buffer_opengl_bind(bind_buffer->buffer);
+                break;
+            }
             case RENDER_CMD_DRAW_INDEXED: {
                 const RenderCmdDrawIndexed* draw_indexed = (RenderCmdDrawIndexed*)cmd;
-                shader_opengl_bind(draw_indexed->shader);
-                buffer_opengl_bind(draw_indexed->vertex);
-                buffer_opengl_bind(draw_indexed->index);
                 glDrawElements(
-                    GL_TRIANGLES, (GLsizei)draw_indexed->index->element_count, GL_UNSIGNED_INT, NULL
+                    GL_TRIANGLES, (GLsizei)draw_indexed->index_count, GL_UNSIGNED_INT, NULL
                 );
                 break;
             }
             case RENDER_CMD_SET_SHADER_MAT4: {
                 const RenderCmdSetShaderMat4* set_mat4 = (RenderCmdSetShaderMat4*)cmd;
-                shader_opengl_bind(set_mat4->shader);
                 shader_opengl_set_mat4(set_mat4->shader, set_mat4->name, set_mat4->matrix);
                 break;
             }
             case RENDER_CMD_SET_SHADER_INT_ARRAY: {
                 const RenderCmdSetShaderIntArray* set_int_array = (RenderCmdSetShaderIntArray*)cmd;
-                shader_opengl_bind(set_int_array->shader);
                 shader_opengl_set_int_array(
                     set_int_array->shader,
                     set_int_array->name,

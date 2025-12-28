@@ -55,15 +55,26 @@ void render_cmd_end_pass(RenderCommandBuffer* buffer, RenderPass* pass) {
     cmd->pass = pass;
 }
 
-void render_cmd_draw_indexed(
-    RenderCommandBuffer* buffer, struct Shader* shader, struct Buffer* vertex, struct Buffer* index
-) {
+void render_cmd_bind_shader(RenderCommandBuffer* buffer, Shader* shader) {
+    RenderCmdBindShader* cmd = render_cmd_allocate(buffer, sizeof(RenderCmdBindShader));
+    cmd->header.type = RENDER_CMD_BIND_SHADER;
+    cmd->header.size = sizeof(RenderCmdBindShader);
+    cmd->shader = shader;
+}
+
+void render_cmd_bind_buffer(RenderCommandBuffer* buffer, Buffer* input) {
+    RenderCmdBindBuffer* cmd = render_cmd_allocate(buffer, sizeof(RenderCmdBindBuffer));
+    cmd->header.type = RENDER_CMD_BIND_BUFFER;
+    cmd->header.size = sizeof(RenderCmdBindBuffer);
+    cmd->buffer = input;
+}
+
+void render_cmd_draw_indexed(RenderCommandBuffer* buffer, u32 index_count, u32 first_index) {
     RenderCmdDrawIndexed* cmd = render_cmd_allocate(buffer, sizeof(RenderCmdDrawIndexed));
     cmd->header.type = RENDER_CMD_DRAW_INDEXED;
     cmd->header.size = sizeof(RenderCmdDrawIndexed);
-    cmd->shader = shader;
-    cmd->vertex = vertex;
-    cmd->index = index;
+    cmd->index_count = index_count;
+    cmd->first_index = first_index;
 }
 
 void render_cmd_shader_set_mat4(
