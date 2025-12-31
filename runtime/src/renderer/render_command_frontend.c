@@ -6,6 +6,7 @@
 #include "vara/renderer/render_command.h"
 #include "vara/renderer/render_pass.h"
 #include "vara/renderer/shader.h"
+#include "vara/renderer/texture.h"
 
 static void* render_cmd_allocate(RenderCommandBuffer* buffer, u32 size) {
     if (buffer->used + size > buffer->capacity) {
@@ -67,6 +68,14 @@ void render_cmd_bind_buffer(RenderCommandBuffer* buffer, Buffer* input) {
     cmd->header.type = RENDER_CMD_BIND_BUFFER;
     cmd->header.size = sizeof(RenderCmdBindBuffer);
     cmd->buffer = input;
+}
+
+void render_cmd_bind_texture(RenderCommandBuffer* buffer, Texture* texture, u32 slot) {
+    RenderCmdBindTexture* cmd = render_cmd_allocate(buffer, sizeof(RenderCmdBindTexture));
+    cmd->header.type = RENDER_CMD_BIND_TEXTURE;
+    cmd->header.size = sizeof(RenderCmdBindTexture);
+    cmd->texture = texture;
+    cmd->slot = slot;
 }
 
 void render_cmd_draw_indexed(RenderCommandBuffer* buffer, u32 index_count, u32 first_index) {

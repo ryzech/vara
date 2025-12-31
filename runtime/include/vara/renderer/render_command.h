@@ -10,18 +10,21 @@ typedef struct RenderCmdBeginPass RenderCmdBeginPass;
 typedef struct RenderCmdEndPass RenderCmdEndPass;
 typedef struct RenderCmdBindShader RenderCmdBindShader;
 typedef struct RenderCmdBindBuffer RenderCmdBindBuffer;
+typedef struct RenderCmdBindTexture RenderCmdBindTexture;
 typedef struct RenderCmdDrawIndexed RenderCmdDrawIndexed;
 typedef struct RenderCmdSetShaderMat4 RenderCmdSetShaderMat4;
 typedef struct RenderCmdSetShaderIntArray RenderCmdSetShaderIntArray;
 
 struct Buffer;
 struct Shader;
+struct Texture;
 struct RenderPass;
 
 enum RenderCommandType {
     RENDER_CMD_BEGIN_PASS,
     RENDER_CMD_BIND_SHADER,
     RENDER_CMD_BIND_BUFFER,
+    RENDER_CMD_BIND_TEXTURE,
     RENDER_CMD_DRAW,
     RENDER_CMD_DRAW_INDEXED,
     RENDER_CMD_SET_SHADER_MAT4,
@@ -66,6 +69,12 @@ struct RenderCmdBindBuffer {
     struct Buffer* buffer;
 };
 
+struct RenderCmdBindTexture {
+    RenderCommandHeader header;
+    struct Texture* texture;
+    u32 slot;
+};
+
 struct RenderCmdSetShaderMat4 {
     RenderCommandHeader header;
     Matrix4 matrix;
@@ -89,6 +98,7 @@ void render_cmd_begin_pass(RenderCommandBuffer* buffer, struct RenderPass* pass)
 void render_cmd_end_pass(RenderCommandBuffer* buffer, struct RenderPass* pass);
 void render_cmd_bind_shader(RenderCommandBuffer* buffer, struct Shader* shader);
 void render_cmd_bind_buffer(RenderCommandBuffer* buffer, struct Buffer* input);
+void render_cmd_bind_texture(RenderCommandBuffer* buffer, struct Texture* texture, u32 slot);
 void render_cmd_shader_set_mat4(
     RenderCommandBuffer* buffer, struct Shader* shader, const char* name, Matrix4 matrix
 );

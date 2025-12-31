@@ -74,6 +74,11 @@ static void renderer_opengl_submit(const RenderCommandBuffer* buffer) {
                 buffer_opengl_bind(bind_buffer->buffer);
                 break;
             }
+            case RENDER_CMD_BIND_TEXTURE: {
+                const RenderCmdBindTexture* bind_texture = (RenderCmdBindTexture*)cmd;
+                texture_opengl_bind(bind_texture->texture, bind_texture->slot);
+                break;
+            }
             case RENDER_CMD_DRAW_INDEXED: {
                 const RenderCmdDrawIndexed* draw_indexed = (RenderCmdDrawIndexed*)cmd;
                 glDrawElements(

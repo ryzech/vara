@@ -25,7 +25,7 @@ const char* vertex_src = "#version 330 core\n"
                          "void main() {\n"
                          "    vPosition = aPos;\n"
                          "    vColor = aColor;\n"
-                         "    gl_Position = uModel * uViewProj * vec4(aPos, 1.0);\n"
+                         "    gl_Position = uViewProj * uModel * vec4(aPos, 1.0);\n"
                          "}\n";
 
 const char* fragment_src = "#version 330 core\n"
