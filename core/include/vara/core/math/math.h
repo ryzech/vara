@@ -6,6 +6,7 @@
 #include "vara/core/math/types.h"
 #include "vara/core/math/vec2.h"
 #include "vara/core/math/vec3.h"
+#include "vara/core/math/vec4.h"
 
 #define PI            3.14159265358979323846264338327950288
 #define PI_OVER_TWO   PI / 2

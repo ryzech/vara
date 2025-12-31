@@ -14,27 +14,7 @@
 #include <vara/renderer/render_packet.h>
 #include <vara/renderer/render_pass.h>
 #include <vara/renderer/shader.h>
-
-const char* vertex_src = "#version 330 core\n"
-                         "layout (location = 0) in vec3 aPos;\n"
-                         "layout (location = 1) in vec3 aColor;\n"
-                         "uniform mat4 uModel;\n"
-                         "uniform mat4 uViewProj;\n"
-                         "out vec3 vPosition;\n"
-                         "out vec3 vColor;\n"
-                         "void main() {\n"
-                         "    vPosition = aPos;\n"
-                         "    vColor = aColor;\n"
-                         "    gl_Position = uViewProj * uModel * vec4(aPos, 1.0);\n"
-                         "}\n";
-
-const char* fragment_src = "#version 330 core\n"
-                           "layout(location = 0) out vec4 color;\n"
-                           "in vec3 vPosition;\n"
-                           "in vec3 vColor;\n"
-                           "void main() {\n"
-                           "    color = vec4(0.2, 0.3, 0.4, 1.0);\n"
-                           "}\n";
+#include <vara/shaders/basic_shader.glsl.gen.h>
 
 static Buffer* index_buffer;
 static Buffer* vertex_buffer;
@@ -92,11 +72,11 @@ void sandbox_init(void) {
     ShaderSource sources[] = {
         {
             .stage = SHADER_STAGE_VERTEX,
-            .source = vertex_src,
+            .source = basic_shader_vertex_source,
         },
         {
             .stage = SHADER_STAGE_FRAGMENT,
-            .source = fragment_src,
+            .source = basic_shader_fragment_source,
         },
     };
 

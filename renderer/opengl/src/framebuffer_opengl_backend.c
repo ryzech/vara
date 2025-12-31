@@ -18,7 +18,11 @@ static TextureFormat fb_format_to_texture_format(FramebufferAttachmentFormat for
     switch (format) {
         case FRAMEBUFFER_FORMAT_RGBA8:
             return TEXTURE_FORMAT_RGBA;
-        // Is there an actual depth texture format?
+        case FRAMEBUFFER_FORMAT_RGBA16F:
+            return TEXTURE_FORMAT_RGBA;
+        case FRAMEBUFFER_FORMAT_RGB16F:
+            return TEXTURE_FORMAT_RGB;
+            // Is there an actual depth texture format?
         case FRAMEBUFFER_FORMAT_DEPTH24_STENCIL8:
             return TEXTURE_FORMAT_R;
         default:
@@ -30,6 +34,12 @@ static GLint format_to_gl_internal(FramebufferAttachmentFormat format) {
     switch (format) {
         case FRAMEBUFFER_FORMAT_RGBA8:
             return GL_RGBA8;
+        case FRAMEBUFFER_FORMAT_RGBA16F:
+            return GL_RGBA16F;
+        case FRAMEBUFFER_FORMAT_RGB16F:
+            return GL_RGB16F;
+        case FRAMEBUFFER_FORMAT_RG16F:
+            return GL_RG16F;
         case FRAMEBUFFER_FORMAT_DEPTH24_STENCIL8:
             return GL_DEPTH24_STENCIL8;
         default:
@@ -41,6 +51,12 @@ static GLenum format_to_gl_format(FramebufferAttachmentFormat format) {
     switch (format) {
         case FRAMEBUFFER_FORMAT_RGBA8:
             return GL_RGBA;
+        case FRAMEBUFFER_FORMAT_RGBA16F:
+            return GL_RGBA;
+        case FRAMEBUFFER_FORMAT_RGB16F:
+            return GL_RGB;
+        case FRAMEBUFFER_FORMAT_RG16F:
+            return GL_RG;
         case FRAMEBUFFER_FORMAT_DEPTH24_STENCIL8:
             return GL_DEPTH_STENCIL;
         default:
