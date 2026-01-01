@@ -1,25 +1,27 @@
 #include <stdio.h>
 #include <vara/application/application.h>
 #include <vara/camera/camera.h>
-#include <vara/core/defines.h>
 #include <vara/core/event/event.h>
 #include <vara/core/input/input.h>
-#include <vara/core/logger.h>
 #include <vara/core/math/math.h>
 #include <vara/core/platform/platform.h>
-#include <vara/core/platform/platform_graphics_types.h>
-#include <vara/core/platform/platform_window.h>
 #include <vara/material/material.h>
 #include <vara/renderer/buffer.h>
+#include <vara/renderer/framebuffer.h>
 #include <vara/renderer/render_packet.h>
 #include <vara/renderer/render_pass.h>
 #include <vara/renderer/shader.h>
+#include <vara/renderer/texture.h>
 #include <vara/shaders/basic_shader.glsl.gen.h>
+#include <vara/shaders/screen_quad.glsl.gen.h>
 
 static Buffer* index_buffer;
 static Buffer* vertex_buffer;
 static Shader* shader;
+static Shader* screen_shader;
 static RenderPass* render_pass;
+static RenderPass* screen_pass;
+static Framebuffer* render_buffer;
 
 static Camera* camera;
 
@@ -29,6 +31,9 @@ static b8 on_window_resize(i16 event_code, void* sender, const EventData* event)
     const i32 width = event->i32[0];
     const i32 height = event->i32[1];
     const Vector2i size = {width, height};
+
+    // Needs the physical size in pixels rather than logical.
+    framebuffer_resize(render_buffer, width * 2, height * 2);
 
     camera_update(camera, size);
     return false;
@@ -79,7 +84,6 @@ void sandbox_init(void) {
             .source = basic_shader_fragment_source,
         },
     };
-
     const ShaderConfig shader_config = {
         .name = "basic_shader",
         .stages = sources,
@@ -87,13 +91,53 @@ void sandbox_init(void) {
     };
     shader = shader_create(renderer, &shader_config);
 
+    ShaderSource screen_sources[] = {
+        {
+            .stage = SHADER_STAGE_VERTEX,
+            .source = screen_quad_vertex_source,
+        },
+        {
+            .stage = SHADER_STAGE_FRAGMENT,
+            .source = screen_quad_fragment_source,
+        },
+    };
+    const ShaderConfig screen_shader_config = {
+        .name = "screen_shader",
+        .stages = screen_sources,
+        .stage_count = 2,
+    };
+    screen_shader = shader_create(renderer, &screen_shader_config);
+
+    const Vector2i size = platform_window_get_size(application_get_window());
+    FramebufferAttachmentConfig attachments[] = {
+        {.type = FRAMEBUFFER_ATTACHMENT_COLOR, .format = FRAMEBUFFER_FORMAT_RGBA8},
+        {.type = FRAMEBUFFER_ATTACHMENT_DEPTH, .format = FRAMEBUFFER_FORMAT_DEPTH24_STENCIL8},
+    };
+    const FramebufferConfig fb_config = {
+        .name = "offscreen_fb",
+        .attachments = attachments,
+        .attachment_count = 2,
+        .width = size.x * 2,
+        .height = size.y * 2,
+        .samples = 1,
+    };
+    render_buffer = framebuffer_create(renderer, &fb_config);
+
     const RenderPassConfig pass_config = {
         .name = "main_pass",
-        .target = NULL,
+        .target = render_buffer,
         .clear = true,
         .clear_color = (Vector4){0.1f, 0.1f, 0.1f, 1.0f},
     };
     render_pass = render_pass_create(renderer, &pass_config);
+
+    const RenderPassConfig screen_pass_config = {
+        .name = "screen_pass",
+        .target = NULL,
+        .clear = true,
+        .clear_color = vec4(0.2f, 0.2f, 0.2f, 1.0f),
+    };
+    screen_pass = render_pass_create(renderer, &screen_pass_config);
 
     camera = camera_create();
     camera_update(
@@ -168,13 +212,34 @@ void sandbox_update(f32 delta_time) {
         render_pass_submit(render_pass, &packet);
     }
     render_pass_end(renderer, render_pass);
+
+    render_pass_begin(screen_pass);
+    {
+        Texture* screen_texture = framebuffer_get_attachment(render_buffer, 0);
+        Material material = {
+            .shader = screen_shader,
+            .model = mat4_identity(),
+            .view_projection = mat4_identity(),
+            .texture_count = 1,
+        };
+        material.textures[0] = screen_texture;
+        RenderPacket packet = {
+            .material = &material,
+            .vertex_count = 3,
+        };
+        render_pass_submit(screen_pass, &packet);
+    }
+    render_pass_end(renderer, screen_pass);
 }
 
 void sandbox_shutdown() {
+    framebuffer_destroy(render_buffer);
     shader_destroy(shader);
+    shader_destroy(screen_shader);
     buffer_destroy(vertex_buffer);
     buffer_destroy(index_buffer);
     render_pass_destroy(render_pass);
+    render_pass_destroy(screen_pass);
 }
 
 void application_init(ApplicationConfig* config) {
