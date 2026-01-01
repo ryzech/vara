@@ -11,6 +11,7 @@ typedef struct RenderCmdEndPass RenderCmdEndPass;
 typedef struct RenderCmdBindShader RenderCmdBindShader;
 typedef struct RenderCmdBindBuffer RenderCmdBindBuffer;
 typedef struct RenderCmdBindTexture RenderCmdBindTexture;
+typedef struct RenderCmdDraw RenderCmdDraw;
 typedef struct RenderCmdDrawIndexed RenderCmdDrawIndexed;
 typedef struct RenderCmdSetShaderMat4 RenderCmdSetShaderMat4;
 typedef struct RenderCmdSetShaderIntArray RenderCmdSetShaderIntArray;
@@ -51,6 +52,12 @@ struct RenderCmdBeginPass {
 struct RenderCmdEndPass {
     RenderCommandHeader header;
     struct RenderPass* pass;
+};
+
+struct RenderCmdDraw {
+    RenderCommandHeader header;
+    u32 vertex_count;
+    u32 first_vertex;
 };
 
 struct RenderCmdDrawIndexed {
@@ -109,4 +116,5 @@ void render_cmd_shader_set_int_array(
     const i32* array,
     u32 count
 );
+void render_cmd_draw(RenderCommandBuffer* buffer, u32 vertex_count, u32 first_vertex);
 void render_cmd_draw_indexed(RenderCommandBuffer* buffer, u32 index_count, u32 first_index);

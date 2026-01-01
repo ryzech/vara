@@ -78,6 +78,14 @@ void render_cmd_bind_texture(RenderCommandBuffer* buffer, Texture* texture, u32 
     cmd->slot = slot;
 }
 
+void render_cmd_draw(RenderCommandBuffer* buffer, u32 vertex_count, u32 first_vertex) {
+    RenderCmdDraw* cmd = render_cmd_allocate(buffer, sizeof(RenderCmdDraw));
+    cmd->header.type = RENDER_CMD_DRAW;
+    cmd->header.size = sizeof(RenderCmdDraw);
+    cmd->vertex_count = vertex_count;
+    cmd->first_vertex = first_vertex;
+}
+
 void render_cmd_draw_indexed(RenderCommandBuffer* buffer, u32 index_count, u32 first_index) {
     RenderCmdDrawIndexed* cmd = render_cmd_allocate(buffer, sizeof(RenderCmdDrawIndexed));
     cmd->header.type = RENDER_CMD_DRAW_INDEXED;

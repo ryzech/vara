@@ -15,7 +15,6 @@ static void render_pass_build_commands(RenderPass* pass) {
         const Material* material = packet->material;
 
         render_cmd_bind_shader(buffer, material->shader);
-
         for (u32 t = 0; t < material->texture_count; t++) {
             render_cmd_bind_texture(buffer, material->textures[t], t);
         }
@@ -30,6 +29,11 @@ static void render_pass_build_commands(RenderPass* pass) {
             render_cmd_bind_buffer(buffer, packet->vertex_buffer);
             render_cmd_bind_buffer(buffer, packet->index_buffer);
             render_cmd_draw_indexed(buffer, packet->index_count, packet->first_index);
+        } else if (packet->vertex_count > 0) {
+            if (packet->vertex_buffer) {
+                render_cmd_bind_buffer(buffer, packet->vertex_buffer);
+            }
+            render_cmd_draw(buffer, packet->vertex_count, packet->first_vertex);
         }
     }
 }
