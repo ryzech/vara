@@ -138,9 +138,9 @@ b8 framebuffer_opengl_create(Framebuffer* buffer, const FramebufferConfig* confi
     u32 color_index = 0;
     for (u32 i = 0; i < config->attachment_count; i++) {
         const FramebufferAttachmentConfig* attachment = &config->attachments[i];
-        GLuint texture =
+        const GLuint texture =
             opengl_texture_create(attachment, config->width, config->height, config->samples);
-        GLenum target = (config->samples > 1) ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
+        const GLenum target = (config->samples > 1) ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
 
         switch (attachment->type) {
             case FRAMEBUFFER_ATTACHMENT_COLOR: {
@@ -170,6 +170,7 @@ b8 framebuffer_opengl_create(Framebuffer* buffer, const FramebufferConfig* confi
         texture_wrapper->height = config->height;
         texture_wrapper->format = fb_format_to_texture_format(attachment->format);
         texture_wrapper->filter = TEXTURE_FILTER_LINEAR;
+        texture_wrapper->samples = config->samples;
 
         OpenGLTextureState* texture_state = platform_allocate(sizeof(OpenGLTextureState));
         texture_state->id = texture;

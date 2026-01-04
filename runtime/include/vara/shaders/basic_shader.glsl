@@ -29,14 +29,6 @@ in vec4 vColor;
 in vec3 vWorldPos;
 in vec2 vTexCoord;
 
-uniform sampler2D uTexture;
-
 void main() {
-    vec4 texColor = texture(uTexture, vTexCoord);
-
-    if (texColor.a <= 0.0f) {
-        discard;
-    }
-
-    oColor = texColor * vColor;
+    oColor = vColor;
 }

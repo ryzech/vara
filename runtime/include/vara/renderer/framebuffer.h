@@ -5,8 +5,6 @@
 // Forward declarations, in case they need access to each other.
 typedef enum FramebufferAttachmentType FramebufferAttachmentType;
 typedef enum FramebufferAttachmentFormat FramebufferAttachmentFormat;
-typedef enum FramebufferAttachmentLoadOp FramebufferAttachmentLoadOp;
-typedef enum FramebufferAttachmentStoreOp FramebufferAttachmentStoreOp;
 typedef struct FramebufferAttachmentConfig FramebufferAttachmentConfig;
 typedef struct Framebuffer Framebuffer;
 typedef struct FramebufferConfig FramebufferConfig;
@@ -28,17 +26,6 @@ enum FramebufferAttachmentFormat {
     FRAMEBUFFER_FORMAT_RGB16F,
     FRAMEBUFFER_FORMAT_RG16F,
     FRAMEBUFFER_FORMAT_DEPTH24_STENCIL8,
-};
-
-enum FramebufferAttachmentLoadOp {
-    ATTACHMENT_LOAD_OP_LOAD,
-    ATTACHMENT_LOAD_OP_CLEAR,
-    ATTACHMENT_LOAD_OP_DONT_CARE,
-};
-
-enum FramebufferAttachmentStoreOp {
-    ATTACHMENT_STORE_OP_STORE,
-    ATTACHMENT_STORE_OP_DONT_CARE,
 };
 
 struct FramebufferAttachmentConfig {

@@ -44,8 +44,26 @@ RenderPass* render_pass_create(Renderer* renderer, const RenderPassConfig* confi
 
     pass->name = config->name;
     pass->target = config->target;
-    pass->clear = config->clear;
-    pass->clear_color = config->clear_color;
+
+    pass->color_attachment_count = config->color_attachment_count;
+    if (config->color_attachment_count > 0) {
+        pass->color_attachments =
+            platform_allocate(sizeof(RenderPassAttachment) * config->color_attachment_count);
+        platform_copy_memory(
+            pass->color_attachments,
+            config->color_attachments,
+            sizeof(RenderPassAttachment) * config->color_attachment_count
+        );
+    }
+
+    if (config->depth_stencil_attachment) {
+        pass->depth_stencil_attachment = platform_allocate(sizeof(RenderPassAttachment));
+        platform_copy_memory(
+            pass->depth_stencil_attachment,
+            config->depth_stencil_attachment,
+            sizeof(RenderPassAttachment)
+        );
+    }
 
     RendererBackend* backend = renderer_backend_get(renderer);
     pass->backend = backend;
@@ -68,6 +86,12 @@ void render_pass_destroy(RenderPass* pass) {
         pass->backend->render_pass.destroy(pass);
         render_cmd_buffer_destroy(pass->command_buffer);
         platform_free(pass->packets);
+        if (pass->color_attachments) {
+            platform_free(pass->color_attachments);
+        }
+        if (pass->depth_stencil_attachment) {
+            platform_free(pass->depth_stencil_attachment);
+        }
         platform_free(pass);
     }
 }

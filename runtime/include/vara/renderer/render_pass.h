@@ -6,6 +6,9 @@
 // Forward declarations, in case they need access to each other.
 typedef struct RenderPass RenderPass;
 typedef struct RenderPassConfig RenderPassConfig;
+typedef enum AttachmentLoadOp AttachmentLoadOp;
+typedef enum AttachmentStoreOp AttachmentStoreOp;
+typedef struct RenderPassAttachment RenderPassAttachment;
 
 // Redeclaration's so we don't have to include header.
 struct Framebuffer;
@@ -14,19 +17,38 @@ struct Renderer;
 struct RendererBackend;
 struct RenderPacket;
 
+enum AttachmentLoadOp {
+    ATTACHMENT_LOAD_OP_LOAD,
+    ATTACHMENT_LOAD_OP_CLEAR,
+    ATTACHMENT_LOAD_OP_DONT_CARE,
+};
+
+enum AttachmentStoreOp {
+    ATTACHMENT_STORE_OP_STORE,
+    ATTACHMENT_STORE_OP_DONT_CARE,
+};
+
+struct RenderPassAttachment {
+    AttachmentLoadOp load;
+    AttachmentStoreOp store;
+    Vector4 clear;
+};
+
 struct RenderPassConfig {
-    Vector4 clear_color;
     const char* name;
     struct Framebuffer* target;
-    // TODO: LOAD/STORE ops rather than just clear.
-    b8 clear;
+    RenderPassAttachment* color_attachments;
+    u32 color_attachment_count;
+    RenderPassAttachment* depth_stencil_attachment;
 };
 
 struct RenderPass {
     const char* name;
     struct Framebuffer* target;
-    b8 clear;
-    Vector4 clear_color;
+    RenderPassAttachment* color_attachments;
+    u32 color_attachment_count;
+    RenderPassAttachment* depth_stencil_attachment;
+
     struct RenderPacket* packets;
     u32 packet_count;
     u32 packet_capacity;

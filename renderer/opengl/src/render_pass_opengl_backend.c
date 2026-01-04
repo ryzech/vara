@@ -48,11 +48,25 @@ void render_pass_opengl_begin(RenderPass* pass) {
         framebuffer_opengl_bind(pass->target);
     }
 
-    if (pass->clear) {
-        const Vector4 color = pass->clear_color;
-        glClearColor(color.x, color.y, color.z, color.w);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    for (u32 i = 0; i < pass->color_attachment_count; i++) {
+        const RenderPassAttachment* attachment = &pass->color_attachments[i];
+        switch (attachment->load) {
+            case ATTACHMENT_LOAD_OP_CLEAR: {
+                const Vector4 value = attachment->clear;
+                glClearColor(value.x, value.y, value.z, value.w);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                break;
+            }
+            case ATTACHMENT_LOAD_OP_LOAD: {
+                break;
+            }
+            case ATTACHMENT_LOAD_OP_DONT_CARE: {
+                break;
+            }
+        }
     }
+
+    // TODO: handle depth/stencil.
 
     render_pass_state->active = true;
 }

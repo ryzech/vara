@@ -123,19 +123,27 @@ void sandbox_init(void) {
     };
     render_buffer = framebuffer_create(renderer, &fb_config);
 
+    RenderPassAttachment color = {
+        .load = ATTACHMENT_LOAD_OP_CLEAR,
+        .clear = vec4(0.1f, 0.1f, 0.1f, 1.0f),
+    };
     const RenderPassConfig pass_config = {
         .name = "main_pass",
         .target = render_buffer,
-        .clear = true,
-        .clear_color = (Vector4){0.1f, 0.1f, 0.1f, 1.0f},
+        .color_attachments = &color,
+        .color_attachment_count = 1,
     };
     render_pass = render_pass_create(renderer, &pass_config);
 
+    RenderPassAttachment screen_color = {
+        .load = ATTACHMENT_LOAD_OP_CLEAR,
+        .clear = vec4(0.2f, 0.2f, 0.2f, 1.0f),
+    };
     const RenderPassConfig screen_pass_config = {
         .name = "screen_pass",
         .target = NULL,
-        .clear = true,
-        .clear_color = vec4(0.2f, 0.2f, 0.2f, 1.0f),
+        .color_attachments = &screen_color,
+        .color_attachment_count = 1,
     };
     screen_pass = render_pass_create(renderer, &screen_pass_config);
 
