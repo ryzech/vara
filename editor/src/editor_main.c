@@ -25,10 +25,16 @@ void editor_init(void) {
 
     Renderer* renderer = application_get_renderer();
     RenderContext* render_context = application_get_render_context();
+
+    RenderPassAttachment screen_color = {
+        .load = ATTACHMENT_LOAD_OP_CLEAR,
+        .clear = vec4(0.2f, 0.2f, 0.2f, 1.0f),
+    };
     const RenderPassConfig ui_pass_config = {
         .name = "ui_pass",
         .target = NULL,
-        .clear = true,
+        .color_attachments = &screen_color,
+        .color_attachment_count = 1,
     };
     ui_pass = render_pass_create(renderer, &ui_pass_config);
     editor_ui_create(render_context);

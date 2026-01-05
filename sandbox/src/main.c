@@ -33,7 +33,11 @@ static b8 on_window_resize(i16 event_code, void* sender, const EventData* event)
     const Vector2i size = {width, height};
 
     // Needs the physical size in pixels rather than logical.
-    framebuffer_resize(render_buffer, width * 2, height * 2);
+    const VaraWindow* window = application_get_window();
+    const f32 scale = window->pixel_density;
+    const i32 scaled_x = (i32)((f32)width * scale);
+    const i32 scaled_y = (i32)((f32)height * scale);
+    framebuffer_resize(render_buffer, scaled_x, scaled_y);
 
     camera_update(camera, size);
     return false;
@@ -108,7 +112,10 @@ void sandbox_init(void) {
     };
     screen_shader = shader_create(renderer, &screen_shader_config);
 
-    const Vector2i size = platform_window_get_size(application_get_window());
+    const VaraWindow* window = application_get_window();
+    const f32 scale = window->pixel_density;
+    const i32 scaled_x = (i32)((f32)window->width * scale);
+    const i32 scaled_y = (i32)((f32)window->height * scale);
     FramebufferAttachmentConfig attachments[] = {
         {.type = FRAMEBUFFER_ATTACHMENT_COLOR, .format = FRAMEBUFFER_FORMAT_RGBA8},
         {.type = FRAMEBUFFER_ATTACHMENT_DEPTH, .format = FRAMEBUFFER_FORMAT_DEPTH24_STENCIL8},
@@ -117,8 +124,8 @@ void sandbox_init(void) {
         .name = "offscreen_fb",
         .attachments = attachments,
         .attachment_count = 2,
-        .width = size.x * 2,
-        .height = size.y * 2,
+        .width = scaled_x,
+        .height = scaled_y,
         .samples = 1,
     };
     render_buffer = framebuffer_create(renderer, &fb_config);
