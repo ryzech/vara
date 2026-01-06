@@ -5,6 +5,7 @@
 #include "vara/renderer/buffer.h"
 #include "vara/renderer/render_command.h"
 #include "vara/renderer/render_pass.h"
+#include "vara/renderer/render_pipeline.h"
 #include "vara/renderer/shader.h"
 #include "vara/renderer/texture.h"
 
@@ -54,6 +55,13 @@ void render_cmd_end_pass(RenderCommandBuffer* buffer, RenderPass* pass) {
     cmd->header.type = RENDER_CMD_END_PASS;
     cmd->header.size = sizeof(RenderCmdEndPass);
     cmd->pass = pass;
+}
+
+void render_cmd_bind_pipeline(RenderCommandBuffer* buffer, RenderPipeline* pipeline) {
+    RenderCmdBindPipeline* cmd = render_cmd_allocate(buffer, sizeof(RenderCmdBindPipeline));
+    cmd->header.type = RENDER_CMD_BIND_PIPELINE;
+    cmd->header.size = sizeof(RenderCmdBindPipeline);
+    cmd->pipeline = pipeline;
 }
 
 void render_cmd_bind_shader(RenderCommandBuffer* buffer, Shader* shader) {

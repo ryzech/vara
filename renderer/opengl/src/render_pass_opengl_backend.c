@@ -1,10 +1,9 @@
 #include <glad/gl.h>
-#include <vara/core/defines.h>
 #include <vara/core/logger.h>
 #include <vara/core/platform/platform.h>
-#include <vara/renderer/render_pass.h>
 
 #include "vara/renderer/framebuffer_opengl_backend.h"
+#include "vara/renderer/render_pass_opengl_backend.h"
 
 typedef struct OpenGLRenderPassState {
     b8 active;

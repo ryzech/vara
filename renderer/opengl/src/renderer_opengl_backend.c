@@ -8,6 +8,7 @@
 #include "vara/renderer/buffer_opengl_backend.h"
 #include "vara/renderer/framebuffer_opengl_backend.h"
 #include "vara/renderer/render_pass_opengl_backend.h"
+#include "vara/renderer/render_pipeline_opengl_backend.h"
 #include "vara/renderer/shader_opengl_backend.h"
 #include "vara/renderer/texture_opengl_backend.h"
 
@@ -62,6 +63,11 @@ static void renderer_opengl_submit(const RenderCommandBuffer* buffer) {
             case RENDER_CMD_END_PASS: {
                 const RenderCmdEndPass* end_pass = (RenderCmdEndPass*)cmd;
                 render_pass_opengl_end(end_pass->pass);
+                break;
+            }
+            case RENDER_CMD_BIND_PIPELINE: {
+                const RenderCmdBindPipeline* bind_pipeline = (RenderCmdBindPipeline*)cmd;
+                render_pipeline_opengl_bind(bind_pipeline->pipeline);
                 break;
             }
             case RENDER_CMD_BIND_SHADER: {
@@ -174,6 +180,11 @@ void renderer_opengl_init(RendererBackend* backend, VaraWindow* window) {
     backend->framebuffer.bind = framebuffer_opengl_bind;
     backend->framebuffer.unbind = framebuffer_opengl_unbind;
     backend->framebuffer.resize = framebuffer_opengl_resize;
+
+    // Pipeline API
+    backend->render_pipeline.create = render_pipeline_opengl_create;
+    backend->render_pipeline.destroy = render_pipeline_opengl_destroy;
+    backend->render_pipeline.bind = render_pipeline_opengl_bind;
 
     DEBUG("Creating RendererBackend named('%s')", backend->name);
 }

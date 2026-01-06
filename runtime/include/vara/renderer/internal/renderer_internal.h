@@ -6,6 +6,7 @@
 #include "vara/renderer/internal/renderer_buffer_internal.h"
 #include "vara/renderer/internal/renderer_framebuffer_internal.h"
 #include "vara/renderer/internal/renderer_pass_internal.h"
+#include "vara/renderer/internal/renderer_pipeline_internal.h"
 #include "vara/renderer/internal/renderer_shader_internal.h"
 #include "vara/renderer/internal/renderer_texture_internal.h"
 #include "vara/renderer/render_command.h"
@@ -32,6 +33,7 @@ struct RendererBackend {
     BufferBackendVT buffer;
     FramebufferBackendVT framebuffer;
     RenderPassBackendVT render_pass;
+    RenderPipelineBackendVT render_pipeline;
     TextureBackendVT texture;
 
     const char* name;

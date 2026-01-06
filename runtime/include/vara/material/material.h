@@ -4,11 +4,9 @@
 
 typedef struct Material Material;
 
-struct Shader;
 struct Texture;
 
 struct Material {
-    struct Shader* shader;
     Matrix4 model;
     Matrix4 view_projection;
     struct Texture* textures[16];

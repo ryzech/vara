@@ -14,15 +14,15 @@ static void render_pass_build_commands(RenderPass* pass) {
         const RenderPacket* packet = &pass->packets[i];
         const Material* material = packet->material;
 
-        render_cmd_bind_shader(buffer, material->shader);
+        render_cmd_bind_pipeline(buffer, packet->pipeline);
         for (u32 t = 0; t < material->texture_count; t++) {
             render_cmd_bind_texture(buffer, material->textures[t], t);
         }
 
         render_cmd_shader_set_mat4(
-            buffer, material->shader, "uViewProj", material->view_projection
+            buffer, packet->pipeline->shader, "uViewProj", material->view_projection
         );
-        render_cmd_shader_set_mat4(buffer, material->shader, "uModel", material->model);
+        render_cmd_shader_set_mat4(buffer, packet->pipeline->shader, "uModel", material->model);
 
         // Should we allow non-indexed drawing?
         if (packet->vertex_buffer && packet->index_buffer && packet->index_count > 0) {

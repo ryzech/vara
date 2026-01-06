@@ -10,6 +10,7 @@
 #include <vara/renderer/framebuffer.h>
 #include <vara/renderer/render_packet.h>
 #include <vara/renderer/render_pass.h>
+#include <vara/renderer/render_pipeline.h>
 #include <vara/renderer/shader.h>
 #include <vara/renderer/texture.h>
 #include <vara/shaders/basic_shader.glsl.gen.h>
@@ -22,6 +23,8 @@ static Shader* screen_shader;
 static RenderPass* render_pass;
 static RenderPass* screen_pass;
 static Framebuffer* render_buffer;
+static RenderPipeline* base_pipeline;
+static RenderPipeline* screen_pipeline;
 
 static Camera* camera;
 
@@ -79,14 +82,8 @@ void sandbox_init(void) {
     index_buffer = buffer_create(renderer, &index_buffer_config);
 
     ShaderSource sources[] = {
-        {
-            .stage = SHADER_STAGE_VERTEX,
-            .source = basic_shader_vertex_source,
-        },
-        {
-            .stage = SHADER_STAGE_FRAGMENT,
-            .source = basic_shader_fragment_source,
-        },
+        {.stage = SHADER_STAGE_VERTEX, .source = basic_shader_vertex_source},
+        {.stage = SHADER_STAGE_FRAGMENT, .source = basic_shader_fragment_source},
     };
     const ShaderConfig shader_config = {
         .name = "basic_shader",
@@ -96,14 +93,8 @@ void sandbox_init(void) {
     shader = shader_create(renderer, &shader_config);
 
     ShaderSource screen_sources[] = {
-        {
-            .stage = SHADER_STAGE_VERTEX,
-            .source = screen_quad_vertex_source,
-        },
-        {
-            .stage = SHADER_STAGE_FRAGMENT,
-            .source = screen_quad_fragment_source,
-        },
+        {.stage = SHADER_STAGE_VERTEX, .source = screen_quad_vertex_source},
+        {.stage = SHADER_STAGE_FRAGMENT, .source = screen_quad_fragment_source},
     };
     const ShaderConfig screen_shader_config = {
         .name = "screen_shader",
@@ -153,6 +144,18 @@ void sandbox_init(void) {
         .color_attachment_count = 1,
     };
     screen_pass = render_pass_create(renderer, &screen_pass_config);
+
+    const RenderPipelineConfig base_pipeline_config = {
+        .name = "base_pipeline",
+        .shader = shader,
+    };
+    base_pipeline = render_pipeline_create(renderer, &base_pipeline_config);
+
+    const RenderPipelineConfig screen_pipeline_config = {
+        .name = "screen_pipeline",
+        .shader = screen_shader,
+    };
+    screen_pipeline = render_pipeline_create(renderer, &screen_pipeline_config);
 
     camera = camera_create();
     camera_update(
@@ -214,11 +217,11 @@ void sandbox_update(f32 delta_time) {
     render_pass_begin(render_pass);
     {
         Material material = {
-            .shader = shader,
             .model = mat4_identity(),
             .view_projection = camera_get_view_projection(camera),
         };
         RenderPacket packet = {
+            .pipeline = base_pipeline,
             .material = &material,
             .vertex_buffer = vertex_buffer,
             .index_buffer = index_buffer,
@@ -232,13 +235,13 @@ void sandbox_update(f32 delta_time) {
     {
         Texture* screen_texture = framebuffer_get_attachment(render_buffer, 0);
         Material material = {
-            .shader = screen_shader,
             .model = mat4_identity(),
             .view_projection = mat4_identity(),
             .texture_count = 1,
         };
         material.textures[0] = screen_texture;
         RenderPacket packet = {
+            .pipeline = screen_pipeline,
             .material = &material,
             .vertex_count = 3,
         };
@@ -253,6 +256,8 @@ void sandbox_shutdown() {
     shader_destroy(screen_shader);
     buffer_destroy(vertex_buffer);
     buffer_destroy(index_buffer);
+    render_pipeline_destroy(base_pipeline);
+    render_pipeline_destroy(screen_pipeline);
     render_pass_destroy(render_pass);
     render_pass_destroy(screen_pass);
 }

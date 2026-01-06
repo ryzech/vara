@@ -7,8 +7,10 @@ typedef struct RenderPacket RenderPacket;
 
 struct Buffer;
 struct Material;
+struct RenderPipeline;
 
 struct RenderPacket {
+    struct RenderPipeline* pipeline;
     struct Material* material;
     struct Buffer* vertex_buffer;
     struct Buffer* index_buffer;
