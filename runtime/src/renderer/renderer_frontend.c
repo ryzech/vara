@@ -58,6 +58,29 @@ void renderer_on_window_resize(Renderer* renderer, Vector2i new_size) {
     }
 }
 
+void renderer_begin_frame(Renderer* renderer) {
+    render_cmd_buffer_reset(renderer_get_frame_command_buffer(renderer));
+}
+
+void renderer_end_frame(Renderer* renderer) {
+    renderer_execute_commands(renderer, renderer_get_frame_command_buffer(renderer));
+    renderer_present(renderer);
+}
+
+void renderer_present(Renderer* renderer) {
+    if (renderer) {
+        const RendererBackend* backend = renderer->backend;
+        backend->renderer.present();
+    }
+}
+
+void renderer_execute_commands(Renderer* renderer, RenderCommandBuffer* buffer) {
+    if (renderer) {
+        const RendererBackend* backend = renderer->backend;
+        backend->renderer.submit(buffer);
+    }
+}
+
 PlatformRendererType renderer_get_renderer_type(Renderer* renderer) {
     if (renderer) {
         return renderer->backend->type;
@@ -72,41 +95,4 @@ RenderCommandBuffer* renderer_get_frame_command_buffer(Renderer* renderer) {
     }
 
     return renderer->command_buffer;
-}
-
-void renderer_begin_frame(Renderer* renderer) {
-    render_cmd_buffer_reset(renderer_get_frame_command_buffer(renderer));
-}
-
-void renderer_end_frame(Renderer* renderer) {
-    renderer_execute_commands(renderer, renderer_get_frame_command_buffer(renderer));
-    renderer_present(renderer);
-}
-
-void renderer_clear(Renderer* renderer) {
-    if (renderer) {
-        const RendererBackend* backend = renderer->backend;
-        backend->renderer.clear();
-    }
-}
-
-void renderer_clear_color(Renderer* renderer, const Vector4 color) {
-    if (renderer) {
-        const RendererBackend* backend = renderer->backend;
-        backend->renderer.clear_color(color);
-    }
-}
-
-void renderer_execute_commands(Renderer* renderer, RenderCommandBuffer* buffer) {
-    if (renderer) {
-        const RendererBackend* backend = renderer->backend;
-        backend->renderer.submit(buffer);
-    }
-}
-
-void renderer_present(Renderer* renderer) {
-    if (renderer) {
-        const RendererBackend* backend = renderer->backend;
-        backend->renderer.present();
-    }
 }

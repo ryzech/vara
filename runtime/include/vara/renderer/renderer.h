@@ -7,12 +7,14 @@
 
 typedef struct Renderer Renderer;
 
+struct Swapchain;
 struct RendererBackend;
 struct RenderCommandBuffer;
 
 struct Renderer {
     struct RendererBackend* backend;
     struct RenderCommandBuffer* command_buffer;
+    struct Swapchain* swapchain;
     VaraWindow* window;
 };
 
@@ -34,29 +36,15 @@ void renderer_destroy(Renderer* renderer);
  */
 void renderer_on_window_resize(Renderer* renderer, Vector2i new_size);
 
-/**
- * Get the active PlatformGraphicsType (i.e. OpenGL, Vulkan, etc.)
- * @return Type of active RendererInstance.
- */
-PlatformRendererType renderer_get_renderer_type(Renderer* renderer);
-
-struct RenderCommandBuffer* renderer_get_frame_command_buffer(Renderer* renderer);
-
 void renderer_begin_frame(Renderer* renderer);
 
 void renderer_end_frame(Renderer* renderer);
 
 /**
- * Clear the screen from the previous frame.\n
- * Clears both color and depth buffers.
+ * This presents the image to the swapchain.\n
+ * In the case of OpenGL this simply swaps the buffers, as there isn't an explicit swapchain.
  */
-void renderer_clear(Renderer* renderer);
-
-/**
- * Sets the color for the next screen clear.
- * @param color Color to use when clearing the screen.
- */
-void renderer_clear_color(Renderer* renderer, Vector4 color);
+void renderer_present(Renderer* renderer);
 
 /**
  * Execute commands in given RenderCommandBuffer.
@@ -65,7 +53,9 @@ void renderer_clear_color(Renderer* renderer, Vector4 color);
 void renderer_execute_commands(Renderer* renderer, struct RenderCommandBuffer* buffer);
 
 /**
- * This submits all the commands in the pass queue.\n
- * In the case of OpenGL this simply swaps the buffers.
+ * Get the active PlatformRendererType (i.e. OpenGL, Vulkan, etc.)
+ * @return Type of active RendererBackend.
  */
-void renderer_present(Renderer* renderer);
+PlatformRendererType renderer_get_renderer_type(Renderer* renderer);
+
+struct RenderCommandBuffer* renderer_get_frame_command_buffer(Renderer* renderer);

@@ -20,20 +20,8 @@ static OpenGLRendererState renderer_state;
 
 static b8 renderer_opengl_create(void) {
     gladLoadGL((GLADloadfunc)platform_window_get_proc_address);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
     DEBUG("Loaded OpenGL: %s | %s", glGetString(GL_VERSION), glGetString(GL_RENDERER));
     return true;
-}
-
-// Do we need glClear and glCLearColor? Should they be differentiated?
-static void renderer_opengl_clear(void) {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-// Do we need glClear and glCLearColor? Should they be differentiated?
-static void renderer_opengl_clear_color(Vector4 color) {
-    glClearColor(color.x, color.y, color.z, color.w);
 }
 
 // Should likely just make this a RENDER_CMD instead of an immediate function.
@@ -137,8 +125,6 @@ void renderer_opengl_init(RendererBackend* backend, VaraWindow* window) {
 
     // Core Renderer
     backend->renderer.create = renderer_opengl_create;
-    backend->renderer.clear = renderer_opengl_clear;
-    backend->renderer.clear_color = renderer_opengl_clear_color;
     backend->renderer.set_viewport = renderer_opengl_set_viewport;
     backend->renderer.submit = renderer_opengl_submit;
     backend->renderer.present = renderer_opengl_present;

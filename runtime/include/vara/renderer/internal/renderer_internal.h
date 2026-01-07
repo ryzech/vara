@@ -20,8 +20,6 @@ struct Renderer;
 struct RendererBackendVT {
     b8 (*create)(void);
     void (*destroy)(void);
-    void (*clear)(void);
-    void (*clear_color)(Vector4 color);
     void (*set_viewport)(Vector2i viewport_size);
     void (*submit)(const RenderCommandBuffer* buffer);
     void (*present)(void);
