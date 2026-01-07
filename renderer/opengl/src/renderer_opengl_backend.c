@@ -10,6 +10,7 @@
 #include "vara/renderer/render_pass_opengl_backend.h"
 #include "vara/renderer/render_pipeline_opengl_backend.h"
 #include "vara/renderer/shader_opengl_backend.h"
+#include "vara/renderer/swapchain_opengl_backend.h"
 #include "vara/renderer/texture_opengl_backend.h"
 
 typedef struct OpenGLRendererState {
@@ -110,10 +111,6 @@ static void renderer_opengl_submit(const RenderCommandBuffer* buffer) {
     }
 }
 
-static void renderer_opengl_present(void) {
-    platform_window_swap_buffers(renderer_state.window);
-}
-
 static void renderer_opengl_destroy(void) {
 }
 
@@ -127,7 +124,6 @@ void renderer_opengl_init(RendererBackend* backend, VaraWindow* window) {
     backend->renderer.create = renderer_opengl_create;
     backend->renderer.set_viewport = renderer_opengl_set_viewport;
     backend->renderer.submit = renderer_opengl_submit;
-    backend->renderer.present = renderer_opengl_present;
     backend->renderer.destroy = renderer_opengl_destroy;
 
     // Buffer API
@@ -171,6 +167,10 @@ void renderer_opengl_init(RendererBackend* backend, VaraWindow* window) {
     backend->render_pipeline.create = render_pipeline_opengl_create;
     backend->render_pipeline.destroy = render_pipeline_opengl_destroy;
     backend->render_pipeline.bind = render_pipeline_opengl_bind;
+
+    backend->swapchain.create = swapchain_opengl_create;
+    backend->swapchain.destroy = swapchain_opengl_destroy;
+    backend->swapchain.present = swapchain_opengl_present;
 
     DEBUG("Creating RendererBackend named('%s')", backend->name);
 }

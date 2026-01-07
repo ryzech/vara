@@ -8,6 +8,7 @@
 #include "vara/renderer/internal/renderer_pass_internal.h"
 #include "vara/renderer/internal/renderer_pipeline_internal.h"
 #include "vara/renderer/internal/renderer_shader_internal.h"
+#include "vara/renderer/internal/renderer_swapchain_internal.h"
 #include "vara/renderer/internal/renderer_texture_internal.h"
 #include "vara/renderer/render_command.h"
 
@@ -22,7 +23,6 @@ struct RendererBackendVT {
     void (*destroy)(void);
     void (*set_viewport)(Vector2i viewport_size);
     void (*submit)(const RenderCommandBuffer* buffer);
-    void (*present)(void);
 };
 
 struct RendererBackend {
@@ -33,6 +33,7 @@ struct RendererBackend {
     RenderPassBackendVT render_pass;
     RenderPipelineBackendVT render_pipeline;
     TextureBackendVT texture;
+    SwapchainBackendVT swapchain;
 
     const char* name;
     PlatformRendererType type;

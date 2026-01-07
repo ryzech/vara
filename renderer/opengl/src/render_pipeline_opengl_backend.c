@@ -10,6 +10,10 @@ typedef struct OpenGLRenderPipelineState {
 } OpenGLRenderPipelineState;
 
 b8 render_pipeline_opengl_create(RenderPipeline* pipeline, const RenderPipelineConfig* config) {
+    if (!pipeline || !config) {
+        return false;
+    }
+
     DEBUG("Creating RenderPipeline named('%s')", config->name);
     OpenGLRenderPipelineState* render_pipeline_state =
         platform_allocate(sizeof(OpenGLRenderPipelineState));

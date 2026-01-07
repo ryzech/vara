@@ -14,6 +14,7 @@ set(RUNTIME_SOURCES src/application/application.c src/renderer/renderer_frontend
         src/scene/system/transform_system.c
         src/renderer/render_context_frontend.c
         src/renderer/render_pipeline_frontend.c
+        src/renderer/swapchain_frontend.c
 )
 
 add_library(vara-runtime STATIC ${RUNTIME_SOURCES})

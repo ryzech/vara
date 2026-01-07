@@ -7,6 +7,7 @@
 #include "vara/renderer/internal/renderer_internal.h"
 #include "vara/renderer/render_command.h"
 #include "vara/renderer/renderer.h"
+#include "vara/renderer/swapchain.h"
 
 Renderer* renderer_create(VaraWindow* window) {
     Renderer* renderer = platform_allocate(sizeof(Renderer));
@@ -32,6 +33,19 @@ Renderer* renderer_create(VaraWindow* window) {
         return NULL;
     }
 
+    const SwapchainConfig swapchain_config = {
+        .window = renderer->window,
+        // Needs to be configurable somehow.
+        .vsync = true,
+        .image_count = 3,
+    };
+    renderer->swapchain = swapchain_create(renderer, &swapchain_config);
+    if (!renderer->swapchain) {
+        FATAL("Failed to create the windows Swapchain.");
+        renderer_destroy(renderer);
+        return NULL;
+    }
+
     return renderer;
 }
 
@@ -39,6 +53,10 @@ void renderer_destroy(Renderer* renderer) {
     if (renderer) {
         if (renderer->command_buffer) {
             render_cmd_buffer_destroy(renderer->command_buffer);
+        }
+
+        if (renderer->swapchain) {
+            swapchain_destroy(renderer->swapchain);
         }
 
         if (renderer->backend) {
@@ -59,18 +77,21 @@ void renderer_on_window_resize(Renderer* renderer, Vector2i new_size) {
 }
 
 void renderer_begin_frame(Renderer* renderer) {
-    render_cmd_buffer_reset(renderer_get_frame_command_buffer(renderer));
+    if (renderer) {
+        render_cmd_buffer_reset(renderer_get_frame_command_buffer(renderer));
+    }
 }
 
 void renderer_end_frame(Renderer* renderer) {
-    renderer_execute_commands(renderer, renderer_get_frame_command_buffer(renderer));
-    renderer_present(renderer);
+    if (renderer) {
+        renderer_execute_commands(renderer, renderer_get_frame_command_buffer(renderer));
+        renderer_present(renderer);
+    }
 }
 
 void renderer_present(Renderer* renderer) {
     if (renderer) {
-        const RendererBackend* backend = renderer->backend;
-        backend->renderer.present();
+        swapchain_present(renderer->swapchain);
     }
 }
 
