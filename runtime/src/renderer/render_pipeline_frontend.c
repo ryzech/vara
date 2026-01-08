@@ -12,7 +12,8 @@ RenderPipeline* render_pipeline_create(Renderer* renderer, const RenderPipelineC
     pipeline->name = config->name;
     pipeline->shader = config->shader;
     pipeline->layout = config->layout;
-    pipeline->target = config->target;
+    pipeline->depth = config->depth;
+    pipeline->blend = config->blend;
 
     RendererBackend* backend = renderer_backend_get(renderer);
     pipeline->backend = backend;

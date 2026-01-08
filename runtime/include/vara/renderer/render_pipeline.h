@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vara/core/defines.h>
+#include "vara/renderer/render_types.h"
 
 typedef struct RenderPipeline RenderPipeline;
 typedef struct RenderPipelineConfig RenderPipelineConfig;
@@ -15,14 +16,16 @@ struct RenderPipelineConfig {
     const char* name;
     struct Shader* shader;
     struct VertexLayout* layout;
-    struct Framebuffer* target;
+    DepthState depth;
+    BlendState blend;
 };
 
 struct RenderPipeline {
     const char* name;
     struct Shader* shader;
     struct VertexLayout* layout;
-    struct Framebuffer* target;
+    DepthState depth;
+    BlendState blend;
     void* backend_data;
     struct RendererBackend* backend;
 };

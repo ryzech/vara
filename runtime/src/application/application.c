@@ -89,9 +89,7 @@ int application_main(int argc, char** argv) {
 
         const f64 current_time = platform_get_time();
         const f32 delta_time = (f32)(current_time - application_state.last_time);
-        application_state.last_time = current_time;
 
-        input_system_update();
         if (application_state.config.app.on_update) {
             if (application_state.renderer) {
                 renderer_begin_frame(application_state.renderer);
@@ -107,6 +105,9 @@ int application_main(int argc, char** argv) {
                 renderer_end_frame(application_state.renderer);
             }
         }
+
+        input_system_update();
+        application_state.last_time = current_time;
     }
 
     if (application_state.config.app.on_shutdown) {
