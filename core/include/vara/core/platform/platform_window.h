@@ -29,6 +29,8 @@ struct VaraWindow {
     /** */
     i32 width, height;
     /** */
+    i32 framebuffer_width, framebuffer_height;
+    /** */
     i32 x, y;
     /** Pixel density of the given display the window is on. */
     f32 pixel_density;
@@ -58,6 +60,7 @@ void platform_window_set_size(VaraWindow* window, u32 width, u32 height);
 void platform_window_set_position(VaraWindow* window, i32 x, i32 y);
 void platform_window_set_cursor(VaraWindow* window, CursorType cursor);
 Vector2i platform_window_get_size(VaraWindow* window);
+Vector2i platform_window_get_framebuffer_size(VaraWindow* window);
 Vector2i platform_window_get_position(VaraWindow* window);
 void* platform_window_get_native_handle(const VaraWindow* window);
 void* platform_window_get_proc_address(const char* name);

@@ -273,11 +273,6 @@ static void glfw_mouse_move_callback(GLFWwindow* window, f64 xpos, f64 ypos) {
 
 static void glfw_resize_callback(GLFWwindow* window, i32 width, i32 height) {
     VaraWindow* vara_window = glfwGetWindowUserPointer(window);
-
-    i32 fb_width, fb_height;
-    glfwGetFramebufferSize(window, &fb_width, &fb_height);
-
-    vara_window->pixel_density = (f32)fb_width / (f32)width;
     vara_window->width = width;
     vara_window->height = height;
 
@@ -285,6 +280,12 @@ static void glfw_resize_callback(GLFWwindow* window, i32 width, i32 height) {
     data.i32[0] = width;
     data.i32[1] = height;
     event_fire(EVENT_WINDOW_RESIZE, NULL, &data);
+}
+
+static void glfw_framebuffer_resize_callback(GLFWwindow* window, i32 width, i32 height) {
+    VaraWindow* vara_window = glfwGetWindowUserPointer(window);
+    vara_window->framebuffer_width = width;
+    vara_window->framebuffer_height = height;
 }
 
 static void glfw_close_callback(GLFWwindow* window) {
@@ -336,8 +337,7 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
 
     if (!glfw_window) {
         ERROR("Failed to create GLFW window.");
-        platform_free(window->platform_state);
-        platform_free(window);
+        platform_window_destroy(window);
         return NULL;
     }
 
@@ -358,6 +358,8 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
 
     window->width = logical_width;
     window->height = logical_height;
+    window->framebuffer_width = fb_width;
+    window->framebuffer_height = fb_height;
     window->pixel_density = (f32)fb_width / (f32)logical_width;
 
     glfwSetWindowUserPointer(glfw_window, window);
@@ -366,6 +368,7 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
     glfwSetMouseButtonCallback(glfw_window, glfw_mouse_button_callback);
     glfwSetCursorPosCallback(glfw_window, glfw_mouse_move_callback);
     glfwSetWindowSizeCallback(glfw_window, glfw_resize_callback);
+    glfwSetFramebufferSizeCallback(glfw_window, glfw_framebuffer_resize_callback);
     glfwSetWindowCloseCallback(glfw_window, glfw_close_callback);
 
     // TODO: need to update these when switching away from glfw, as GLFW does not support some
@@ -394,6 +397,7 @@ void platform_window_destroy(VaraWindow* window) {
 
     platform_free(window->platform_state);
     window->platform_state = NULL;
+    platform_free(window);
 }
 
 void platform_window_set_title(VaraWindow* window, const char* title) {
@@ -425,8 +429,17 @@ void platform_window_set_cursor(VaraWindow* window, CursorType cursor) {
 }
 
 Vector2i platform_window_get_size(VaraWindow* window) {
-    Vector2i dimensions = {.x = window->width, .y = window->height};
-    return dimensions;
+    return (Vector2i){
+        window->width,
+        window->height,
+    };
+}
+
+Vector2i platform_window_get_framebuffer_size(VaraWindow* window) {
+    return (Vector2i){
+        window->framebuffer_width,
+        window->framebuffer_height,
+    };
 }
 
 void* platform_window_get_native_handle(const VaraWindow* window) {
@@ -456,20 +469,6 @@ void platform_window_make_context_current(VaraWindow* window) {
     }
 
     glfwMakeContextCurrent(window->platform_state->window);
-}
-
-void platform_window_swap_buffers(VaraWindow* window) {
-    if (!window || window->renderer_type != RENDERER_TYPE_OPENGL) {
-        WARN(
-            "Tried to swap buffers in window. Renderer named('%s') "
-            "does not support this. OpenGL only!",
-            renderer_type_to_string(window->renderer_type)
-        );
-
-        return;
-    }
-
-    glfwSwapBuffers(window->platform_state->window);
 }
 
 void platform_window_set_visible(VaraWindow* window, b8 visible) {

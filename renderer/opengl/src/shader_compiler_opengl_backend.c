@@ -34,8 +34,8 @@ static GLuint compile_shader_stage(GLenum type, const char* source, const char* 
     GLint success;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (!success) {
-        char info_log[512];
-        glGetShaderInfoLog(shader, sizeof(info_log), 0, info_log);
+        GLchar info_log[1024];
+        glGetShaderInfoLog(shader, sizeof(info_log), NULL, info_log);
         ERROR("Shader compilation failed for stage named('%s'):\n%s", stage_name, info_log);
         glDeleteShader(shader);
         return 0;
@@ -86,9 +86,10 @@ GLuint shader_compiler_opengl_compile(const ShaderConfig* config) {
     GLint success;
     glGetProgramiv(program, GL_LINK_STATUS, &success);
     if (!success) {
-        char info_log[1024];
-        glGetProgramInfoLog(program, sizeof(info_log), 0, info_log);
+        GLchar info_log[1024];
+        glGetProgramInfoLog(program, sizeof(info_log), NULL, info_log);
         ERROR("Program linking failed for shader named('%s'):\n%s", config->name, info_log);
+        glDeleteProgram(program);
         return 0;
     }
 

@@ -46,6 +46,7 @@ void _log_output(const LogLevel level, const char* func, const char* message, ..
     vsnprintf(out_message, sizeof(out_message), message, arg_ptr);
     va_end(arg_ptr);
 
+    // TODO: handle newlines so error blocks don't look weird.
     char final_message[4200];
     platform_set_memory(final_message, 0, sizeof(final_message));
     snprintf(
