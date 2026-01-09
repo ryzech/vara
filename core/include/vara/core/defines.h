@@ -79,6 +79,14 @@ typedef struct range32 {
 #define I32_MIN INT32_MIN
 #define I64_MIN INT64_MIN
 
+#define GiB(amount) ((amount) * 1024ULL * 1024ULL * 1024ULL)
+#define MiB(amount) ((amount) * 1024ULL * 1024ULL)
+#define KiB(amount) ((amount) * 1024ULL)
+
+#define GB(amount) ((amount) * 1000ULL * 1000ULL * 1000ULL)
+#define MB(amount) ((amount) * 1000ULL * 1000ULL)
+#define KB(amount) ((amount) * 1000ULL)
+
 // Platform detection
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
 #define VARA_PLATFORM_WINDOWS 1
