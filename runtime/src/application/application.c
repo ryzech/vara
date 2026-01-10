@@ -1,6 +1,7 @@
 #include <vara/core/event/event.h>
 #include <vara/core/input/input.h>
 #include <vara/core/logger.h>
+#include <vara/core/memory/memory.h>
 #include <vara/core/platform/platform.h>
 
 #include "vara/application/application.h"
@@ -33,6 +34,11 @@ static b8 application_on_window_resize(i16 event_code, void* sender, const Event
 }
 
 int application_main(int argc, char** argv) {
+    if (!memory_system_create()) {
+        FATAL("Memory system failed to be created!");
+        return EXIT_FAILURE;
+    }
+
     if (!platform_create()) {
         ERROR("Failed to create platform!");
         return EXIT_FAILURE;
@@ -131,6 +137,7 @@ int application_main(int argc, char** argv) {
     logging_system_destroy();
     event_system_destroy();
     platform_destroy();
+    memory_system_destroy();
 
     return EXIT_SUCCESS;
 }

@@ -1,17 +1,17 @@
 #include <vara/core/logger.h>
-#include <vara/core/platform/platform.h>
+#include <vara/core/memory/memory.h>
 
 #include "vara/renderer/framebuffer.h"
 #include "vara/renderer/internal/renderer_internal.h"
 #include "vara/renderer/renderer.h"
 
 Framebuffer* framebuffer_create(Renderer* renderer, const FramebufferConfig* config) {
-    Framebuffer* buffer = platform_allocate(sizeof(Framebuffer));
-    platform_zero_memory(buffer, sizeof(Framebuffer));
+    Framebuffer* buffer = vara_allocate(sizeof(Framebuffer));
+    vara_zero_memory(buffer, sizeof(Framebuffer));
 
     buffer->attachments =
-        platform_allocate(sizeof(FramebufferAttachmentConfig) * config->attachment_count);
-    platform_copy_memory(
+        vara_allocate(sizeof(FramebufferAttachmentConfig) * config->attachment_count);
+    vara_copy_memory(
         buffer->attachments,
         config->attachments,
         sizeof(FramebufferAttachmentConfig) * config->attachment_count
@@ -39,9 +39,11 @@ void framebuffer_destroy(Framebuffer* buffer) {
         buffer->backend->framebuffer.destroy(buffer);
 
         if (buffer->attachments) {
-            platform_free(buffer->attachments);
+            vara_free(
+                buffer->attachments, sizeof(FramebufferAttachmentConfig) * buffer->attachment_count
+            );
         }
-        platform_free(buffer);
+        vara_free(buffer, sizeof(Buffer));
     }
 }
 

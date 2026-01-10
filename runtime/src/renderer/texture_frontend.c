@@ -1,5 +1,5 @@
 #include <vara/core/logger.h>
-#include <vara/core/platform/platform.h>
+#include <vara/core/memory/memory.h>
 
 #include "vara/renderer/internal/renderer_internal.h"
 #include "vara/renderer/renderer.h"
@@ -7,8 +7,8 @@
 #include "vendor/stb/stb_image.h"
 
 Texture* texture_create(Renderer* renderer, const TextureConfig* config) {
-    Texture* texture = platform_allocate(sizeof(Texture));
-    platform_zero_memory(texture, sizeof(Texture));
+    Texture* texture = vara_allocate(sizeof(Texture));
+    vara_zero_memory(texture, sizeof(Texture));
 
     texture->width = config->width;
     texture->height = config->height;
@@ -69,7 +69,7 @@ Texture* texture_load_file(Renderer* renderer, const TextureConfig* config, cons
 void texture_destroy(Texture* texture) {
     if (texture) {
         texture->backend->texture.destroy(texture);
-        platform_free(texture);
+        vara_free(texture, sizeof(Texture));
     }
 }
 

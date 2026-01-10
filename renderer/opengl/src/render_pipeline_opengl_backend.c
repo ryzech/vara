@@ -1,6 +1,6 @@
 #include <glad/gl.h>
 #include <vara/core/logger.h>
-#include <vara/core/platform/platform.h>
+#include <vara/core/memory/memory.h>
 
 #include "vara/renderer/render_pipeline_opengl_backend.h"
 #include "vara/renderer/shader_opengl_backend.h"
@@ -70,7 +70,7 @@ b8 render_pipeline_opengl_create(RenderPipeline* pipeline, const RenderPipelineC
     }
 
     DEBUG("Creating RenderPipeline named('%s')", config->name);
-    OpenGLRenderPipelineState* state = platform_allocate(sizeof(OpenGLRenderPipelineState));
+    OpenGLRenderPipelineState* state = vara_allocate(sizeof(OpenGLRenderPipelineState));
     if (!state) {
         return false;
     }
@@ -93,7 +93,7 @@ void render_pipeline_opengl_destroy(RenderPipeline* pipeline) {
         return;
     }
 
-    platform_free(pipeline->backend_data);
+    vara_free(pipeline->backend_data, sizeof(OpenGLRenderPipelineState));
     pipeline->backend_data = NULL;
 }
 

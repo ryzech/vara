@@ -3,7 +3,8 @@ set(CORE_SOURCES src/logger.c src/util/uuid.c
         src/event/event.c
         src/util/string.c
         src/math/geometry.c
-        src/memory/arena_allocator.c)
+        src/memory/arena_allocator.c
+        src/memory/memory.c)
 
 if(APPLE)
     list(APPEND CORE_SOURCES

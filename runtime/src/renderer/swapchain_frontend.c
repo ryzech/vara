@@ -1,13 +1,13 @@
 #include <vara/core/logger.h>
-#include <vara/core/platform/platform.h>
+#include <vara/core/memory/memory.h>
 
 #include "vara/renderer/internal/renderer_internal.h"
 #include "vara/renderer/swapchain.h"
 #include "vara/renderer/renderer.h"
 
 Swapchain* swapchain_create(Renderer* renderer, const SwapchainConfig* config) {
-    Swapchain* swapchain = platform_allocate(sizeof(Swapchain));
-    platform_zero_memory(swapchain, sizeof(Swapchain));
+    Swapchain* swapchain = vara_allocate(sizeof(Swapchain));
+    vara_zero_memory(swapchain, sizeof(Swapchain));
 
     swapchain->window = config->window;
     swapchain->image_count = config->image_count;
@@ -28,7 +28,7 @@ Swapchain* swapchain_create(Renderer* renderer, const SwapchainConfig* config) {
 void swapchain_destroy(Swapchain* swapchain) {
     if (swapchain) {
         swapchain->backend->swapchain.destroy(swapchain);
-        platform_free(swapchain);
+        vara_free(swapchain, sizeof(Swapchain));
     }
 }
 

@@ -1,12 +1,12 @@
-#include <vara/core/platform/platform.h>
+#include <vara/core/memory/memory.h>
 
 #include "vara/renderer/render_context.h"
 #include "vara/renderer/renderer.h"
 #include "vara/renderer2d/renderer2d.h"
 
 RenderContext* render_context_create(Renderer* renderer) {
-    RenderContext* context = platform_allocate(sizeof(RenderContext));
-    platform_zero_memory(context, sizeof(RenderContext));
+    RenderContext* context = vara_allocate(sizeof(RenderContext));
+    vara_zero_memory(context, sizeof(RenderContext));
 
     if (!context) {
         return NULL;
@@ -26,7 +26,7 @@ void render_context_destroy(RenderContext* context) {
         if (context->r2d) {
             renderer2d_destroy(context->r2d);
         }
-        platform_free(context);
+        vara_free(context, sizeof(RenderContext));
     }
 }
 

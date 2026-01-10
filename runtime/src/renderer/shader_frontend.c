@@ -1,14 +1,14 @@
 #include <stdlib.h>
 #include <vara/core/logger.h>
-#include <vara/core/platform/platform.h>
+#include <vara/core/memory/memory.h>
 
 #include "vara/renderer/internal/renderer_internal.h"
 #include "vara/renderer/renderer.h"
 #include "vara/renderer/shader.h"
 
 Shader* shader_create(Renderer* renderer, const ShaderConfig* config) {
-    Shader* shader = platform_allocate(sizeof(Shader));
-    platform_zero_memory(shader, sizeof(Shader));
+    Shader* shader = vara_allocate(sizeof(Shader));
+    vara_zero_memory(shader, sizeof(Shader));
 
     shader->name = config->name;
 
@@ -27,7 +27,7 @@ Shader* shader_create(Renderer* renderer, const ShaderConfig* config) {
 void shader_destroy(Shader* shader) {
     if (shader) {
         shader->backend->shader.destroy(shader);
-        platform_free(shader);
+        vara_free(shader, sizeof(Shader));
     }
 }
 

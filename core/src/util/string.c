@@ -1,6 +1,6 @@
 #include <string.h>
 
-#include "vara/core/platform/platform.h"
+#include "vara/core/memory/memory.h"
 #include "vara/core/util/string.h"
 
 u64 string_length(const char* string) {
@@ -21,8 +21,8 @@ char* string_duplicate(const char* string) {
         return NULL;
     }
     const u64 length = string_length(string);
-    char* copy = platform_allocate(length + 1);
-    platform_copy_memory(copy, string, length);
+    char* copy = vara_allocate(length + 1);
+    vara_copy_memory(copy, string, length);
     copy[length] = 0;
     return copy;
 }
@@ -31,7 +31,7 @@ void string_free(const char* string) {
     if (!string) {
         return;
     }
-    platform_free((char*)string);
+    vara_free((char*)string, sizeof(string));
 }
 
 b8 strings_equal(const char* a, const char* b) {

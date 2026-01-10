@@ -1,14 +1,14 @@
 #include <stdlib.h>
 #include <vara/core/logger.h>
-#include <vara/core/platform/platform.h>
+#include <vara/core/memory/memory.h>
 
 #include "vara/renderer/buffer.h"
 #include "vara/renderer/internal/renderer_internal.h"
 #include "vara/renderer/renderer.h"
 
 Buffer* buffer_create(Renderer* renderer, const BufferConfig* config) {
-    Buffer* buffer = platform_allocate(sizeof(Buffer));
-    platform_zero_memory(buffer, sizeof(Buffer));
+    Buffer* buffer = vara_allocate(sizeof(Buffer));
+    vara_zero_memory(buffer, sizeof(Buffer));
 
     buffer->type = config->type;
     buffer->usage = config->usage;
@@ -34,8 +34,8 @@ Buffer* buffer_create(Renderer* renderer, const BufferConfig* config) {
 
         if (config->layout->attribute_count > 0) {
             buffer->layout.attributes =
-                platform_allocate(sizeof(VertexAttribute) * config->layout->attribute_count);
-            platform_copy_memory(
+                vara_allocate(sizeof(VertexAttribute) * config->layout->attribute_count);
+            vara_copy_memory(
                 buffer->layout.attributes,
                 config->layout->attributes,
                 sizeof(VertexAttribute) * config->layout->attribute_count
@@ -59,9 +59,11 @@ void buffer_destroy(Buffer* buffer) {
         buffer->backend->buffer.destroy(buffer);
 
         if (buffer->layout.attributes) {
-            platform_free(buffer->layout.attributes);
+            vara_free(
+                buffer->layout.attributes, sizeof(VertexAttribute) * buffer->layout.attribute_count
+            );
         }
-        platform_free(buffer);
+        vara_free(buffer, sizeof(Buffer));
     }
 }
 

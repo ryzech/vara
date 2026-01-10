@@ -1,14 +1,14 @@
 #include "vara/core/math/geometry.h"
 #include "vara/core/math/math.h"
-#include "vara/core/platform/platform.h"
+#include "vara/core/memory/memory.h"
 
 Geometry2D geometry_generate_quad(Vector2 size, Vector2 uv0, Vector2 uv1, Vector4 color) {
     Geometry2D data;
     data.vertex_count = 4;
     data.index_count = 6;
 
-    data.vertices = platform_allocate(sizeof(Vertex) * data.vertex_count);
-    data.indices = platform_allocate(sizeof(u32) * data.index_count);
+    data.vertices = vara_allocate(sizeof(Vertex) * data.vertex_count);
+    data.indices = vara_allocate(sizeof(u32) * data.index_count);
 
     data.vertices[0] = (Vertex){
         .position = {0.0f, 0.0f, 0.0f},
@@ -49,11 +49,11 @@ void geometry_transform(Geometry2D* geometry, const Matrix4* matrix) {
 
 void geometry_destroy(Geometry2D* geometry) {
     if (geometry->vertices) {
-        platform_free(geometry->vertices);
+        vara_free(geometry->vertices, sizeof(Vertex) * geometry->vertex_count);
         geometry->vertices = NULL;
     }
     if (geometry->indices) {
-        platform_free(geometry->indices);
+        vara_free(geometry->indices, sizeof(u32) * geometry->index_count);
         geometry->indices = NULL;
     }
     geometry->vertex_count = 0;

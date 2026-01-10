@@ -1,5 +1,5 @@
 #include "vara/core/event/event.h"
-#include "vara/core/platform/platform.h"
+#include "vara/core/memory/memory.h"
 
 #define MAX_LISTENERS 32
 
@@ -14,15 +14,15 @@ struct EventState {
 static EventState* event_state;
 
 b8 event_system_create(void) {
-    event_state = platform_allocate(sizeof(EventState));
-    platform_zero_memory(event_state, sizeof(EventState));
+    event_state = vara_allocate(sizeof(EventState));
+    vara_zero_memory(event_state, sizeof(EventState));
 
     return true;
 }
 
 void event_system_destroy(void) {
     if (event_state) {
-        platform_free(event_state);
+        vara_free(event_state, sizeof(EventState));
     }
 }
 

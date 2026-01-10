@@ -1,6 +1,5 @@
 #include <vara/core/defines.h>
-#include <vara/core/math/math.h>
-#include <vara/core/platform/platform.h>
+#include <vara/core/memory/memory.h>
 
 #include "vara/renderer/buffer.h"
 #include "vara/renderer/render_command.h"
@@ -14,10 +13,10 @@ static void* render_cmd_allocate(RenderCommandBuffer* buffer, u32 size) {
         // Increase buffer size.
         buffer->capacity *= 2;
         // Allocate new resized buffer.
-        u8* resized_buffer = platform_allocate(buffer->capacity);
+        u8* resized_buffer = vara_allocate(buffer->capacity);
         // Copy old buffer.
-        platform_copy_memory(resized_buffer, buffer->buffer, buffer->used);
-        platform_free(buffer->buffer);
+        vara_copy_memory(resized_buffer, buffer->buffer, buffer->used);
+        vara_free(buffer->buffer, buffer->used);
         buffer->buffer = resized_buffer;
     }
 
@@ -27,16 +26,16 @@ static void* render_cmd_allocate(RenderCommandBuffer* buffer, u32 size) {
 }
 
 RenderCommandBuffer* render_cmd_buffer_create(void) {
-    RenderCommandBuffer* buffer = platform_allocate(sizeof(RenderCommandBuffer));
+    RenderCommandBuffer* buffer = vara_allocate(sizeof(RenderCommandBuffer));
     buffer->capacity = 1024;
     buffer->used = 0;
-    buffer->buffer = platform_allocate(buffer->capacity);
+    buffer->buffer = vara_allocate(buffer->capacity);
     return buffer;
 }
 
 void render_cmd_buffer_destroy(RenderCommandBuffer* buffer) {
-    platform_free(buffer->buffer);
-    platform_free(buffer);
+    vara_free(buffer->buffer, buffer->used);
+    vara_free(buffer, sizeof(RenderCommandBuffer));
 }
 
 void render_cmd_buffer_reset(RenderCommandBuffer* buffer) {
@@ -124,5 +123,5 @@ void render_cmd_shader_set_int_array(
     cmd->name = name;
     cmd->count = count;
 
-    platform_copy_memory(cmd->array, array, count * sizeof(i32));
+    vara_copy_memory(cmd->array, array, count * sizeof(i32));
 }

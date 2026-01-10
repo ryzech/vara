@@ -1,6 +1,6 @@
 #include <glad/gl.h>
 #include <vara/core/logger.h>
-#include <vara/core/platform/platform.h>
+#include <vara/core/memory/memory.h>
 
 #include "vara/renderer/framebuffer_opengl_backend.h"
 #include "vara/renderer/texture_opengl_backend.h"
@@ -112,13 +112,13 @@ b8 framebuffer_opengl_create(Framebuffer* buffer, const FramebufferConfig* confi
         return false;
     }
 
-    OpenGLFramebufferState* buffer_state = platform_allocate(sizeof(OpenGLFramebufferState));
-    platform_zero_memory(buffer_state, sizeof(OpenGLFramebufferState));
+    OpenGLFramebufferState* buffer_state = vara_allocate(sizeof(OpenGLFramebufferState));
+    vara_zero_memory(buffer_state, sizeof(OpenGLFramebufferState));
     if (!buffer_state) {
         return false;
     }
 
-    buffer->attachment_textures = platform_allocate(sizeof(Texture*) * config->attachment_count);
+    buffer->attachment_textures = vara_allocate(sizeof(Texture*) * config->attachment_count);
 
     glGenFramebuffers(1, &buffer_state->fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, buffer_state->fbo);
@@ -131,7 +131,7 @@ b8 framebuffer_opengl_create(Framebuffer* buffer, const FramebufferConfig* confi
     }
 
     if (color_count > 0) {
-        buffer_state->color_buffers = platform_allocate(sizeof(GLuint) * color_count);
+        buffer_state->color_buffers = vara_allocate(sizeof(GLuint) * color_count);
         buffer_state->color_buffer_count = color_count;
     }
 
@@ -165,14 +165,14 @@ b8 framebuffer_opengl_create(Framebuffer* buffer, const FramebufferConfig* confi
                 break;
         }
 
-        Texture* texture_wrapper = platform_allocate(sizeof(Texture));
+        Texture* texture_wrapper = vara_allocate(sizeof(Texture));
         texture_wrapper->width = config->width;
         texture_wrapper->height = config->height;
         texture_wrapper->format = fb_format_to_texture_format(attachment->format);
         texture_wrapper->filter = TEXTURE_FILTER_LINEAR;
         texture_wrapper->samples = config->samples;
 
-        OpenGLTextureState* texture_state = platform_allocate(sizeof(OpenGLTextureState));
+        OpenGLTextureState* texture_state = vara_allocate(sizeof(OpenGLTextureState));
         texture_state->id = texture;
         texture_state->slot = 0;
         texture_wrapper->backend_data = texture_state;
@@ -181,12 +181,12 @@ b8 framebuffer_opengl_create(Framebuffer* buffer, const FramebufferConfig* confi
     }
 
     if (color_count > 0) {
-        GLenum* draw_buffers = platform_allocate(sizeof(GLenum) * color_count);
+        GLenum* draw_buffers = vara_allocate(sizeof(GLenum) * color_count);
         for (u32 i = 0; i < color_count; i++) {
             draw_buffers[i] = GL_COLOR_ATTACHMENT0 + i;
         }
         glDrawBuffers((GLsizei)color_count, draw_buffers);
-        platform_free(draw_buffers);
+        vara_free(draw_buffers, sizeof(GLenum) * color_count);
     } else {
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
@@ -218,7 +218,7 @@ void framebuffer_opengl_destroy(Framebuffer* buffer) {
 
     if (buffer_state->color_buffers) {
         glDeleteTextures((GLsizei)buffer_state->color_buffer_count, buffer_state->color_buffers);
-        platform_free(buffer_state->color_buffers);
+        vara_free(buffer_state->color_buffers, sizeof(GLuint) * buffer_state->color_buffer_count);
     }
 
     if (buffer_state->depth_buffer) {
@@ -243,16 +243,16 @@ void framebuffer_opengl_destroy(Framebuffer* buffer) {
             Texture* texture = buffer->attachment_textures[i];
             if (texture) {
                 if (texture->backend_data) {
-                    platform_free(texture->backend_data);
+                    vara_free(texture->backend_data, sizeof(OpenGLTextureState));
                 }
-                platform_free(texture);
+                vara_free(texture, sizeof(Texture));
             }
         }
-        platform_free(buffer->attachment_textures);
+        vara_free(buffer->attachment_textures, sizeof(Texture*) * buffer->attachment_count);
         buffer->attachment_textures = NULL;
     }
 
-    platform_free(buffer_state);
+    vara_free(buffer_state, sizeof(OpenGLFramebufferState));
     buffer->backend_data = NULL;
 }
 

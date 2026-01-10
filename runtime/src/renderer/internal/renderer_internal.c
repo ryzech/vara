@@ -1,5 +1,5 @@
 #include <vara/core/logger.h>
-#include <vara/core/platform/platform.h>
+#include <vara/core/memory/memory.h>
 #include <vara/core/platform/platform_window.h>
 
 #include "vara/renderer/internal/renderer_internal.h"
@@ -8,8 +8,8 @@
 extern void renderer_opengl_init(RendererBackend* backend, VaraWindow* window);
 
 RendererBackend* renderer_backend_create(VaraWindow* window) {
-    RendererBackend* backend = platform_allocate(sizeof(RendererBackend));
-    platform_zero_memory(backend, sizeof(RendererBackend));
+    RendererBackend* backend = vara_allocate(sizeof(RendererBackend));
+    vara_zero_memory(backend, sizeof(RendererBackend));
 
     switch (window->renderer_type) {
         case RENDERER_TYPE_OPENGL:
@@ -23,7 +23,7 @@ RendererBackend* renderer_backend_create(VaraWindow* window) {
     if (!backend->renderer.create()) {
         FATAL("Failed to initialize Renderer!");
         renderer_backend_destroy(backend);
-        platform_free(backend);
+        vara_free(backend, sizeof(RendererBackend));
         return NULL;
     }
 

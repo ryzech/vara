@@ -1,13 +1,13 @@
 #include <vara/core/logger.h>
-#include <vara/core/platform/platform.h>
+#include <vara/core/memory/memory.h>
 
 #include "vara/renderer/internal/renderer_internal.h"
 #include "vara/renderer/render_pipeline.h"
 #include "vara/renderer/renderer.h"
 
 RenderPipeline* render_pipeline_create(Renderer* renderer, const RenderPipelineConfig* config) {
-    RenderPipeline* pipeline = platform_allocate(sizeof(RenderPipeline));
-    platform_zero_memory(pipeline, sizeof(RenderPipeline));
+    RenderPipeline* pipeline = vara_allocate(sizeof(RenderPipeline));
+    vara_zero_memory(pipeline, sizeof(RenderPipeline));
 
     pipeline->name = config->name;
     pipeline->shader = config->shader;
@@ -30,6 +30,6 @@ RenderPipeline* render_pipeline_create(Renderer* renderer, const RenderPipelineC
 void render_pipeline_destroy(RenderPipeline* pipeline) {
     if (pipeline) {
         pipeline->backend->render_pipeline.destroy(pipeline);
-        platform_free(pipeline);
+        vara_free(pipeline, sizeof(RenderPipeline));
     }
 }

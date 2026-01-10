@@ -42,6 +42,7 @@ Arena arena_create(size_t size) {
     }
 
     void* buffer = platform_allocate(size);
+    platform_zero_memory(buffer, size);
     return (Arena){
         .buffer = buffer,
         .size = size,
@@ -57,12 +58,16 @@ Allocator arena_allocator(Arena* arena) {
 }
 
 void arena_reset(Arena* arena) {
-    arena->offset = 0;
-    arena->used = 0;
+    if (arena) {
+        arena->offset = 0;
+        arena->used = 0;
+    }
 }
 
 void arena_destroy(Arena* arena) {
-    if (arena->buffer) {
-        platform_free(arena->buffer);
+    if (arena) {
+        if (arena->buffer) {
+            platform_free(arena->buffer);
+        }
     }
 }

@@ -1,5 +1,5 @@
 #include <vara/core/logger.h>
-#include <vara/core/platform/platform.h>
+#include <vara/core/memory/memory.h>
 
 #include "vara/material/material.h"
 #include "vara/renderer/internal/renderer_internal.h"
@@ -39,8 +39,8 @@ static void render_pass_build_commands(RenderPass* pass) {
 }
 
 RenderPass* render_pass_create(Renderer* renderer, const RenderPassConfig* config) {
-    RenderPass* pass = platform_allocate(sizeof(RenderPass));
-    platform_zero_memory(pass, sizeof(RenderPass));
+    RenderPass* pass = vara_allocate(sizeof(RenderPass));
+    vara_zero_memory(pass, sizeof(RenderPass));
 
     pass->name = config->name;
     pass->target = config->target;
@@ -48,8 +48,8 @@ RenderPass* render_pass_create(Renderer* renderer, const RenderPassConfig* confi
     pass->color_attachment_count = config->color_attachment_count;
     if (config->color_attachment_count > 0) {
         pass->color_attachments =
-            platform_allocate(sizeof(RenderPassAttachment) * config->color_attachment_count);
-        platform_copy_memory(
+            vara_allocate(sizeof(RenderPassAttachment) * config->color_attachment_count);
+        vara_copy_memory(
             pass->color_attachments,
             config->color_attachments,
             sizeof(RenderPassAttachment) * config->color_attachment_count
@@ -57,8 +57,8 @@ RenderPass* render_pass_create(Renderer* renderer, const RenderPassConfig* confi
     }
 
     if (config->depth_stencil_attachment) {
-        pass->depth_stencil_attachment = platform_allocate(sizeof(RenderPassAttachment));
-        platform_copy_memory(
+        pass->depth_stencil_attachment = vara_allocate(sizeof(RenderPassAttachment));
+        vara_copy_memory(
             pass->depth_stencil_attachment,
             config->depth_stencil_attachment,
             sizeof(RenderPassAttachment)
@@ -69,7 +69,7 @@ RenderPass* render_pass_create(Renderer* renderer, const RenderPassConfig* confi
     pass->backend = backend;
 
     pass->packet_capacity = 256;
-    pass->packets = platform_allocate(sizeof(RenderPacket) * pass->packet_capacity);
+    pass->packets = vara_allocate(sizeof(RenderPacket) * pass->packet_capacity);
     pass->command_buffer = render_cmd_buffer_create();
 
     if (!pass->backend->render_pass.create(pass, config)) {
@@ -85,14 +85,16 @@ void render_pass_destroy(RenderPass* pass) {
     if (pass) {
         pass->backend->render_pass.destroy(pass);
         render_cmd_buffer_destroy(pass->command_buffer);
-        platform_free(pass->packets);
+        vara_free(pass->packets, sizeof(RenderPacket) * pass->packet_count);
         if (pass->color_attachments) {
-            platform_free(pass->color_attachments);
+            vara_free(
+                pass->color_attachments, sizeof(RenderPassAttachment) * pass->color_attachment_count
+            );
         }
         if (pass->depth_stencil_attachment) {
-            platform_free(pass->depth_stencil_attachment);
+            vara_free(pass->depth_stencil_attachment, sizeof(RenderPassAttachment));
         }
-        platform_free(pass);
+        vara_free(pass, sizeof(RenderPass));
     }
 }
 
@@ -112,11 +114,9 @@ void render_pass_end(Renderer* renderer, RenderPass* pass) {
 void render_pass_submit(RenderPass* pass, RenderPacket* packet) {
     if (pass->packet_count >= pass->packet_capacity) {
         pass->packet_capacity *= 2;
-        void* resized_array = platform_allocate(sizeof(RenderPacket) * pass->packet_capacity);
-        platform_copy_memory(
-            resized_array, pass->packets, sizeof(RenderPacket) * pass->packet_count
-        );
-        platform_free(pass->packets);
+        void* resized_array = vara_allocate(sizeof(RenderPacket) * pass->packet_capacity);
+        vara_copy_memory(resized_array, pass->packets, sizeof(RenderPacket) * pass->packet_count);
+        vara_free(pass->packets, sizeof(RenderPacket) * pass->packet_count);
         pass->packets = resized_array;
     }
     pass->packets[pass->packet_count++] = *packet;

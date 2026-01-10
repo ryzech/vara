@@ -1,5 +1,5 @@
 #include <glad/gl.h>
-#include <vara/core/platform/platform.h>
+#include <vara/core/memory/memory.h>
 
 #include "vara/renderer/buffer_opengl_backend.h"
 
@@ -83,8 +83,8 @@ b8 buffer_opengl_create(Buffer* buffer, const BufferConfig* config) {
         return false;
     }
 
-    OpenGLBufferState* buffer_state = platform_allocate(sizeof(OpenGLBufferState));
-    platform_zero_memory(buffer_state, sizeof(OpenGLBufferState));
+    OpenGLBufferState* buffer_state = vara_allocate(sizeof(OpenGLBufferState));
+    vara_zero_memory(buffer_state, sizeof(OpenGLBufferState));
     if (!buffer_state) {
         return false;
     }
@@ -93,7 +93,7 @@ b8 buffer_opengl_create(Buffer* buffer, const BufferConfig* config) {
 
     glGenBuffers(1, &buffer_state->id);
     if (buffer_state->id == 0) {
-        platform_free(buffer_state);
+        vara_free(buffer_state, sizeof(OpenGLBufferState));
         return false;
     }
 
@@ -160,7 +160,7 @@ void buffer_opengl_destroy(Buffer* buffer) {
         buffer_state->id = 0;
     }
 
-    platform_free(buffer_state);
+    vara_free(buffer_state, sizeof(OpenGLBufferState));
     buffer->backend_data = NULL;
 }
 

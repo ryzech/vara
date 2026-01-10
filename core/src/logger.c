@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "vara/core/logger.h"
+#include "vara/core/memory/memory.h"
 #include "vara/core/platform/platform.h"
 
 // How should we handle this?
@@ -39,7 +40,7 @@ void _log_output(const LogLevel level, const char* func, const char* message, ..
     };
 
     char out_message[4096];
-    platform_set_memory(out_message, 0, sizeof(out_message));
+    vara_set_memory(out_message, 0, sizeof(out_message));
 
     va_list arg_ptr;
     va_start(arg_ptr, message);
@@ -48,7 +49,7 @@ void _log_output(const LogLevel level, const char* func, const char* message, ..
 
     // TODO: handle newlines so error blocks don't look weird.
     char final_message[4200];
-    platform_set_memory(final_message, 0, sizeof(final_message));
+    vara_set_memory(final_message, 0, sizeof(final_message));
     snprintf(
         final_message,
         sizeof(final_message),

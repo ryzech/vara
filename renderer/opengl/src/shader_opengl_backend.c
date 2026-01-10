@@ -1,6 +1,6 @@
 #include <glad/gl.h>
 #include <vara/core/logger.h>
-#include <vara/core/platform/platform.h>
+#include <vara/core/memory/memory.h>
 
 #include "vara/renderer/shader_compiler_opengl.h"
 #include "vara/renderer/shader_opengl_backend.h"
@@ -11,14 +11,15 @@ typedef struct OpenGLShaderState {
 
 b8 shader_opengl_create(Shader* shader, const ShaderConfig* config) {
     DEBUG("Creating shader program named('%s')", config->name);
-    OpenGLShaderState* shader_state = platform_allocate(sizeof(OpenGLShaderState));
+    OpenGLShaderState* shader_state = vara_allocate(sizeof(OpenGLShaderState));
+    vara_zero_memory(shader_state, sizeof(OpenGLShaderState));
     if (!shader_state) {
         return false;
     }
 
     shader_state->shader_program = shader_compiler_opengl_compile(config);
     if (shader_state->shader_program == 0) {
-        platform_free(shader_state);
+        vara_free(shader_state, sizeof(OpenGLShaderState));
         return false;
     }
 
@@ -37,7 +38,7 @@ void shader_opengl_destroy(Shader* shader) {
         shader_state->shader_program = 0;
     }
 
-    platform_free(shader_state);
+    vara_free(shader_state, sizeof(OpenGLShaderState));
     shader->backend_data = NULL;
 }
 

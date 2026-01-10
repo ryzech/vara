@@ -1,5 +1,6 @@
 #include "vara/core/input/input.h"
-#include "vara/core/platform/platform.h"
+
+#include "vara/core/memory/memory.h"
 
 typedef struct KeyState KeyState;
 typedef struct MouseState MouseState;
@@ -24,20 +25,22 @@ struct InputState {
 static InputState* input_state;
 
 b8 input_system_create(void) {
-    input_state = platform_allocate(sizeof(InputState));
-    platform_zero_memory(input_state, sizeof(InputState));
+    input_state = vara_allocate(sizeof(InputState));
+    vara_zero_memory(input_state, sizeof(InputState));
     return true;
 }
 
 void input_system_destroy(void) {
-    platform_free(input_state);
+    if (input_state) {
+        vara_free(input_state, sizeof(InputState));
+    }
 }
 
 void input_system_update(void) {
-    platform_copy_memory(
+    vara_copy_memory(
         &input_state->previous_key_state, &input_state->current_key_state, sizeof(KeyState)
     );
-    platform_copy_memory(
+    vara_copy_memory(
         &input_state->previous_mouse_state, &input_state->current_mouse_state, sizeof(MouseState)
     );
 }

@@ -5,9 +5,9 @@
 #include "vara/core/input/keycodes.h"
 #include "vara/core/logger.h"
 #include "vara/core/math/types.h"
-#include "vara/core/platform/platform.h"
 #include "vara/core/platform/platform_graphics_types.h"
 #include "vara/core/platform/platform_window.h"
+#include "vara/core/memory/memory.h"
 
 static GLFWcursor* default_cursor;
 static GLFWcursor* hand_cursor;
@@ -301,16 +301,16 @@ VaraWindow* platform_window_create(const VaraWindowConfig* config) {
     }
 
     DEBUG("Creating VaraWindow named('%s')", config->name);
-    VaraWindow* window = platform_allocate(sizeof(VaraWindow));
+    VaraWindow* window = vara_allocate(sizeof(VaraWindow));
     if (!window) {
         ERROR("Failed to allocate VaraWindow");
         return NULL;
     }
 
-    window->platform_state = platform_allocate(sizeof(VaraWindowState));
+    window->platform_state = vara_allocate(sizeof(VaraWindowState));
     if (!window->platform_state) {
         ERROR("Failed to allocate VaraWindowState");
-        platform_free(window);
+        vara_free(window, sizeof(VaraWindow));
         return NULL;
     }
 
@@ -395,9 +395,9 @@ void platform_window_destroy(VaraWindow* window) {
         window->platform_state->window = NULL;
     }
 
-    platform_free(window->platform_state);
+    vara_free(window->platform_state, sizeof(VaraWindowState));
     window->platform_state = NULL;
-    platform_free(window);
+    vara_free(window, sizeof(VaraWindow));
 }
 
 void platform_window_set_title(VaraWindow* window, const char* title) {

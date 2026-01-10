@@ -1,5 +1,5 @@
 #include <glad/gl.h>
-#include <vara/core/platform/platform.h>
+#include <vara/core/memory/memory.h>
 #include <vara/renderer/texture_opengl_backend.h>
 
 static GLenum texture_format_to_gl(TextureFormat format) {
@@ -41,8 +41,8 @@ b8 texture_opengl_create(Texture* texture, const TextureConfig* config) {
         return false;
     }
 
-    OpenGLTextureState* texture_state = platform_allocate(sizeof(OpenGLTextureState));
-    platform_zero_memory(texture_state, sizeof(OpenGLTextureState));
+    OpenGLTextureState* texture_state = vara_allocate(sizeof(OpenGLTextureState));
+    vara_zero_memory(texture_state, sizeof(OpenGLTextureState));
     if (!texture_state) {
         return false;
     }
@@ -98,7 +98,7 @@ void texture_opengl_destroy(Texture* texture) {
 
     glDeleteTextures(1, &texture_state->id);
 
-    platform_free(texture_state);
+    vara_free(texture_state, sizeof(OpenGLTextureState));
     texture->backend_data = NULL;
 }
 

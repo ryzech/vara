@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <vara/core/logger.h>
-#include <vara/core/platform/platform.h>
 #include <vara/core/platform/platform_graphics_types.h>
 #include <vara/core/platform/platform_window.h>
+#include <vara/core/memory/memory.h>
 
 #include "vara/renderer/internal/renderer_internal.h"
 #include "vara/renderer/render_command.h"
@@ -10,8 +10,8 @@
 #include "vara/renderer/swapchain.h"
 
 Renderer* renderer_create(VaraWindow* window) {
-    Renderer* renderer = platform_allocate(sizeof(Renderer));
-    platform_zero_memory(renderer, sizeof(Renderer));
+    Renderer* renderer = vara_allocate(sizeof(Renderer));
+    vara_zero_memory(renderer, sizeof(Renderer));
     if (!renderer) {
         FATAL("Failed to allocate Renderer.");
         return NULL;
@@ -63,7 +63,7 @@ void renderer_destroy(Renderer* renderer) {
             renderer_backend_destroy(renderer->backend);
         }
 
-        platform_free(renderer);
+        vara_free(renderer, sizeof(Renderer));
     }
 }
 

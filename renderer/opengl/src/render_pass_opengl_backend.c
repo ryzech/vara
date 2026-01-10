@@ -1,6 +1,6 @@
 #include <glad/gl.h>
 #include <vara/core/logger.h>
-#include <vara/core/platform/platform.h>
+#include <vara/core/memory/memory.h>
 
 #include "vara/renderer/framebuffer_opengl_backend.h"
 #include "vara/renderer/render_pass_opengl_backend.h"
@@ -11,7 +11,7 @@ typedef struct OpenGLRenderPassState {
 
 b8 render_pass_opengl_create(RenderPass* pass, const RenderPassConfig* config) {
     DEBUG("Creating render pass named('%s')", config->name);
-    OpenGLRenderPassState* render_pass_state = platform_allocate(sizeof(OpenGLRenderPassState));
+    OpenGLRenderPassState* render_pass_state = vara_allocate(sizeof(OpenGLRenderPassState));
     if (!render_pass_state) {
         return false;
     }
@@ -27,7 +27,7 @@ void render_pass_opengl_destroy(RenderPass* pass) {
         return;
     }
 
-    platform_free(pass->backend_data);
+    vara_free(pass->backend_data, sizeof(OpenGLRenderPassState));
     pass->backend_data = NULL;
 }
 
