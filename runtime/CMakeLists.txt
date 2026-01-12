@@ -15,6 +15,7 @@ set(RUNTIME_SOURCES src/application/application.c src/renderer/renderer_frontend
         src/renderer/render_context_frontend.c
         src/renderer/render_pipeline_frontend.c
         src/renderer/swapchain_frontend.c
+        src/renderer/internal/shader/shader_compiler_internal.c
 )
 
 add_library(vara-runtime STATIC ${RUNTIME_SOURCES})
@@ -25,5 +26,5 @@ generate_shader_headers(vara-runtime ${CMAKE_CURRENT_SOURCE_DIR}/include/vara/sh
 
 target_include_directories(vara-runtime PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(vara-runtime PUBLIC ${FREETYPE_INCLUDE_DIRS})
-target_link_libraries(vara-runtime PRIVATE ${FREETYPE_LIBRARIES})
+target_link_libraries(vara-runtime PRIVATE ${FREETYPE_LIBRARIES} glslang::glslang glslang-default-resource-limits spirv-cross-c)
 target_link_libraries(vara-runtime PUBLIC vara-core flecs::flecs_static)

@@ -1,7 +1,7 @@
 #[vertex]
 
 #version 410
-out vec2 vTexCoord;
+layout (location = 0) out vec2 vTexCoord;
 
 void main() {
     vec2 uv = vec2((gl_VertexID >> 1), gl_VertexID & 1) * 2.0;
@@ -14,9 +14,9 @@ void main() {
 #[fragment]
 
 #version 410
-layout(location = 0) out vec4 fragColor;
+layout (location = 0) in vec2 vTexCoord;
 
-in vec2 vTexCoord;
+layout (location = 0) out vec4 fragColor;
 
 uniform sampler2D uScreenTexture;
 

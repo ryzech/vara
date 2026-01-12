@@ -5,9 +5,9 @@ layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec4 aColor;
 layout (location = 2) in vec2 aTexCoord;
 
-out vec4 vColor;
-out vec3 vWorldPos;
-out vec2 vTexCoord;
+layout (location = 0) out vec4 vColor;
+layout (location = 1) out vec3 vWorldPos;
+layout (location = 2) out vec2 vTexCoord;
 
 uniform mat4 uViewProj;
 uniform mat4 uModel;
@@ -23,11 +23,11 @@ void main() {
 #[fragment]
 
 #version 410
-layout(location = 0) out vec4 oColor;
+layout (location = 0) in vec4 vColor;
+layout (location = 1) in vec3 vWorldPos;
+layout (location = 2) in vec2 vTexCoord;
 
-in vec4 vColor;
-in vec3 vWorldPos;
-in vec2 vTexCoord;
+layout (location = 0) out vec4 oColor;
 
 void main() {
     oColor = vColor;

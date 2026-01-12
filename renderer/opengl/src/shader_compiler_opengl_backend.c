@@ -4,19 +4,15 @@
 
 #include "vara/renderer/shader_compiler_opengl.h"
 
-static GLenum stage_to_gl_type(ShaderStage stage, const char** out_name) {
+static GLenum stage_to_gl_type(ShaderStage stage) {
     switch (stage) {
         case SHADER_STAGE_VERTEX:
-            *out_name = "vertex_shader";
             return GL_VERTEX_SHADER;
         case SHADER_STAGE_FRAGMENT:
-            *out_name = "fragment_shader";
             return GL_FRAGMENT_SHADER;
         case SHADER_STAGE_COMPUTE:
-            *out_name = "compute_shader";
             return GL_COMPUTE_SHADER;
         default:
-            *out_name = "unknown_shader";
             return 0;
     }
 }
@@ -66,8 +62,8 @@ GLuint shader_compiler_opengl_compile(const ShaderConfig* config) {
             return 0;
         }
 
-        const char* stage_name;
-        GLenum gl_type = stage_to_gl_type(src->stage, &stage_name);
+        const char* stage_name = shader_stage_name(src->stage);
+        GLenum gl_type = stage_to_gl_type(src->stage);
         if (!gl_type) {
             return 0;
         }

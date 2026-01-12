@@ -6,9 +6,9 @@ layout (location = 1) in vec4 aColor;
 layout (location = 2) in vec2 aTexCoord;
 layout (location = 3) in float aTexIndex;
 
-out vec4 vColor;
-out vec2 vTexCoord;
-out float vTexIndex;
+layout (location = 0) out vec4 vColor;
+layout (location = 1) out vec2 vTexCoord;
+layout (location = 2) out float vTexIndex;
 
 uniform mat4 uProjection;
 
@@ -22,11 +22,11 @@ void main() {
 #[fragment]
 
 #version 410
-in vec4 vColor;
-in vec2 vTexCoord;
-in float vTexIndex;
+layout (location = 0) in vec4 vColor;
+layout (location = 1) in vec2 vTexCoord;
+layout (location = 2) in float vTexIndex;
 
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
 
 uniform sampler2D uTextures[16];
 
