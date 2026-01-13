@@ -9,15 +9,17 @@ layout (location = 0) out vec4 vColor;
 layout (location = 1) out vec3 vWorldPos;
 layout (location = 2) out vec2 vTexCoord;
 
-uniform mat4 uViewProj;
-uniform mat4 uModel;
+layout (std140) uniform CameraUBO {
+    mat4 view;
+    mat4 projection;
+};
 
 void main() {
-    vec4 worldPos = uModel * vec4(aPos, 1.0);
+    vec4 worldPos = vec4(aPos, 1.0);
     vWorldPos = worldPos.xyz;
     vColor = aColor;
     vTexCoord = aTexCoord;
-    gl_Position = uViewProj * worldPos;
+    gl_Position = projection * view * worldPos;
 }
 
 #[fragment]

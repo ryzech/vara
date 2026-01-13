@@ -165,7 +165,7 @@ void shader_compiler_release(CompiledShader* compiled) {
         if (stage->bytecode) {
             size_t size = stage->bytecode_size;
             if (size == 0) {
-                size = string_length((const char*)stage->bytecode) + 1;
+                size = string_length(stage->bytecode) + 1;
             }
             vara_free(stage->bytecode, size);
             stage->bytecode = NULL;

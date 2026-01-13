@@ -12,11 +12,11 @@ RenderContext* render_context_create(Renderer* renderer) {
         return NULL;
     }
 
-    const Renderer2DConfig r2d_config = {
-        .max_indices = 4096,
-        .max_vertices = 4096,
-    };
-    context->r2d = renderer2d_create(renderer, &r2d_config);
+    // const Renderer2DConfig r2d_config = {
+    //     .max_indices = 4096,
+    //     .max_vertices = 4096,
+    // };
+    // context->r2d = renderer2d_create(renderer, &r2d_config);
 
     return context;
 }

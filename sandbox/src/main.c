@@ -8,6 +8,7 @@
 #include <vara/material/material.h>
 #include <vara/renderer/buffer.h>
 #include <vara/renderer/framebuffer.h>
+#include <vara/renderer/render_command.h>
 #include <vara/renderer/render_packet.h>
 #include <vara/renderer/render_pass.h>
 #include <vara/renderer/render_pipeline.h>
@@ -25,10 +26,15 @@ static RenderPass* screen_pass;
 static Framebuffer* render_buffer;
 static RenderPipeline* base_pipeline;
 static RenderPipeline* screen_pipeline;
+static Buffer* ubo;
 
 static Camera* camera;
-
 static f32 timer;
+
+typedef struct CameraUBO {
+    Matrix4 view;
+    Matrix4 projection;
+} CameraUBO;
 
 static b8 on_window_resize(i16 event_code, void* sender, const EventData* event) {
     const i32 width = event->i32[0];
@@ -159,6 +165,14 @@ void sandbox_init(void) {
             application_get_window()->height,
         }
     );
+
+    const BufferConfig ubo_config = {
+        .type = BUFFER_TYPE_UNIFORM,
+        .binding = 0,
+        .size = sizeof(CameraUBO),
+        .usage = BUFFER_USAGE_DYNAMIC,
+    };
+    ubo = buffer_create(renderer, &ubo_config);
 }
 
 void sandbox_update(f32 delta_time) {
@@ -210,17 +224,19 @@ void sandbox_update(f32 delta_time) {
     Renderer* renderer = application_get_renderer();
     render_pass_begin(render_pass);
     {
-        Material material = {
-            .model = mat4_identity(),
-            .view_projection = camera_get_view_projection(camera),
+        // This needs majorly cleaned up.
+        const CameraUBO ubo_data = {
+            .view = camera_get_view(camera),
+            .projection = camera_get_projection(camera),
         };
         RenderPacket packet = {
             .pipeline = base_pipeline,
-            .material = &material,
             .vertex_buffer = vertex_buffer,
             .index_buffer = index_buffer,
             .index_count = 3,
         };
+        buffer_set_data(ubo, &ubo_data, sizeof(ubo_data), 0);
+        render_cmd_bind_buffer(render_pass->command_buffer, ubo);
         render_pass_submit(render_pass, &packet);
     }
     render_pass_end(renderer, render_pass);
@@ -229,8 +245,6 @@ void sandbox_update(f32 delta_time) {
     {
         Texture* screen_texture = framebuffer_get_attachment(render_buffer, 0);
         Material material = {
-            .model = mat4_identity(),
-            .view_projection = mat4_identity(),
             .texture_count = 1,
         };
         material.textures[0] = screen_texture;
