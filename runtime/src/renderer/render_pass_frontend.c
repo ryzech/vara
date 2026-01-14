@@ -69,10 +69,12 @@ RenderPass* render_pass_create(Renderer* renderer, const RenderPassConfig* confi
     pass->packets = vara_allocate(sizeof(RenderPacket) * pass->packet_capacity);
     pass->command_buffer = render_cmd_buffer_create();
 
-    if (!pass->backend->render_pass.create(pass, config)) {
-        ERROR("Failed to create render pass named('%s')", config->name);
-        render_pass_destroy(pass);
-        return NULL;
+    if (pass->backend->render_pass.create) {
+        if (!pass->backend->render_pass.create(pass, config)) {
+            ERROR("Failed to create render pass named('%s')", config->name);
+            render_pass_destroy(pass);
+            return NULL;
+        }
     }
 
     return pass;
@@ -80,7 +82,9 @@ RenderPass* render_pass_create(Renderer* renderer, const RenderPassConfig* confi
 
 void render_pass_destroy(RenderPass* pass) {
     if (pass) {
-        pass->backend->render_pass.destroy(pass);
+        if (pass->backend->render_pass.destroy) {
+            pass->backend->render_pass.destroy(pass);
+        }
         render_cmd_buffer_destroy(pass->command_buffer);
         vara_free(pass->packets, sizeof(RenderPacket) * pass->packet_count);
         if (pass->color_attachments) {

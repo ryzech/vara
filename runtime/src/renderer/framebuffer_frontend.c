@@ -26,9 +26,11 @@ Framebuffer* framebuffer_create(Renderer* renderer, const FramebufferConfig* con
     RendererBackend* backend = renderer_backend_get(renderer);
     buffer->backend = backend;
 
-    if (!buffer->backend->framebuffer.create(buffer, config)) {
-        framebuffer_destroy(buffer);
-        return NULL;
+    if (buffer->backend->framebuffer.create) {
+        if (!buffer->backend->framebuffer.create(buffer, config)) {
+            framebuffer_destroy(buffer);
+            return NULL;
+        }
     }
 
     return buffer;
@@ -36,7 +38,9 @@ Framebuffer* framebuffer_create(Renderer* renderer, const FramebufferConfig* con
 
 void framebuffer_destroy(Framebuffer* buffer) {
     if (buffer) {
-        buffer->backend->framebuffer.destroy(buffer);
+        if (buffer->backend->framebuffer.destroy) {
+            buffer->backend->framebuffer.destroy(buffer);
+        }
 
         if (buffer->attachments) {
             vara_free(
@@ -49,19 +53,25 @@ void framebuffer_destroy(Framebuffer* buffer) {
 
 void framebuffer_bind(Framebuffer* buffer) {
     if (buffer) {
-        buffer->backend->framebuffer.bind(buffer);
+        if (buffer->backend->framebuffer.bind) {
+            buffer->backend->framebuffer.bind(buffer);
+        }
     }
 }
 
 void framebuffer_unbind(Framebuffer* buffer) {
     if (buffer) {
-        buffer->backend->framebuffer.unbind(buffer);
+        if (buffer->backend->framebuffer.unbind) {
+            buffer->backend->framebuffer.unbind(buffer);
+        }
     }
 }
 
 void framebuffer_resize(Framebuffer* buffer, const u32 width, const u32 height) {
     if (buffer) {
-        buffer->backend->framebuffer.resize(buffer, width, height);
+        if (buffer->backend->framebuffer.resize) {
+            buffer->backend->framebuffer.resize(buffer, width, height);
+        }
     }
 }
 

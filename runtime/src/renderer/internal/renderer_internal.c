@@ -6,6 +6,7 @@
 #include "vara/renderer/renderer.h"
 
 extern void renderer_opengl_init(RendererBackend* backend, VaraWindow* window);
+extern void renderer_vulkan_init(RendererBackend* backend, VaraWindow* window);
 
 RendererBackend* renderer_backend_create(VaraWindow* window) {
     RendererBackend* backend = vara_allocate(sizeof(RendererBackend));
@@ -14,6 +15,9 @@ RendererBackend* renderer_backend_create(VaraWindow* window) {
     switch (window->renderer_type) {
         case RENDERER_TYPE_OPENGL:
             renderer_opengl_init(backend, window);
+            break;
+        case RENDERER_TYPE_VULKAN:
+            renderer_vulkan_init(backend, window);
             break;
         default:
             ERROR("Unsupported renderer type.")

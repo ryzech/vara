@@ -2,8 +2,8 @@
 #include <vara/core/memory/memory.h>
 
 #include "vara/renderer/internal/renderer_internal.h"
-#include "vara/renderer/swapchain.h"
 #include "vara/renderer/renderer.h"
+#include "vara/renderer/swapchain.h"
 
 Swapchain* swapchain_create(Renderer* renderer, const SwapchainConfig* config) {
     Swapchain* swapchain = vara_allocate(sizeof(Swapchain));
@@ -16,10 +16,12 @@ Swapchain* swapchain_create(Renderer* renderer, const SwapchainConfig* config) {
     RendererBackend* backend = renderer_backend_get(renderer);
     swapchain->backend = backend;
 
-    if (!swapchain->backend->swapchain.create(swapchain, config)) {
-        ERROR("Failed to create Swapchain");
-        swapchain_destroy(swapchain);
-        return NULL;
+    if (swapchain->backend->swapchain.create) {
+        if (!swapchain->backend->swapchain.create(swapchain, config)) {
+            ERROR("Failed to create Swapchain");
+            swapchain_destroy(swapchain);
+            return NULL;
+        }
     }
 
     return swapchain;
@@ -27,13 +29,17 @@ Swapchain* swapchain_create(Renderer* renderer, const SwapchainConfig* config) {
 
 void swapchain_destroy(Swapchain* swapchain) {
     if (swapchain) {
-        swapchain->backend->swapchain.destroy(swapchain);
+        if (swapchain->backend->swapchain.destroy) {
+            swapchain->backend->swapchain.destroy(swapchain);
+        }
         vara_free(swapchain, sizeof(Swapchain));
     }
 }
 
 void swapchain_present(Swapchain* swapchain) {
     if (swapchain) {
-        swapchain->backend->swapchain.present(swapchain);
+        if (swapchain->backend->swapchain.present) {
+            swapchain->backend->swapchain.present(swapchain);
+        }
     }
 }

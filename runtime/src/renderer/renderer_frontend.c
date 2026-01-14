@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <vara/core/logger.h>
+#include <vara/core/memory/memory.h>
 #include <vara/core/platform/platform_graphics_types.h>
 #include <vara/core/platform/platform_window.h>
-#include <vara/core/memory/memory.h>
 
 #include "vara/renderer/internal/renderer_internal.h"
 #include "vara/renderer/render_command.h"
@@ -98,7 +98,9 @@ void renderer_present(Renderer* renderer) {
 void renderer_execute_commands(Renderer* renderer, RenderCommandBuffer* buffer) {
     if (renderer) {
         const RendererBackend* backend = renderer->backend;
-        backend->renderer.submit(buffer);
+        if (backend->renderer.submit) {
+            backend->renderer.submit(buffer);
+        }
     }
 }
 

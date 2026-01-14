@@ -18,10 +18,12 @@ RenderPipeline* render_pipeline_create(Renderer* renderer, const RenderPipelineC
     RendererBackend* backend = renderer_backend_get(renderer);
     pipeline->backend = backend;
 
-    if (!pipeline->backend->render_pipeline.create(pipeline, config)) {
-        ERROR("Failed to create RenderPipeline named('%s')", config->name);
-        render_pipeline_destroy(pipeline);
-        return NULL;
+    if (pipeline->backend->render_pipeline.create) {
+        if (!pipeline->backend->render_pipeline.create(pipeline, config)) {
+            ERROR("Failed to create RenderPipeline named('%s')", config->name);
+            render_pipeline_destroy(pipeline);
+            return NULL;
+        }
     }
 
     return pipeline;
@@ -29,7 +31,9 @@ RenderPipeline* render_pipeline_create(Renderer* renderer, const RenderPipelineC
 
 void render_pipeline_destroy(RenderPipeline* pipeline) {
     if (pipeline) {
-        pipeline->backend->render_pipeline.destroy(pipeline);
+        if (pipeline->backend->render_pipeline.destroy) {
+            pipeline->backend->render_pipeline.destroy(pipeline);
+        }
         vara_free(pipeline, sizeof(RenderPipeline));
     }
 }

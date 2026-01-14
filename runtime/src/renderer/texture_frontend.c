@@ -19,9 +19,11 @@ Texture* texture_create(Renderer* renderer, const TextureConfig* config) {
     RendererBackend* backend = renderer_backend_get(renderer);
     texture->backend = backend;
 
-    if (!texture->backend->texture.create(texture, config)) {
-        texture_destroy(texture);
-        return NULL;
+    if (texture->backend->texture.create) {
+        if (!texture->backend->texture.create(texture, config)) {
+            texture_destroy(texture);
+            return NULL;
+        }
     }
 
     return texture;
@@ -68,20 +70,26 @@ Texture* texture_load_file(Renderer* renderer, const TextureConfig* config, cons
 
 void texture_destroy(Texture* texture) {
     if (texture) {
-        texture->backend->texture.destroy(texture);
+        if (texture->backend->texture.destroy) {
+            texture->backend->texture.destroy(texture);
+        }
         vara_free(texture, sizeof(Texture));
     }
 }
 
 void texture_bind(Texture* texture, u32 slot) {
     if (texture) {
-        texture->backend->texture.bind(texture, slot);
+        if (texture->backend->texture.bind) {
+            texture->backend->texture.bind(texture, slot);
+        }
     }
 }
 
 void texture_unbind(Texture* texture) {
     if (texture) {
-        texture->backend->texture.unbind(texture);
+        if (texture->backend->texture.unbind) {
+            texture->backend->texture.unbind(texture);
+        }
     }
 }
 
@@ -90,12 +98,16 @@ void texture_set_data(Texture* texture, void* data, size_t size) {
         return;
     }
 
-    texture->backend->texture.set_data(texture, data, size);
+    if (texture->backend->texture.set_data) {
+        texture->backend->texture.set_data(texture, data, size);
+    }
 }
 
 u32 texture_get_id(Texture* texture) {
     if (texture) {
-        return texture->backend->texture.get_id(texture);
+        if (texture->backend->texture.get_id) {
+            return texture->backend->texture.get_id(texture);
+        }
     }
 
     return 0;

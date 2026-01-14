@@ -54,7 +54,6 @@ int application_main(int argc, char** argv) {
 
     if (application_state.config.window_config) {
         application_state.window = platform_window_create(application_state.config.window_config);
-        platform_window_make_context_current(application_state.window);
         if (!application_state.window) {
             ERROR("Failed to create window!");
             platform_destroy();

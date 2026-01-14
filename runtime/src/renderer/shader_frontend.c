@@ -15,10 +15,12 @@ Shader* shader_create(Renderer* renderer, const ShaderConfig* config) {
     RendererBackend* backend = renderer_backend_get(renderer);
     shader->backend = backend;
 
-    if (!shader->backend->shader.create(shader, config)) {
-        ERROR("Failed to create shader named('%s')", config->name);
-        shader_destroy(shader);
-        return NULL;
+    if (shader->backend->shader.create) {
+        if (!shader->backend->shader.create(shader, config)) {
+            ERROR("Failed to create shader named('%s')", config->name);
+            shader_destroy(shader);
+            return NULL;
+        }
     }
 
     return shader;
@@ -26,20 +28,26 @@ Shader* shader_create(Renderer* renderer, const ShaderConfig* config) {
 
 void shader_destroy(Shader* shader) {
     if (shader) {
-        shader->backend->shader.destroy(shader);
+        if (shader->backend->shader.destroy) {
+            shader->backend->shader.destroy(shader);
+        }
         vara_free(shader, sizeof(Shader));
     }
 }
 
 void shader_bind(Shader* shader) {
     if (shader) {
-        shader->backend->shader.bind(shader);
+        if (shader->backend->shader.bind) {
+            shader->backend->shader.bind(shader);
+        }
     }
 }
 
 void shader_unbind(Shader* shader) {
     if (shader) {
-        shader->backend->shader.unbind(shader);
+        if (shader->backend->shader.unbind) {
+            shader->backend->shader.unbind(shader);
+        }
     }
 }
 
@@ -57,6 +65,8 @@ void shader_set_int_array(Shader* shader, const char* name, const i32* array, u3
 
 void shader_dispatch(Shader* shader, const i16 x, const i16 y, const i16 z) {
     if (shader) {
-        shader->backend->shader.dispatch(shader, x, y, z);
+        if (shader->backend->shader.dispatch) {
+            shader->backend->shader.dispatch(shader, x, y, z);
+        }
     }
 }

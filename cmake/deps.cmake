@@ -49,3 +49,5 @@ FetchContent_Declare(
 set(SPIRV_CROSS_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
 set(SPIRV_CROSS_ENABLE_C_API ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(spirv-cross)
+
+find_package(Vulkan QUIET)

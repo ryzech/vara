@@ -46,9 +46,11 @@ Buffer* buffer_create(Renderer* renderer, const BufferConfig* config) {
     RendererBackend* backend = renderer_backend_get(renderer);
     buffer->backend = backend;
 
-    if (!buffer->backend->buffer.create(buffer, config)) {
-        buffer_destroy(buffer);
-        return NULL;
+    if (buffer->backend->buffer.create) {
+        if (!buffer->backend->buffer.create(buffer, config)) {
+            buffer_destroy(buffer);
+            return NULL;
+        }
     }
 
     return buffer;
@@ -56,7 +58,9 @@ Buffer* buffer_create(Renderer* renderer, const BufferConfig* config) {
 
 void buffer_destroy(Buffer* buffer) {
     if (buffer) {
-        buffer->backend->buffer.destroy(buffer);
+        if (buffer->backend->buffer.destroy) {
+            buffer->backend->buffer.destroy(buffer);
+        }
 
         if (buffer->layout.attributes) {
             vara_free(
@@ -90,5 +94,7 @@ void buffer_set_data(Buffer* buffer, const void* data, size_t size, size_t offse
 
     buffer->element_count =
         size / (buffer->type == BUFFER_TYPE_INDEX ? sizeof(u32) : buffer->layout.stride);
-    buffer->backend->buffer.set_data(buffer, data, size, offset);
+    if (buffer->backend->buffer.set_data) {
+        buffer->backend->buffer.set_data(buffer, data, size, offset);
+    }
 }
