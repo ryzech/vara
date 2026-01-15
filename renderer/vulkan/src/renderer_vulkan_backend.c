@@ -3,15 +3,16 @@
 #include <vara/core/math/types.h>
 #include <vara/core/platform/platform_window.h>
 #include <vara/core/util/array.h>
+#include <vara/core/util/string.h>
 #include <vara/renderer/internal/renderer_internal.h>
 
-#include "vara/core/util/string.h"
 #include "volk/volk.h"
 
 typedef struct VulkanRendererState {
     VaraWindow* window;
     VkInstance instance;
     const char** required_extensions;
+    const char** optional_extensions;
     const char** enabled_extensions;
 } VulkanRendererState;
 
@@ -41,14 +42,15 @@ static b8 renderer_vulkan_create(void) {
     };
 
     renderer_state.required_extensions = array(const char*, NULL);
-    array_append(renderer_state.required_extensions, &VK_KHR_SURFACE_EXTENSION_NAME);
+    renderer_state.optional_extensions = array(const char*, NULL);
+    array_append(renderer_state.required_extensions, VK_KHR_SURFACE_EXTENSION_NAME);
 #if defined(VARA_PLATFORM_APPLE)
     array_append(
-        renderer_state.required_extensions, &VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME
+        renderer_state.required_extensions, VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME
     );
 #endif
 #if defined(VARA_DEBUG)
-    array_append(renderer_state.required_extensions, &VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+    array_append(renderer_state.optional_extensions, VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 #endif
     renderer_state.enabled_extensions = array(const char*, NULL);
 
@@ -70,6 +72,14 @@ static b8 renderer_vulkan_create(void) {
             return false;
         }
         array_append(renderer_state.enabled_extensions, renderer_state.required_extensions[i]);
+    }
+
+    for (u32 i = 0; i < array_length(renderer_state.optional_extensions); i++) {
+        if (!has_extension(available_extensions, renderer_state.optional_extensions[i])) {
+            WARN("Missing optional Vulkan extension: %s", renderer_state.optional_extensions[i]);
+            break;
+        }
+        array_append(renderer_state.enabled_extensions, renderer_state.optional_extensions[i]);
     }
     array_destroy(available_extensions);
 
@@ -102,6 +112,7 @@ static void renderer_vulkan_destroy(void) {
         renderer_state.instance = VK_NULL_HANDLE;
     }
     array_destroy(renderer_state.required_extensions);
+    array_destroy(renderer_state.optional_extensions);
     array_destroy(renderer_state.enabled_extensions);
     volkFinalize();
 }

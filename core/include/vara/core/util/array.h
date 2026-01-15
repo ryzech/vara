@@ -21,11 +21,11 @@ void* _array_append(void* array, void* value);
 size_t array_length(void* array);
 void array_set_length(void* array, size_t length);
 
-#define array_sized(size, type, allocator) (type*)_array_create(16, sizeof(type), allocator)
+#define array_sized(size, type, allocator) (type*)_array_create(size, sizeof(type), allocator)
 #define array(type, allocator)             (type*)_array_create(16, sizeof(type), allocator)
 
 #define array_append(arr, value)                                                                   \
     {                                                                                              \
-        typeof(value) _tmp = (value);                                                              \
+        typeof(*(arr)) _tmp = (value);                                                             \
         (arr) = _array_append((arr), &_tmp);                                                       \
     }
