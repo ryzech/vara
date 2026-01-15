@@ -276,7 +276,7 @@ void application_init(ApplicationConfig* config) {
         .y = 100,
         .width = 800,
         .height = 600,
-        .renderer_type = RENDERER_TYPE_OPENGL,
+        .renderer_type = RENDERER_TYPE_VULKAN,
         .title = "Vara Engine - Sandbox",
         .name = "vara_sandbox"
     };
