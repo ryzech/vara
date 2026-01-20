@@ -1,3 +1,5 @@
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 #include <glad/gl.h>
 #include <vara/core/defines.h>
 #include <vara/core/logger.h>
@@ -20,7 +22,7 @@ typedef struct OpenGLRendererState {
 static OpenGLRendererState renderer_state;
 
 static b8 renderer_opengl_create(void) {
-    platform_window_make_context_current(renderer_state.window);
+    glfwMakeContextCurrent(platform_window_get_native_handle(renderer_state.window));
     gladLoadGL((GLADloadfunc)platform_window_get_proc_address);
     DEBUG("Loaded OpenGL: %s | %s", glGetString(GL_VERSION), glGetString(GL_RENDERER));
     return true;

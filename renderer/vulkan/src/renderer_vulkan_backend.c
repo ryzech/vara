@@ -7,11 +7,16 @@
 #include <vara/renderer/internal/renderer_internal.h>
 
 #include "vara/renderer/vulkan_device.h"
+#include "vara/renderer/vulkan_platform.h"
 #include "volk/volk.h"
+/* clang-format off */
+#include <GLFW/glfw3.h>
+/* clang-format on */
 
 typedef struct VulkanRendererState {
     VaraWindow* window;
     VkInstance instance;
+    VkSurfaceKHR surface;
     VulkanDevice device;
 } VulkanRendererState;
 
@@ -42,7 +47,7 @@ static b8 renderer_vulkan_create(void) {
 
     const char** required_extensions = array(const char*, NULL);
     const char** optional_extensions = array(const char*, NULL);
-    array_append(required_extensions, VK_KHR_SURFACE_EXTENSION_NAME);
+    vulkan_platform_get_required_extensions(&required_extensions);
 #if defined(VARA_PLATFORM_APPLE)
     array_append(required_extensions, VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 #endif
@@ -58,9 +63,9 @@ static b8 renderer_vulkan_create(void) {
     vkEnumerateInstanceExtensionProperties(NULL, &extension_count, available_extensions);
     array_set_length(available_extensions, extension_count);
 
-    DEBUG("Available Vulkan Extensions:")
-    for (u32 i = 0; i < array_length(available_extensions); i++) {
-        DEBUG("\t%s", available_extensions[i].extensionName);
+    DEBUG("Required Vulkan Extensions:")
+    for (u32 i = 0; i < array_length(required_extensions); i++) {
+        DEBUG("\t%s", required_extensions[i]);
     }
 
     for (u32 i = 0; i < array_length(required_extensions); i++) {
@@ -106,12 +111,26 @@ static b8 renderer_vulkan_create(void) {
         FATAL("Failed to create VulkanDevice!");
         return false;
     }
-    DEBUG("Loaded Vulkan %u.%u.%u", major, minor, patch);
+
+    const VkResult surface = glfwCreateWindowSurface(
+        renderer_state.instance,
+        platform_window_get_native_handle(renderer_state.window),
+        NULL,
+        &renderer_state.surface
+    );
+    if (surface != VK_SUCCESS) {
+        FATAL("Failed to create VkSurfaceKHR! Code: %u", surface);
+        return false;
+    }
 
     return true;
 }
 
 static void renderer_vulkan_destroy(void) {
+    if (renderer_state.surface) {
+        vkDestroySurfaceKHR(renderer_state.instance, renderer_state.surface, NULL);
+        renderer_state.surface = VK_NULL_HANDLE;
+    }
     if (renderer_state.device.logical_device) {
         vkDestroyDevice(renderer_state.device.logical_device, NULL);
         renderer_state.device.logical_device = VK_NULL_HANDLE;

@@ -458,19 +458,6 @@ void* platform_window_get_proc_address(const char* name) {
     return glfwGetProcAddress(name);
 }
 
-void platform_window_make_context_current(VaraWindow* window) {
-    if (!window || window->renderer_type != RENDERER_TYPE_OPENGL) {
-        WARN(
-            "Tried to make context current in window. Renderer named('%s') "
-            "does not support this. OpenGL only!",
-            renderer_type_to_string(window->renderer_type)
-        );
-        return;
-    }
-
-    glfwMakeContextCurrent(window->platform_state->window);
-}
-
 void platform_window_set_visible(VaraWindow* window, b8 visible) {
     if (visible) {
         glfwShowWindow(window->platform_state->window);

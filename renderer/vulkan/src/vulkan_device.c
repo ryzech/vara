@@ -51,10 +51,47 @@ b8 vulkan_device_create(VkInstance instance, VulkanDevice* device) {
         return false;
     }
 
+    VkPhysicalDeviceDriverProperties driver = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES
+    };
+    VkPhysicalDeviceProperties2 properties2 = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2,
+        .pNext = &driver,
+    };
+
     device->physical_device = selected;
     vkGetPhysicalDeviceProperties(selected, &device->properties);
+    vkGetPhysicalDeviceProperties2(selected, &properties2);
     vkGetPhysicalDeviceFeatures(selected, &device->features);
-    DEBUG("Using GPU named('%s')", device->properties.deviceName);
+    vkGetPhysicalDeviceMemoryProperties(selected, &device->memory);
+    DEBUG("Using GPU named('%s'):", device->properties.deviceName);
+    DEBUG("\tDriver: %s (%s)", driver.driverName, driver.driverInfo);
+
+    const VkPhysicalDeviceFeatures features = {
+        .samplerAnisotropy = VK_TRUE,
+    };
+
+    u32 extension_index = 0;
+    const char* extensions[6] = {0};
+    extensions[extension_index] = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
+    extension_index++;
+#if defined(VARA_PLATFORM_APPLE)
+    extensions[extension_index] = "VK_KHR_portability_subset";
+    extension_index++;
+#endif
+
+    const VkDeviceCreateInfo info = {
+        .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+        .pEnabledFeatures = &features,
+        .enabledExtensionCount = extension_index,
+        .ppEnabledExtensionNames = extensions,
+    };
+    vkCreateDevice(device->physical_device, &info, NULL, &device->logical_device);
+    volkLoadDevice(device->logical_device);
+    const u32 major = VK_VERSION_MAJOR(device->properties.apiVersion);
+    const u32 minor = VK_VERSION_MINOR(device->properties.apiVersion);
+    const u32 patch = VK_VERSION_PATCH(device->properties.apiVersion);
+    DEBUG("Using Vulkan API %u.%u.%u", major, minor, patch);
 
     return true;
 }
