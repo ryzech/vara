@@ -1,4 +1,5 @@
 set(VULKAN_RENDERER_SOURCES src/volk.c src/renderer_vulkan_backend.c
+        src/vulkan_device.c
 )
 
 add_library(vara-vulkan-renderer STATIC ${VULKAN_RENDERER_SOURCES})

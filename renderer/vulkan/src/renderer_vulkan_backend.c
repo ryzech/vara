@@ -6,14 +6,13 @@
 #include <vara/core/util/string.h>
 #include <vara/renderer/internal/renderer_internal.h>
 
+#include "vara/renderer/vulkan_device.h"
 #include "volk/volk.h"
 
 typedef struct VulkanRendererState {
     VaraWindow* window;
     VkInstance instance;
-    const char** required_extensions;
-    const char** optional_extensions;
-    const char** enabled_extensions;
+    VulkanDevice device;
 } VulkanRendererState;
 
 static VulkanRendererState renderer_state;
@@ -41,18 +40,16 @@ static b8 renderer_vulkan_create(void) {
         .engineVersion = VK_MAKE_VERSION(1, 0, 0),
     };
 
-    renderer_state.required_extensions = array(const char*, NULL);
-    renderer_state.optional_extensions = array(const char*, NULL);
-    array_append(renderer_state.required_extensions, VK_KHR_SURFACE_EXTENSION_NAME);
+    const char** required_extensions = array(const char*, NULL);
+    const char** optional_extensions = array(const char*, NULL);
+    array_append(required_extensions, VK_KHR_SURFACE_EXTENSION_NAME);
 #if defined(VARA_PLATFORM_APPLE)
-    array_append(
-        renderer_state.required_extensions, VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME
-    );
+    array_append(required_extensions, VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 #endif
 #if defined(VARA_DEBUG)
-    array_append(renderer_state.optional_extensions, VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+    array_append(optional_extensions, VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 #endif
-    renderer_state.enabled_extensions = array(const char*, NULL);
+    const char** enabled_extensions = array(const char*, NULL);
 
     u32 extension_count = 0;
     vkEnumerateInstanceExtensionProperties(NULL, &extension_count, NULL);
@@ -66,28 +63,30 @@ static b8 renderer_vulkan_create(void) {
         DEBUG("\t%s", available_extensions[i].extensionName);
     }
 
-    for (u32 i = 0; i < array_length(renderer_state.required_extensions); i++) {
-        if (!has_extension(available_extensions, renderer_state.required_extensions[i])) {
-            FATAL("Missing required Vulkan extension: %s", renderer_state.required_extensions[i]);
+    for (u32 i = 0; i < array_length(required_extensions); i++) {
+        if (!has_extension(available_extensions, required_extensions[i])) {
+            FATAL("Missing required Vulkan extension: %s", required_extensions[i]);
             return false;
         }
-        array_append(renderer_state.enabled_extensions, renderer_state.required_extensions[i]);
+        array_append(enabled_extensions, required_extensions[i]);
     }
 
-    for (u32 i = 0; i < array_length(renderer_state.optional_extensions); i++) {
-        if (!has_extension(available_extensions, renderer_state.optional_extensions[i])) {
-            WARN("Missing optional Vulkan extension: %s", renderer_state.optional_extensions[i]);
+    for (u32 i = 0; i < array_length(optional_extensions); i++) {
+        if (!has_extension(available_extensions, optional_extensions[i])) {
+            WARN("Missing optional Vulkan extension: %s", optional_extensions[i]);
             break;
         }
-        array_append(renderer_state.enabled_extensions, renderer_state.optional_extensions[i]);
+        array_append(enabled_extensions, optional_extensions[i]);
     }
     array_destroy(available_extensions);
+    array_destroy(required_extensions);
+    array_destroy(optional_extensions);
 
     const VkInstanceCreateInfo instance_info = {
         .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
         .pApplicationInfo = &application,
-        .enabledExtensionCount = array_length(renderer_state.enabled_extensions),
-        .ppEnabledExtensionNames = renderer_state.enabled_extensions,
+        .enabledExtensionCount = array_length(enabled_extensions),
+        .ppEnabledExtensionNames = enabled_extensions,
         .enabledLayerCount = 0,
         .ppEnabledLayerNames = 0,
 #if defined(VARA_PLATFORM_APPLE)
@@ -100,20 +99,27 @@ static b8 renderer_vulkan_create(void) {
         FATAL("Failed to create VkInstance! Code: %u", instance);
         return false;
     }
+    array_destroy(enabled_extensions);
     volkLoadInstance(renderer_state.instance);
+
+    if (!vulkan_device_create(renderer_state.instance, &renderer_state.device)) {
+        FATAL("Failed to create VulkanDevice!");
+        return false;
+    }
     DEBUG("Loaded Vulkan %u.%u.%u", major, minor, patch);
 
     return true;
 }
 
 static void renderer_vulkan_destroy(void) {
+    if (renderer_state.device.logical_device) {
+        vkDestroyDevice(renderer_state.device.logical_device, NULL);
+        renderer_state.device.logical_device = VK_NULL_HANDLE;
+    }
     if (renderer_state.instance) {
         vkDestroyInstance(renderer_state.instance, NULL);
         renderer_state.instance = VK_NULL_HANDLE;
     }
-    array_destroy(renderer_state.required_extensions);
-    array_destroy(renderer_state.optional_extensions);
-    array_destroy(renderer_state.enabled_extensions);
     volkFinalize();
 }
 
