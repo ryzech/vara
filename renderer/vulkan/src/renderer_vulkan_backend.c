@@ -107,11 +107,6 @@ static b8 renderer_vulkan_create(void) {
     array_destroy(enabled_extensions);
     volkLoadInstance(renderer_state.instance);
 
-    if (!vulkan_device_create(renderer_state.instance, &renderer_state.device)) {
-        FATAL("Failed to create VulkanDevice!");
-        return false;
-    }
-
     const VkResult surface = glfwCreateWindowSurface(
         renderer_state.instance,
         platform_window_get_native_handle(renderer_state.window),
@@ -120,6 +115,13 @@ static b8 renderer_vulkan_create(void) {
     );
     if (surface != VK_SUCCESS) {
         FATAL("Failed to create VkSurfaceKHR! Code: %u", surface);
+        return false;
+    }
+
+    if (!vulkan_device_create(
+            renderer_state.instance, renderer_state.surface, &renderer_state.device
+        )) {
+        FATAL("Failed to create VulkanDevice!");
         return false;
     }
 
