@@ -4,6 +4,7 @@
 #include <vara/core/defines.h>
 #include <vara/core/logger.h>
 #include <vara/core/math/types.h>
+#include <vara/core/memory/memory.h>
 #include <vara/core/platform/platform_window.h>
 #include <vara/renderer/internal/renderer_internal.h>
 
@@ -19,27 +20,27 @@ typedef struct OpenGLRendererState {
     VaraWindow* window;
 } OpenGLRendererState;
 
-static OpenGLRendererState renderer_state;
-
-static b8 renderer_opengl_create(void) {
-    glfwMakeContextCurrent(platform_window_get_native_handle(renderer_state.window));
+static b8 renderer_opengl_create(RendererBackend* backend) {
+    OpenGLRendererState* state = backend->backend_data;
+    glfwMakeContextCurrent(platform_window_get_native_handle(state->window));
     gladLoadGL((GLADloadfunc)platform_window_get_proc_address);
     DEBUG("Loaded OpenGL: %s | %s", glGetString(GL_VERSION), glGetString(GL_RENDERER));
     return true;
 }
 
 // Should likely just make this a RENDER_CMD instead of an immediate function.
-static void renderer_opengl_set_viewport(Vector2i viewport_size) {
+static void renderer_opengl_set_viewport(RendererBackend* backend, Vector2i viewport_size) {
     // Calculate scaled size (framebuffer size).
     // Should be the same regardless of window, so we query the main window.
-    const f32 scale = renderer_state.window->pixel_density;
+    OpenGLRendererState* state = backend->backend_data;
+    const f32 scale = state->window->pixel_density;
     const i32 scaled_x = (i32)((f32)viewport_size.x * scale);
     const i32 scaled_y = (i32)((f32)viewport_size.y * scale);
 
     glViewport(0, 0, scaled_x, scaled_y);
 }
 
-static void renderer_opengl_submit(const RenderCommandBuffer* buffer) {
+static void renderer_opengl_submit(RendererBackend* backend, const RenderCommandBuffer* buffer) {
     u8* cmd = buffer->buffer;
     const u8* end = buffer->buffer + buffer->used;
 
@@ -114,11 +115,22 @@ static void renderer_opengl_submit(const RenderCommandBuffer* buffer) {
     }
 }
 
-static void renderer_opengl_destroy(void) {
+static void renderer_opengl_destroy(RendererBackend* backend) {
+    OpenGLRendererState* state = backend->backend_data;
+    if (!state) {
+        return;
+    }
+    vara_free(state, sizeof(OpenGLRendererState));
 }
 
 void renderer_opengl_init(RendererBackend* backend, VaraWindow* window) {
-    renderer_state.window = window;
+    OpenGLRendererState* state = vara_allocate(sizeof(OpenGLRendererState));
+    if (!state) {
+        return;
+    }
+
+    backend->backend_data = state;
+    state->window = window;
 
     backend->name = "OpenGL";
     backend->type = RENDERER_TYPE_OPENGL;

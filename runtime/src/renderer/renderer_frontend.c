@@ -69,9 +69,9 @@ void renderer_destroy(Renderer* renderer) {
 
 void renderer_on_window_resize(Renderer* renderer, Vector2i new_size) {
     if (renderer) {
-        const RendererBackend* backend = renderer->backend;
+        RendererBackend* backend = renderer->backend;
         if (backend->renderer.set_viewport) {
-            backend->renderer.set_viewport(new_size);
+            backend->renderer.set_viewport(backend, new_size);
         }
     }
 }
@@ -97,9 +97,9 @@ void renderer_present(Renderer* renderer) {
 
 void renderer_execute_commands(Renderer* renderer, RenderCommandBuffer* buffer) {
     if (renderer) {
-        const RendererBackend* backend = renderer->backend;
+        RendererBackend* backend = renderer->backend;
         if (backend->renderer.submit) {
-            backend->renderer.submit(buffer);
+            backend->renderer.submit(backend, buffer);
         }
     }
 }

@@ -19,10 +19,10 @@ struct VaraWindow;
 struct Renderer;
 
 struct RendererBackendVT {
-    b8 (*create)(void);
-    void (*destroy)(void);
-    void (*set_viewport)(Vector2i viewport_size);
-    void (*submit)(const RenderCommandBuffer* buffer);
+    b8 (*create)(RendererBackend* backend);
+    void (*destroy)(RendererBackend* backend);
+    void (*set_viewport)(RendererBackend* backend, Vector2i viewport_size);
+    void (*submit)(RendererBackend* backend, const RenderCommandBuffer* buffer);
 };
 
 struct RendererBackend {
@@ -37,6 +37,7 @@ struct RendererBackend {
 
     const char* name;
     PlatformRendererType type;
+    void* backend_data;
 };
 
 RendererBackend* renderer_backend_create(struct VaraWindow* window);

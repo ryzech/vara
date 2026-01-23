@@ -1,26 +1,18 @@
 #include <vara/core/defines.h>
 #include <vara/core/logger.h>
 #include <vara/core/math/types.h>
+#include <vara/core/memory/memory.h>
 #include <vara/core/platform/platform_window.h>
 #include <vara/core/util/array.h>
 #include <vara/core/util/string.h>
 #include <vara/renderer/internal/renderer_internal.h>
 
-#include "vara/renderer/vulkan_device.h"
+#include "vara/renderer/renderer_vulkan_backend.h"
+#include "vara/renderer/swapchain_vulkan_backend.h"
 #include "vara/renderer/vulkan_platform.h"
-#include "volk/volk.h"
 /* clang-format off */
 #include <GLFW/glfw3.h>
 /* clang-format on */
-
-typedef struct VulkanRendererState {
-    VaraWindow* window;
-    VkInstance instance;
-    VkSurfaceKHR surface;
-    VulkanDevice device;
-} VulkanRendererState;
-
-static VulkanRendererState renderer_state;
 
 static b8 has_extension(VkExtensionProperties* available, const char* name) {
     for (u32 i = 0; i < array_length(available); i++) {
@@ -31,7 +23,8 @@ static b8 has_extension(VkExtensionProperties* available, const char* name) {
     return false;
 }
 
-static b8 renderer_vulkan_create(void) {
+static b8 renderer_vulkan_create(RendererBackend* backend) {
+    VulkanRendererState* state = backend->backend_data;
     volkInitialize();
     const u32 major = VK_VERSION_MAJOR(volkGetInstanceVersion());
     const u32 minor = VK_VERSION_MINOR(volkGetInstanceVersion());
@@ -39,7 +32,7 @@ static b8 renderer_vulkan_create(void) {
     const VkApplicationInfo application = {
         .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
         .apiVersion = VK_MAKE_API_VERSION(0, major, minor, patch),
-        .pApplicationName = renderer_state.window->name,
+        .pApplicationName = state->window->name,
         .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
         .pEngineName = "Vara Engine",
         .engineVersion = VK_MAKE_VERSION(1, 0, 0),
@@ -99,28 +92,23 @@ static b8 renderer_vulkan_create(void) {
 #endif
     };
 
-    const VkResult instance = vkCreateInstance(&instance_info, NULL, &renderer_state.instance);
+    const VkResult instance = vkCreateInstance(&instance_info, NULL, &state->instance);
     if (instance != VK_SUCCESS) {
         FATAL("Failed to create VkInstance! Code: %u", instance);
         return false;
     }
     array_destroy(enabled_extensions);
-    volkLoadInstance(renderer_state.instance);
+    volkLoadInstance(state->instance);
 
     const VkResult surface = glfwCreateWindowSurface(
-        renderer_state.instance,
-        platform_window_get_native_handle(renderer_state.window),
-        NULL,
-        &renderer_state.surface
+        state->instance, platform_window_get_native_handle(state->window), NULL, &state->surface
     );
     if (surface != VK_SUCCESS) {
         FATAL("Failed to create VkSurfaceKHR! Code: %u", surface);
         return false;
     }
 
-    if (!vulkan_device_create(
-            renderer_state.instance, renderer_state.surface, &renderer_state.device
-        )) {
+    if (!vulkan_device_create(state->instance, state->surface, &state->device)) {
         FATAL("Failed to create VulkanDevice!");
         return false;
     }
@@ -128,24 +116,36 @@ static b8 renderer_vulkan_create(void) {
     return true;
 }
 
-static void renderer_vulkan_destroy(void) {
-    if (renderer_state.surface) {
-        vkDestroySurfaceKHR(renderer_state.instance, renderer_state.surface, NULL);
-        renderer_state.surface = VK_NULL_HANDLE;
+static void renderer_vulkan_destroy(RendererBackend* backend) {
+    VulkanRendererState* state = backend->backend_data;
+    if (!state) {
+        return;
     }
-    if (renderer_state.device.logical_device) {
-        vkDestroyDevice(renderer_state.device.logical_device, NULL);
-        renderer_state.device.logical_device = VK_NULL_HANDLE;
+
+    if (state->surface) {
+        vkDestroySurfaceKHR(state->instance, state->surface, NULL);
+        state->surface = VK_NULL_HANDLE;
     }
-    if (renderer_state.instance) {
-        vkDestroyInstance(renderer_state.instance, NULL);
-        renderer_state.instance = VK_NULL_HANDLE;
+    if (state->device.logical_device) {
+        vkDestroyDevice(state->device.logical_device, NULL);
+        state->device.logical_device = VK_NULL_HANDLE;
+    }
+    if (state->instance) {
+        vkDestroyInstance(state->instance, NULL);
+        state->instance = VK_NULL_HANDLE;
     }
     volkFinalize();
+    vara_free(state, sizeof(VulkanRendererState));
 }
 
 void renderer_vulkan_init(RendererBackend* backend, VaraWindow* window) {
-    renderer_state.window = window;
+    VulkanRendererState* state = vara_allocate(sizeof(VulkanRendererState));
+    if (!state) {
+        return;
+    }
+
+    backend->backend_data = state;
+    state->window = window;
 
     backend->name = "Vulkan";
     backend->type = RENDERER_TYPE_VULKAN;
@@ -153,6 +153,11 @@ void renderer_vulkan_init(RendererBackend* backend, VaraWindow* window) {
     // Core Renderer
     backend->renderer.create = renderer_vulkan_create;
     backend->renderer.destroy = renderer_vulkan_destroy;
+
+    // Swapchain
+    backend->swapchain.create = swapchain_vulkan_create;
+    backend->swapchain.destroy = swapchain_vulkan_destroy;
+    backend->swapchain.present = swapchain_vulkan_present;
 
     DEBUG("Creating RendererBackend named('%s')", backend->name);
 }

@@ -24,7 +24,7 @@ RendererBackend* renderer_backend_create(VaraWindow* window) {
             break;
     }
 
-    if (!backend->renderer.create()) {
+    if (!backend->renderer.create(backend)) {
         FATAL("Failed to initialize Renderer!");
         renderer_backend_destroy(backend);
         vara_free(backend, sizeof(RendererBackend));
@@ -36,7 +36,7 @@ RendererBackend* renderer_backend_create(VaraWindow* window) {
 
 void renderer_backend_destroy(RendererBackend* backend) {
     if (backend) {
-        backend->renderer.destroy();
+        backend->renderer.destroy(backend);
     }
 }
 
