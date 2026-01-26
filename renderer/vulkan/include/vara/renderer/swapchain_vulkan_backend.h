@@ -12,6 +12,8 @@ typedef struct VulkanSwapchainState VulkanSwapchainState;
 typedef struct VulkanFrame VulkanFrame;
 
 struct VulkanFrame {
+    VkCommandPool command_pool;
+    VkCommandBuffer command_buffer;
     VkSemaphore image_available;
     VkSemaphore render_finished;
     VkFence in_flight;

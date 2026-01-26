@@ -20,15 +20,16 @@ static VkSurfaceFormatKHR choose_surface_format(VkSurfaceFormatKHR* formats) {
 }
 
 static VkPresentModeKHR choose_present_mode(VkPresentModeKHR* modes, b8 vsync) {
-    if (!vsync) {
+    if (vsync) {
         for (u32 i = 0; i < array_length(modes); i++) {
             if (modes[i] == VK_PRESENT_MODE_MAILBOX_KHR) {
                 return modes[i];
             }
         }
+        return VK_PRESENT_MODE_FIFO_KHR;
     }
 
-    return VK_PRESENT_MODE_FIFO_KHR;
+    return VK_PRESENT_MODE_IMMEDIATE_KHR;
 }
 
 b8 swapchain_vulkan_create(Swapchain* swapchain, const SwapchainConfig* config) {
@@ -143,14 +144,28 @@ b8 swapchain_vulkan_create(Swapchain* swapchain, const SwapchainConfig* config) 
     for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         VulkanFrame* frame = &state->frames[i];
 
+        VkCommandPoolCreateInfo pool_info = {
+            .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+            .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+            .queueFamilyIndex = renderer->device.graphics_queue_index,
+        };
+        VK_CHECK(vkCreateCommandPool(
+            renderer->device.logical_device, &pool_info, renderer->allocator, &frame->command_pool
+        ));
+
+        VkCommandBufferAllocateInfo command_buffer_info = {
+            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+            .commandPool = frame->command_pool,
+            .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+            .commandBufferCount = 1,
+        };
+        VK_CHECK(vkAllocateCommandBuffers(
+            renderer->device.logical_device, &command_buffer_info, &frame->command_buffer
+        ));
+
         VkSemaphoreCreateInfo semaphore_info = {
             .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
         };
-        VkFenceCreateInfo fence_info = {
-            .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-            .flags = VK_FENCE_CREATE_SIGNALED_BIT,
-        };
-
         VK_CHECK(vkCreateSemaphore(
             renderer->device.logical_device,
             &semaphore_info,
@@ -163,6 +178,11 @@ b8 swapchain_vulkan_create(Swapchain* swapchain, const SwapchainConfig* config) 
             renderer->allocator,
             &frame->render_finished
         ));
+
+        VkFenceCreateInfo fence_info = {
+            .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+            .flags = VK_FENCE_CREATE_SIGNALED_BIT,
+        };
         VK_CHECK(vkCreateFence(
             renderer->device.logical_device, &fence_info, renderer->allocator, &frame->in_flight
         ));
@@ -178,6 +198,9 @@ void swapchain_vulkan_destroy(Swapchain* swapchain) {
     for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         const VulkanFrame* frame = &state->frames[i];
 
+        vkDestroyCommandPool(
+            renderer->device.logical_device, frame->command_pool, renderer->allocator
+        );
         vkDestroySemaphore(
             renderer->device.logical_device, frame->image_available, renderer->allocator
         );
@@ -200,18 +223,19 @@ void swapchain_vulkan_present(Swapchain* swapchain) {
 
     VulkanSwapchainState* state = swapchain->backend_data;
     VulkanRendererState* renderer = swapchain->backend->backend_data;
-    VulkanFrame frame = state->frames[state->current_frame];
+    VulkanFrame* frame = &state->frames[state->current_frame];
 
     VkPresentInfoKHR present_info = {
         .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
         .waitSemaphoreCount = 1,
-        .pWaitSemaphores = &frame.render_finished,
+        .pWaitSemaphores = &frame->render_finished,
         .swapchainCount = 1,
         .pSwapchains = &state->swapchain,
         .pImageIndices = &state->image_index,
     };
 
     vkQueuePresentKHR(renderer->device.present_queue, &present_info);
+    state->current_frame = (state->current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
 void swapchain_vulkan_begin_frame(Swapchain* swapchain) {
@@ -223,8 +247,14 @@ void swapchain_vulkan_begin_frame(Swapchain* swapchain) {
     VulkanRendererState* renderer = swapchain->backend->backend_data;
     VulkanFrame* frame = &state->frames[state->current_frame];
 
-    vkWaitForFences(renderer->device.logical_device, 1, &frame->in_flight, VK_TRUE, U64_MAX);
-    vkAcquireNextImageKHR(
+    VkResult result =
+        vkWaitForFences(renderer->device.logical_device, 1, &frame->in_flight, VK_TRUE, U64_MAX);
+    if (result != VK_SUCCESS) {
+        FATAL("Fence wait failure! Code: %d", result);
+        return;
+    }
+
+    result = vkAcquireNextImageKHR(
         renderer->device.logical_device,
         state->swapchain,
         U64_MAX,
@@ -232,6 +262,10 @@ void swapchain_vulkan_begin_frame(Swapchain* swapchain) {
         VK_NULL_HANDLE,
         &state->image_index
     );
+    if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+        return;
+    }
+
     VK_CHECK(vkResetFences(renderer->device.logical_device, 1, &frame->in_flight));
 }
 
@@ -239,7 +273,4 @@ void swapchain_vulkan_end_frame(Swapchain* swapchain) {
     if (!swapchain || !swapchain->backend_data) {
         return;
     }
-
-    VulkanSwapchainState* state = swapchain->backend_data;
-    state->current_frame = (state->current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
 }

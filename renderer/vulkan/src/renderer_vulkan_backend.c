@@ -138,13 +138,79 @@ static void renderer_vulkan_destroy(RendererBackend* backend) {
     vara_free(state, sizeof(VulkanRendererState));
 }
 
+static void renderer_vulkan_submit(RendererBackend* backend, const RenderCommandBuffer* buffer) {
+    VulkanRendererState* state = backend->backend_data;
+    VulkanSwapchainState* swapchain = state->swapchain->backend_data;
+    VulkanFrame* frame = &swapchain->frames[swapchain->current_frame];
+
+    u8* cmd = buffer->buffer;
+    const u8* end = buffer->buffer + buffer->used;
+
+    while (cmd < end) {
+        const RenderCommandHeader* header = (RenderCommandHeader*)cmd;
+
+        switch (header->type) {
+            default: {
+                VkClearColorValue clear_color = {{0.1f, 0.1f, 0.1f, 1.0f}};
+                VkImageSubresourceRange range = {
+                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                    .baseMipLevel = 0,
+                    .levelCount = 1,
+                    .baseArrayLayer = 0,
+                    .layerCount = 1,
+                };
+                vkCmdClearColorImage(
+                    frame->command_buffer,
+                    swapchain->images[swapchain->image_index],
+                    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                    &clear_color,
+                    1,
+                    &range
+                );
+                break;
+            }
+        }
+
+        cmd += header->size;
+    }
+}
+
 static void renderer_vulkan_begin_frame(RendererBackend* backend) {
     VulkanRendererState* state = backend->backend_data;
+    VulkanSwapchainState* swapchain = state->swapchain->backend_data;
+    VulkanFrame* frame = &swapchain->frames[swapchain->current_frame];
+
     swapchain_vulkan_begin_frame(state->swapchain);
+
+    VK_CHECK(vkResetCommandPool(state->device.logical_device, frame->command_pool, 0));
+
+    const VkCommandBufferBeginInfo begin_info = {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+        .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+    };
+    VK_CHECK(vkBeginCommandBuffer(frame->command_buffer, &begin_info));
 }
 
 static void renderer_vulkan_end_frame(RendererBackend* backend) {
     VulkanRendererState* state = backend->backend_data;
+    VulkanSwapchainState* swapchain = state->swapchain->backend_data;
+    VulkanFrame* frame = &swapchain->frames[swapchain->current_frame];
+
+    VK_CHECK(vkEndCommandBuffer(frame->command_buffer));
+
+    VkPipelineStageFlags flags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    const VkSubmitInfo submit_info = {
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        .waitSemaphoreCount = 1,
+        .pWaitSemaphores = &frame->image_available,
+        .pWaitDstStageMask = &flags,
+        .commandBufferCount = 1,
+        .pCommandBuffers = &frame->command_buffer,
+        .signalSemaphoreCount = 1,
+        .pSignalSemaphores = &frame->render_finished,
+    };
+    VK_CHECK(vkQueueSubmit(state->device.graphics_queue, 1, &submit_info, frame->in_flight));
+
     swapchain_vulkan_end_frame(state->swapchain);
 }
 
@@ -164,6 +230,7 @@ void renderer_vulkan_init(RendererBackend* backend, VaraWindow* window) {
     // Core Renderer
     backend->renderer.create = renderer_vulkan_create;
     backend->renderer.destroy = renderer_vulkan_destroy;
+    backend->renderer.submit = renderer_vulkan_submit;
     backend->renderer.begin_frame = renderer_vulkan_begin_frame;
     backend->renderer.end_frame = renderer_vulkan_end_frame;
 
