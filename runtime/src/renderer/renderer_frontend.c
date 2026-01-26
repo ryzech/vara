@@ -37,7 +37,6 @@ Renderer* renderer_create(VaraWindow* window) {
         .window = renderer->window,
         // Needs to be configurable somehow.
         .vsync = true,
-        .image_count = 3,
     };
     renderer->swapchain = swapchain_create(renderer, &swapchain_config);
     if (!renderer->swapchain) {

@@ -5,10 +5,17 @@
 #include "volk/volk.h"
 
 typedef struct VulkanDevice VulkanDevice;
+typedef struct VulkanSurfaceInfo VulkanSurfaceInfo;
+
+struct VulkanSurfaceInfo {
+    VkSurfaceFormatKHR* formats;
+    VkPresentModeKHR* present_modes;
+};
 
 struct VulkanDevice {
     VkPhysicalDevice physical_device;
     VkDevice logical_device;
+    VulkanSurfaceInfo surface_info;
     VkQueue graphics_queue;
     VkQueue present_queue;
     VkQueue transfer_queue;
@@ -23,3 +30,4 @@ struct VulkanDevice {
 };
 
 b8 vulkan_device_create(VkInstance instance, VkSurfaceKHR surface, VulkanDevice* device);
+void vulkan_device_destroy(VulkanDevice* device);

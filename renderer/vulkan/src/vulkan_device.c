@@ -157,6 +157,25 @@ b8 vulkan_device_create(VkInstance instance, VkSurfaceKHR surface, VulkanDevice*
     }
 
     device->physical_device = selected;
+
+    u32 format_count = 0;
+    vkGetPhysicalDeviceSurfaceFormatsKHR(device->physical_device, surface, &format_count, NULL);
+    device->surface_info.formats = array_sized(format_count, VkSurfaceFormatKHR, NULL);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(
+        device->physical_device, surface, &format_count, device->surface_info.formats
+    );
+    array_set_length(device->surface_info.formats, format_count);
+
+    u32 present_count = 0;
+    vkGetPhysicalDeviceSurfacePresentModesKHR(
+        device->physical_device, surface, &present_count, NULL
+    );
+    device->surface_info.present_modes = array_sized(present_count, VkPresentModeKHR, NULL);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(
+        device->physical_device, surface, &present_count, device->surface_info.present_modes
+    );
+    array_set_length(device->surface_info.present_modes, present_count);
+
     vkGetPhysicalDeviceProperties(selected, &device->properties);
     vkGetPhysicalDeviceFeatures(selected, &device->features);
     vkGetPhysicalDeviceMemoryProperties(selected, &device->memory);
@@ -219,4 +238,16 @@ b8 vulkan_device_create(VkInstance instance, VkSurfaceKHR surface, VulkanDevice*
     DEBUG("Using Vulkan API %u.%u.%u", major, minor, patch);
 
     return true;
+}
+
+void vulkan_device_destroy(VulkanDevice* device) {
+    if (!device || !device->logical_device) {
+        return;
+    }
+
+    vkDeviceWaitIdle(device->logical_device);
+    // Get allocator callbacks somehow?
+    vkDestroyDevice(device->logical_device, NULL);
+    array_destroy(device->surface_info.formats);
+    array_destroy(device->surface_info.present_modes);
 }

@@ -12,14 +12,11 @@ struct RendererBackend;
 
 struct SwapchainConfig {
     struct VaraWindow* window;
-    u32 image_count;
     b8 vsync;
 };
 
 struct Swapchain {
     struct VaraWindow* window;
-    u32 image_count;
-    struct Texture** images;
     u32 width, height;
     b8 vsync;
     void* backend_data;

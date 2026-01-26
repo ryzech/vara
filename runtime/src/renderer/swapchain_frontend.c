@@ -10,7 +10,6 @@ Swapchain* swapchain_create(Renderer* renderer, const SwapchainConfig* config) {
     vara_zero_memory(swapchain, sizeof(Swapchain));
 
     swapchain->window = config->window;
-    swapchain->image_count = config->image_count;
     swapchain->vsync = config->vsync;
 
     RendererBackend* backend = renderer_backend_get(renderer);

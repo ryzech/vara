@@ -13,6 +13,8 @@ add_compile_options(
         -Wno-visibility
         -Wno-missing-braces
         -Wno-unused-function
+        -Wno-nullability-completeness
+        -Wno-unused-private-field
 )
 
 # Add debug symbols if in debug mode. (CMake should already, but to be explicit.)

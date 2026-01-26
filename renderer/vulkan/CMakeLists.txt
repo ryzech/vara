@@ -1,4 +1,4 @@
-set(VULKAN_RENDERER_SOURCES src/volk.c src/renderer_vulkan_backend.c
+set(VULKAN_RENDERER_SOURCES src/volk/volk.c src/renderer_vulkan_backend.c
         src/vulkan_device.c
         src/vulkan_platform.c
         src/swapchain_vulkan_backend.c
