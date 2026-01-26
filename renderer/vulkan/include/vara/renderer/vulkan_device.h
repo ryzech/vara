@@ -8,6 +8,7 @@ typedef struct VulkanDevice VulkanDevice;
 typedef struct VulkanSurfaceInfo VulkanSurfaceInfo;
 
 struct VulkanSurfaceInfo {
+    VkSurfaceCapabilitiesKHR capabilities;
     VkSurfaceFormatKHR* formats;
     VkPresentModeKHR* present_modes;
 };

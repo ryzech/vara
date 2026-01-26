@@ -139,7 +139,9 @@ static b8 renderer_vulkan_create(RendererBackend* backend) {
         VK_CHECK(vkCreateSemaphore(
             state->device.logical_device, &semaphore_info, state->allocator, &frame->render_finished
         ));
-        VK_CHECK(vkCreateFence(state->device.logical_device, &fence_info, state->allocator, &frame->in_flight));
+        VK_CHECK(vkCreateFence(
+            state->device.logical_device, &fence_info, state->allocator, &frame->in_flight
+        ));
     }
 
     return true;
@@ -168,6 +170,7 @@ static void renderer_vulkan_destroy(RendererBackend* backend) {
 
 void renderer_vulkan_init(RendererBackend* backend, VaraWindow* window) {
     VulkanRendererState* state = vara_allocate(sizeof(VulkanRendererState));
+    vara_zero_memory(state, sizeof(VulkanRendererState));
     if (!state) {
         return;
     }

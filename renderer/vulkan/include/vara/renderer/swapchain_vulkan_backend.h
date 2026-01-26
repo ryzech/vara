@@ -8,6 +8,8 @@
 typedef struct VulkanSwapchainState {
     VkSwapchainKHR swapchain;
     VkSurfaceFormatKHR image_format;
+    VkPresentModeKHR present_mode;
+    VkExtent2D extent;
     u8 max_frames_in_flight;
     u32 image_count;
     VkImage* images;

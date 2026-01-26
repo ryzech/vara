@@ -1,5 +1,6 @@
 #pragma once
 
+#include "swapchain_vulkan_backend.h"
 #include "vara/renderer/vulkan_device.h"
 #include "volk/volk.h"
 

@@ -48,10 +48,8 @@ static QueueFamilyIndices vulkan_device_find_queue_families(
 
     u32 property_count = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(device, &property_count, NULL);
-    VkQueueFamilyProperties* properties =
-        array_sized(property_count, VkQueueFamilyProperties, NULL);
+    VkQueueFamilyProperties properties[16];
     vkGetPhysicalDeviceQueueFamilyProperties(device, &property_count, properties);
-    array_set_length(properties, property_count);
 
     for (u32 i = 0; i < array_length(properties); i++) {
         VkQueueFamilyProperties property = properties[i];
@@ -92,7 +90,6 @@ static QueueFamilyIndices vulkan_device_find_queue_families(
         indices.present = indices.graphics;
     }
 
-    array_destroy(properties);
     return indices;
 }
 
@@ -157,6 +154,10 @@ b8 vulkan_device_create(VkInstance instance, VkSurfaceKHR surface, VulkanDevice*
     }
 
     device->physical_device = selected;
+
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+        device->physical_device, surface, &device->surface_info.capabilities
+    );
 
     u32 format_count = 0;
     vkGetPhysicalDeviceSurfaceFormatsKHR(device->physical_device, surface, &format_count, NULL);

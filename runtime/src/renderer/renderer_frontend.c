@@ -77,14 +77,22 @@ void renderer_on_window_resize(Renderer* renderer, Vector2i new_size) {
 
 void renderer_begin_frame(Renderer* renderer) {
     if (renderer) {
+        RendererBackend* backend = renderer->backend;
+        if (backend->renderer.begin_frame) {
+            backend->renderer.begin_frame(backend);
+        }
         render_cmd_buffer_reset(renderer_get_frame_command_buffer(renderer));
     }
 }
 
 void renderer_end_frame(Renderer* renderer) {
     if (renderer) {
+        RendererBackend* backend = renderer->backend;
         renderer_execute_commands(renderer, renderer_get_frame_command_buffer(renderer));
         renderer_present(renderer);
+        if (backend->renderer.end_frame) {
+            backend->renderer.end_frame(backend);
+        }
     }
 }
 
