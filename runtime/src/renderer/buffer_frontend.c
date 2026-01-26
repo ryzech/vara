@@ -92,8 +92,18 @@ void buffer_set_data(Buffer* buffer, const void* data, size_t size, size_t offse
         return;
     }
 
-    buffer->element_count =
-        size / (buffer->type == BUFFER_TYPE_INDEX ? sizeof(u32) : buffer->layout.stride);
+    switch (buffer->type) {
+        case BUFFER_TYPE_VERTEX:
+            buffer->element_count = buffer->size / buffer->layout.stride;
+            break;
+        case BUFFER_TYPE_INDEX:
+            buffer->element_count = buffer->size / sizeof(u32);
+            break;
+        default:
+            buffer->element_count = buffer->size;
+            break;
+    }
+
     if (buffer->backend->buffer.set_data) {
         buffer->backend->buffer.set_data(buffer, data, size, offset);
     }

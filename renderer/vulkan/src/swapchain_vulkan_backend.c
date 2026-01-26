@@ -45,6 +45,7 @@ b8 swapchain_vulkan_create(Swapchain* swapchain, const SwapchainConfig* config) 
 
     VulkanRendererState* renderer = swapchain->backend->backend_data;
     swapchain->backend_data = state;
+    renderer->swapchain = swapchain;
 
     VkExtent2D extent = {
         config->window->framebuffer_width,
@@ -139,12 +140,52 @@ b8 swapchain_vulkan_create(Swapchain* swapchain, const SwapchainConfig* config) 
         ));
     }
 
+    for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        VulkanFrame* frame = &state->frames[i];
+
+        VkSemaphoreCreateInfo semaphore_info = {
+            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+        };
+        VkFenceCreateInfo fence_info = {
+            .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+            .flags = VK_FENCE_CREATE_SIGNALED_BIT,
+        };
+
+        VK_CHECK(vkCreateSemaphore(
+            renderer->device.logical_device,
+            &semaphore_info,
+            renderer->allocator,
+            &frame->image_available
+        ));
+        VK_CHECK(vkCreateSemaphore(
+            renderer->device.logical_device,
+            &semaphore_info,
+            renderer->allocator,
+            &frame->render_finished
+        ));
+        VK_CHECK(vkCreateFence(
+            renderer->device.logical_device, &fence_info, renderer->allocator, &frame->in_flight
+        ));
+    }
+
     return true;
 }
 
 void swapchain_vulkan_destroy(Swapchain* swapchain) {
     VulkanSwapchainState* state = swapchain->backend_data;
     VulkanRendererState* renderer = swapchain->backend->backend_data;
+
+    for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        const VulkanFrame* frame = &state->frames[i];
+
+        vkDestroySemaphore(
+            renderer->device.logical_device, frame->image_available, renderer->allocator
+        );
+        vkDestroySemaphore(
+            renderer->device.logical_device, frame->render_finished, renderer->allocator
+        );
+        vkDestroyFence(renderer->device.logical_device, frame->in_flight, renderer->allocator);
+    }
 
     vkDestroySwapchainKHR(renderer->device.logical_device, state->swapchain, renderer->allocator);
     array_destroy(state->views);
@@ -159,7 +200,7 @@ void swapchain_vulkan_present(Swapchain* swapchain) {
 
     VulkanSwapchainState* state = swapchain->backend_data;
     VulkanRendererState* renderer = swapchain->backend->backend_data;
-    VulkanFrame frame = renderer->frames[renderer->current_frame];
+    VulkanFrame frame = state->frames[state->current_frame];
 
     VkPresentInfoKHR present_info = {
         .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
@@ -167,8 +208,38 @@ void swapchain_vulkan_present(Swapchain* swapchain) {
         .pWaitSemaphores = &frame.render_finished,
         .swapchainCount = 1,
         .pSwapchains = &state->swapchain,
-        .pImageIndices = &renderer->image_index,
+        .pImageIndices = &state->image_index,
     };
 
     vkQueuePresentKHR(renderer->device.present_queue, &present_info);
+}
+
+void swapchain_vulkan_begin_frame(Swapchain* swapchain) {
+    if (!swapchain || !swapchain->backend_data) {
+        return;
+    }
+
+    VulkanSwapchainState* state = swapchain->backend_data;
+    VulkanRendererState* renderer = swapchain->backend->backend_data;
+    VulkanFrame* frame = &state->frames[state->current_frame];
+
+    vkWaitForFences(renderer->device.logical_device, 1, &frame->in_flight, VK_TRUE, U64_MAX);
+    vkAcquireNextImageKHR(
+        renderer->device.logical_device,
+        state->swapchain,
+        U64_MAX,
+        frame->image_available,
+        VK_NULL_HANDLE,
+        &state->image_index
+    );
+    VK_CHECK(vkResetFences(renderer->device.logical_device, 1, &frame->in_flight));
+}
+
+void swapchain_vulkan_end_frame(Swapchain* swapchain) {
+    if (!swapchain || !swapchain->backend_data) {
+        return;
+    }
+
+    VulkanSwapchainState* state = swapchain->backend_data;
+    state->current_frame = (state->current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
 }

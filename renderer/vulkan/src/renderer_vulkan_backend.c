@@ -122,28 +122,6 @@ static b8 renderer_vulkan_create(RendererBackend* backend) {
 
     // TODO initialize VMA for better memory management.
 
-    for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        VulkanFrame* frame = &state->frames[i];
-
-        VkSemaphoreCreateInfo semaphore_info = {
-            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-        };
-        VkFenceCreateInfo fence_info = {
-            .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-            .flags = VK_FENCE_CREATE_SIGNALED_BIT,
-        };
-
-        VK_CHECK(vkCreateSemaphore(
-            state->device.logical_device, &semaphore_info, state->allocator, &frame->image_available
-        ));
-        VK_CHECK(vkCreateSemaphore(
-            state->device.logical_device, &semaphore_info, state->allocator, &frame->render_finished
-        ));
-        VK_CHECK(vkCreateFence(
-            state->device.logical_device, &fence_info, state->allocator, &frame->in_flight
-        ));
-    }
-
     return true;
 }
 
@@ -153,19 +131,21 @@ static void renderer_vulkan_destroy(RendererBackend* backend) {
         return;
     }
 
-    for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        const VulkanFrame* frame = &state->frames[i];
-
-        vkDestroySemaphore(state->device.logical_device, frame->image_available, state->allocator);
-        vkDestroySemaphore(state->device.logical_device, frame->render_finished, state->allocator);
-        vkDestroyFence(state->device.logical_device, frame->in_flight, state->allocator);
-    }
-
     vulkan_device_destroy(&state->device);
     vkDestroySurfaceKHR(state->instance, state->surface, state->allocator);
     vkDestroyInstance(state->instance, state->allocator);
     volkFinalize();
     vara_free(state, sizeof(VulkanRendererState));
+}
+
+static void renderer_vulkan_begin_frame(RendererBackend* backend) {
+    VulkanRendererState* state = backend->backend_data;
+    swapchain_vulkan_begin_frame(state->swapchain);
+}
+
+static void renderer_vulkan_end_frame(RendererBackend* backend) {
+    VulkanRendererState* state = backend->backend_data;
+    swapchain_vulkan_end_frame(state->swapchain);
 }
 
 void renderer_vulkan_init(RendererBackend* backend, VaraWindow* window) {
@@ -184,6 +164,8 @@ void renderer_vulkan_init(RendererBackend* backend, VaraWindow* window) {
     // Core Renderer
     backend->renderer.create = renderer_vulkan_create;
     backend->renderer.destroy = renderer_vulkan_destroy;
+    backend->renderer.begin_frame = renderer_vulkan_begin_frame;
+    backend->renderer.end_frame = renderer_vulkan_end_frame;
 
     // Swapchain
     backend->swapchain.create = swapchain_vulkan_create;

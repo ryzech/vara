@@ -4,8 +4,9 @@
 
 #define VK_CHECK(expr)                                                                             \
     {                                                                                              \
-        if (expr == VK_SUCCESS) {                                                                  \
+        VkResult result = expr;                                                                    \
+        if (result == VK_SUCCESS) {                                                                \
         } else {                                                                                   \
-            WARN("Vulkan call failed at (%s:%s)", __FILE__, __LINE__);                             \
+            WARN("Vulkan call failed at line %d with code %d", __LINE__, result);                  \
         }                                                                                          \
     }

@@ -89,10 +89,10 @@ void renderer_end_frame(Renderer* renderer) {
     if (renderer) {
         RendererBackend* backend = renderer->backend;
         renderer_execute_commands(renderer, renderer_get_frame_command_buffer(renderer));
-        renderer_present(renderer);
         if (backend->renderer.end_frame) {
             backend->renderer.end_frame(backend);
         }
+        renderer_present(renderer);
     }
 }
 
