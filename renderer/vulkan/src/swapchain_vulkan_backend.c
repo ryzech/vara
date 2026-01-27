@@ -262,7 +262,7 @@ void swapchain_vulkan_begin_frame(Swapchain* swapchain) {
         VK_NULL_HANDLE,
         &state->image_index
     );
-    if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
         return;
     }
 

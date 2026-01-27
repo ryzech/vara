@@ -28,12 +28,12 @@ static void* compile_glsl(ShaderSource* source, u32* out_size) {
     const glslang_input_t input = {
         .language = GLSLANG_SOURCE_GLSL,
         .stage = stage_to_glslang(source->stage),
-        .client = GLSLANG_CLIENT_VULKAN,
-        .client_version = GLSLANG_TARGET_VULKAN_1_2,
+        .client = GLSLANG_CLIENT_OPENGL,
+        .client_version = GLSLANG_TARGET_OPENGL_450,
         .target_language = GLSLANG_TARGET_SPV,
         .target_language_version = GLSLANG_TARGET_SPV_1_6,
         .code = source->source,
-        .default_version = 410,
+        .default_version = 450,
         .default_profile = GLSLANG_NO_PROFILE,
         .messages = GLSLANG_MSG_DEFAULT_BIT | GLSLANG_MSG_RELAXED_ERRORS_BIT,
         .resource = glslang_default_resource()
@@ -68,6 +68,7 @@ static void* compile_glsl(ShaderSource* source, u32* out_size) {
     glslang_program_SPIRV_generate(program, stage_to_glslang(source->stage));
     const size_t spirv_size = glslang_program_SPIRV_get_size(program);
     *out_size = spirv_size * sizeof(u32);
+
 
     void* bytecode = vara_allocate(*out_size);
     vara_copy_memory(bytecode, glslang_program_SPIRV_get_ptr(program), *out_size);
@@ -141,8 +142,13 @@ CompiledShader* shader_compiler_compile(
 
         switch (backend->type) {
             case RENDERER_TYPE_OPENGL: {
-                stage->bytecode = compile_spirv_to_glsl(bytecode, bytecode_size, 410);
+                stage->bytecode = compile_spirv_to_glsl(bytecode, bytecode_size, 450);
                 vara_free(bytecode, bytecode_size);
+                break;
+            }
+            case RENDERER_TYPE_VULKAN: {
+                stage->bytecode = bytecode;
+                stage->bytecode_size = bytecode_size;
                 break;
             }
             default: {

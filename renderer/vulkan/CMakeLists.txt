@@ -2,6 +2,9 @@ set(VULKAN_RENDERER_SOURCES src/volk/volk.c src/renderer_vulkan_backend.c
         src/vulkan_device.c
         src/vulkan_platform.c
         src/swapchain_vulkan_backend.c
+        src/render_pass_vulkan_backend.c
+        src/shader_vulkan_backend.c
+        src/render_pipeline_vulkan_backend.c
 )
 
 add_library(vara-vulkan-renderer STATIC ${VULKAN_RENDERER_SOURCES})

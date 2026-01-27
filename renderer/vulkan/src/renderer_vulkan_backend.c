@@ -7,7 +7,10 @@
 #include <vara/core/util/string.h>
 #include <vara/renderer/internal/renderer_internal.h>
 
+#include "vara/renderer/render_pass_vulkan_backend.h"
+#include "vara/renderer/render_pipeline_vulkan_backend.h"
 #include "vara/renderer/renderer_vulkan_backend.h"
+#include "vara/renderer/shader_vulkan_backend.h"
 #include "vara/renderer/swapchain_vulkan_backend.h"
 #include "vara/renderer/vulkan_platform.h"
 #include "vara/renderer/vulkan_utils.h"
@@ -150,23 +153,17 @@ static void renderer_vulkan_submit(RendererBackend* backend, const RenderCommand
         const RenderCommandHeader* header = (RenderCommandHeader*)cmd;
 
         switch (header->type) {
+            case RENDER_CMD_BEGIN_PASS: {
+                const RenderCmdBeginPass* begin_pass = (RenderCmdBeginPass*)cmd;
+                render_pass_vulkan_begin(begin_pass->pass);
+                break;
+            }
+            case RENDER_CMD_END_PASS: {
+                const RenderCmdEndPass* end_pass = (RenderCmdEndPass*)cmd;
+                render_pass_vulkan_end(end_pass->pass);
+                break;
+            }
             default: {
-                VkClearColorValue clear_color = {{0.1f, 0.1f, 0.1f, 1.0f}};
-                VkImageSubresourceRange range = {
-                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                    .baseMipLevel = 0,
-                    .levelCount = 1,
-                    .baseArrayLayer = 0,
-                    .layerCount = 1,
-                };
-                vkCmdClearColorImage(
-                    frame->command_buffer,
-                    swapchain->images[swapchain->image_index],
-                    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                    &clear_color,
-                    1,
-                    &range
-                );
                 break;
             }
         }
@@ -238,6 +235,26 @@ void renderer_vulkan_init(RendererBackend* backend, VaraWindow* window) {
     backend->swapchain.create = swapchain_vulkan_create;
     backend->swapchain.destroy = swapchain_vulkan_destroy;
     backend->swapchain.present = swapchain_vulkan_present;
+
+    // Render Pass
+    backend->render_pass.create = render_pass_vulkan_create;
+    backend->render_pass.destroy = render_pass_vulkan_destroy;
+    backend->render_pass.begin = render_pass_vulkan_begin;
+    backend->render_pass.end = render_pass_vulkan_end;
+
+    // Shader
+    backend->shader.create = shader_vulkan_create;
+    backend->shader.destroy = shader_vulkan_destroy;
+    backend->shader.set_mat4 = shader_vulkan_set_mat4;
+    backend->shader.set_int_array = shader_vulkan_set_int_array;
+    backend->shader.bind = shader_vulkan_bind;
+    backend->shader.unbind = shader_vulkan_unbind;
+    backend->shader.dispatch = shader_vulkan_dispatch;
+
+    // Pipeline
+    backend->render_pipeline.create = render_pipeline_vulkan_create;
+    backend->render_pipeline.destroy = render_pipeline_vulkan_destroy;
+    backend->render_pipeline.bind = render_pipeline_vulkan_bind;
 
     DEBUG("Creating RendererBackend named('%s')", backend->name);
 }

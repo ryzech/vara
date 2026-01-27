@@ -131,7 +131,7 @@ void sandbox_init(void) {
         .color_attachments = &color,
         .color_attachment_count = 1,
     };
-    render_pass = render_pass_create(renderer, &pass_config);
+    //render_pass = render_pass_create(renderer, &pass_config);
 
     RenderPassAttachment screen_color = {
         .load = ATTACHMENT_LOAD_OP_CLEAR,
@@ -222,24 +222,24 @@ void sandbox_update(f32 delta_time) {
     }
 
     Renderer* renderer = application_get_renderer();
-    render_pass_begin(render_pass);
-    {
-        // This needs majorly cleaned up.
-        const CameraUBO ubo_data = {
-            .view = camera_get_view(camera),
-            .projection = camera_get_projection(camera),
-        };
-        RenderPacket packet = {
-            .pipeline = base_pipeline,
-            .vertex_buffer = vertex_buffer,
-            .index_buffer = index_buffer,
-            .index_count = 3,
-        };
-        buffer_set_data(ubo, &ubo_data, sizeof(ubo_data), 0);
-        render_cmd_bind_buffer(render_pass->command_buffer, ubo);
-        render_pass_submit(render_pass, &packet);
-    }
-    render_pass_end(renderer, render_pass);
+    // render_pass_begin(render_pass);
+    // {
+    //     // This needs majorly cleaned up.
+    //     const CameraUBO ubo_data = {
+    //         .view = camera_get_view(camera),
+    //         .projection = camera_get_projection(camera),
+    //     };
+    //     RenderPacket packet = {
+    //         .pipeline = base_pipeline,
+    //         .vertex_buffer = vertex_buffer,
+    //         .index_buffer = index_buffer,
+    //         .index_count = 3,
+    //     };
+    //     buffer_set_data(ubo, &ubo_data, sizeof(ubo_data), 0);
+    //     render_cmd_bind_buffer(render_pass->command_buffer, ubo);
+    //     render_pass_submit(render_pass, &packet);
+    // }
+    // render_pass_end(renderer, render_pass);
 
     render_pass_begin(screen_pass);
     {
@@ -266,7 +266,7 @@ void sandbox_shutdown() {
     buffer_destroy(index_buffer);
     render_pipeline_destroy(base_pipeline);
     render_pipeline_destroy(screen_pipeline);
-    render_pass_destroy(render_pass);
+    //render_pass_destroy(render_pass);
     render_pass_destroy(screen_pass);
 }
 
