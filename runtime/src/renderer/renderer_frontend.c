@@ -68,10 +68,9 @@ void renderer_destroy(Renderer* renderer) {
 
 void renderer_on_window_resize(Renderer* renderer, Vector2i new_size) {
     if (renderer) {
-        RendererBackend* backend = renderer->backend;
-        if (backend->renderer.set_viewport) {
-            backend->renderer.set_viewport(backend, new_size);
-        }
+        render_cmd_set_viewport(
+            renderer_get_frame_command_buffer(renderer), new_size.x, new_size.y
+        );
     }
 }
 

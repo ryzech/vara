@@ -101,6 +101,14 @@ void render_cmd_draw_indexed(RenderCommandBuffer* buffer, u32 index_count, u32 f
     cmd->first_index = first_index;
 }
 
+void render_cmd_set_viewport(RenderCommandBuffer* buffer, i32 width, i32 height) {
+    RenderCmdSetViewport* cmd = render_cmd_allocate(buffer, sizeof(RenderCmdSetViewport));
+    cmd->header.type = RENDER_CMD_SET_VIEWPORT;
+    cmd->header.size = sizeof(RenderCmdSetViewport);
+    cmd->width = width;
+    cmd->height = height;
+}
+
 void render_cmd_shader_set_mat4(
     RenderCommandBuffer* buffer, Shader* shader, const char* name, Matrix4 matrix
 ) {

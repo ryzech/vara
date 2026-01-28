@@ -21,7 +21,6 @@ struct Renderer;
 struct RendererBackendVT {
     b8 (*create)(RendererBackend* backend);
     void (*destroy)(RendererBackend* backend);
-    void (*set_viewport)(RendererBackend* backend, Vector2i viewport_size);
     void (*submit)(RendererBackend* backend, const RenderCommandBuffer* buffer);
     void (*begin_frame)(RendererBackend* backend);
     void (*end_frame)(RendererBackend* backend);

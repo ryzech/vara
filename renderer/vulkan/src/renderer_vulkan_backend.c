@@ -168,11 +168,34 @@ static void renderer_vulkan_submit(RendererBackend* backend, const RenderCommand
                 render_pipeline_vulkan_bind(bind_pipeline->pipeline);
                 break;
             }
-            // case RENDER_CMD_DRAW: {
-            //     const RenderCmdDraw* draw = (RenderCmdDraw*)cmd;
-            //     vkCmdDraw(frame->command_buffer, draw->vertex_count, 1, draw->first_vertex, 0);
+            case RENDER_CMD_SET_VIEWPORT: {
+                const RenderCmdSetViewport* viewport = (RenderCmdSetViewport*)cmd;
+                VkViewport viewport_info = {
+                    .x = 0,
+                    .y = 0,
+                    .width = viewport->width,
+                    .height = viewport->height,
+                };
+                vkCmdSetViewport(frame->command_buffer, 0, 1, &viewport_info);
+                break;
+            }
+            // case RENDER_CMD_DRAW_INDEXED: {
+            //     const RenderCmdDrawIndexed* draw_indexed = (RenderCmdDrawIndexed*)cmd;
+            //     vkCmdDrawIndexed(
+            //         frame->command_buffer,
+            //         draw_indexed->index_count,
+            //         1,
+            //         draw_indexed->first_index,
+            //         0,
+            //         0
+            //     );
             //     break;
             // }
+            case RENDER_CMD_DRAW: {
+                const RenderCmdDraw* draw = (RenderCmdDraw*)cmd;
+                vkCmdDraw(frame->command_buffer, draw->vertex_count, 1, draw->first_vertex, 0);
+                break;
+            }
             default: {
                 break;
             }

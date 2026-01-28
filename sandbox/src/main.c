@@ -42,8 +42,8 @@ static b8 on_window_resize(i16 event_code, void* sender, const EventData* event)
     const Vector2i size = {width, height};
 
     // Needs the physical size in pixels rather than logical.
-    const VaraWindow* window = application_get_window();
-    framebuffer_resize(render_buffer, window->framebuffer_width, window->framebuffer_height);
+    // const VaraWindow* window = application_get_window();
+    // framebuffer_resize(render_buffer, window->framebuffer_width, window->framebuffer_height);
 
     camera_update(camera, size);
     return false;
@@ -95,31 +95,31 @@ void sandbox_init(void) {
     };
     shader = shader_create(renderer, &shader_config);
 
-    ShaderSource screen_sources[] = {
-        {.stage = SHADER_STAGE_VERTEX, .source = screen_quad_vertex_source},
-        {.stage = SHADER_STAGE_FRAGMENT, .source = screen_quad_fragment_source},
-    };
-    const ShaderConfig screen_shader_config = {
-        .name = "screen_shader",
-        .stages = screen_sources,
-        .stage_count = 2,
-    };
-    screen_shader = shader_create(renderer, &screen_shader_config);
+    // ShaderSource screen_sources[] = {
+    //     {.stage = SHADER_STAGE_VERTEX, .source = screen_quad_vertex_source},
+    //     {.stage = SHADER_STAGE_FRAGMENT, .source = screen_quad_fragment_source},
+    // };
+    // const ShaderConfig screen_shader_config = {
+    //     .name = "screen_shader",
+    //     .stages = screen_sources,
+    //     .stage_count = 2,
+    // };
+    // screen_shader = shader_create(renderer, &screen_shader_config);
 
-    const VaraWindow* window = application_get_window();
-    FramebufferAttachmentConfig attachments[] = {
-        {.type = FRAMEBUFFER_ATTACHMENT_COLOR, .format = FRAMEBUFFER_FORMAT_RGBA8},
-        {.type = FRAMEBUFFER_ATTACHMENT_DEPTH, .format = FRAMEBUFFER_FORMAT_DEPTH24_STENCIL8},
-    };
-    const FramebufferConfig fb_config = {
-        .name = "offscreen_fb",
-        .attachments = attachments,
-        .attachment_count = 2,
-        .width = window->framebuffer_width,
-        .height = window->framebuffer_height,
-        .samples = 1,
-    };
-    render_buffer = framebuffer_create(renderer, &fb_config);
+    // const VaraWindow* window = application_get_window();
+    // FramebufferAttachmentConfig attachments[] = {
+    //     {.type = FRAMEBUFFER_ATTACHMENT_COLOR, .format = FRAMEBUFFER_FORMAT_RGBA8},
+    //     {.type = FRAMEBUFFER_ATTACHMENT_DEPTH, .format = FRAMEBUFFER_FORMAT_DEPTH24_STENCIL8},
+    // };
+    // const FramebufferConfig fb_config = {
+    //     .name = "offscreen_fb",
+    //     .attachments = attachments,
+    //     .attachment_count = 2,
+    //     .width = window->framebuffer_width,
+    //     .height = window->framebuffer_height,
+    //     .samples = 1,
+    // };
+    // render_buffer = framebuffer_create(renderer, &fb_config);
 
     RenderPassAttachment color = {
         .load = ATTACHMENT_LOAD_OP_CLEAR,
@@ -127,36 +127,37 @@ void sandbox_init(void) {
     };
     const RenderPassConfig pass_config = {
         .name = "main_pass",
-        .target = render_buffer,
+        .target = NULL,
         .color_attachments = &color,
         .color_attachment_count = 1,
     };
-    //render_pass = render_pass_create(renderer, &pass_config);
+    render_pass = render_pass_create(renderer, &pass_config);
 
-    RenderPassAttachment screen_color = {
-        .load = ATTACHMENT_LOAD_OP_CLEAR,
-        .clear = vec4(0.2f, 0.2f, 0.2f, 1.0f),
-    };
-    const RenderPassConfig screen_pass_config = {
-        .name = "screen_pass",
-        .target = NULL,
-        .color_attachments = &screen_color,
-        .color_attachment_count = 1,
-    };
-    screen_pass = render_pass_create(renderer, &screen_pass_config);
-
-    // const RenderPipelineConfig base_pipeline_config = {
-    //     .name = "base_pipeline",
-    //     .shader = shader,
+    // RenderPassAttachment screen_color = {
+    //     .load = ATTACHMENT_LOAD_OP_CLEAR,
+    //     .clear = vec4(0.2f, 0.2f, 0.2f, 1.0f),
     // };
-    // base_pipeline = render_pipeline_create(renderer, &base_pipeline_config);
+    // const RenderPassConfig screen_pass_config = {
+    //     .name = "screen_pass",
+    //     .target = NULL,
+    //     .color_attachments = &screen_color,
+    //     .color_attachment_count = 1,
+    // };
+    // screen_pass = render_pass_create(renderer, &screen_pass_config);
 
-    const RenderPipelineConfig screen_pipeline_config = {
-        .name = "screen_pipeline",
-        .shader = screen_shader,
-        .pass = screen_pass,
+    const RenderPipelineConfig base_pipeline_config = {
+        .name = "base_pipeline",
+        .shader = shader,
+        .pass = render_pass,
     };
-    screen_pipeline = render_pipeline_create(renderer, &screen_pipeline_config);
+    base_pipeline = render_pipeline_create(renderer, &base_pipeline_config);
+
+    // const RenderPipelineConfig screen_pipeline_config = {
+    //     .name = "screen_pipeline",
+    //     .shader = screen_shader,
+    //     .pass = screen_pass,
+    // };
+    // screen_pipeline = render_pipeline_create(renderer, &screen_pipeline_config);
 
     camera = camera_create();
     camera_update(
@@ -223,52 +224,52 @@ void sandbox_update(f32 delta_time) {
     }
 
     Renderer* renderer = application_get_renderer();
-    // render_pass_begin(render_pass);
-    // {
-    //     // This needs majorly cleaned up.
-    //     const CameraUBO ubo_data = {
-    //         .view = camera_get_view(camera),
-    //         .projection = camera_get_projection(camera),
-    //     };
-    //     RenderPacket packet = {
-    //         .pipeline = base_pipeline,
-    //         .vertex_buffer = vertex_buffer,
-    //         .index_buffer = index_buffer,
-    //         .index_count = 3,
-    //     };
-    //     buffer_set_data(ubo, &ubo_data, sizeof(ubo_data), 0);
-    //     render_cmd_bind_buffer(render_pass->command_buffer, ubo);
-    //     render_pass_submit(render_pass, &packet);
-    // }
-    // render_pass_end(renderer, render_pass);
-
-    render_pass_begin(screen_pass);
+    render_pass_begin(render_pass);
     {
-        Texture* screen_texture = framebuffer_get_attachment(render_buffer, 0);
-        Material material = {
-            .texture_count = 1,
+        // This needs majorly cleaned up.
+        const CameraUBO ubo_data = {
+            .view = camera_get_view(camera),
+            .projection = camera_get_projection(camera),
         };
-        material.textures[0] = screen_texture;
         RenderPacket packet = {
-            .pipeline = screen_pipeline,
-            .material = &material,
-            .vertex_count = 3,
+            .pipeline = base_pipeline,
+            .vertex_buffer = vertex_buffer,
+            .index_buffer = index_buffer,
+            .index_count = 3,
         };
-        render_pass_submit(screen_pass, &packet);
+        buffer_set_data(ubo, &ubo_data, sizeof(ubo_data), 0);
+        render_cmd_bind_buffer(render_pass->command_buffer, ubo);
+        render_pass_submit(render_pass, &packet);
     }
-    render_pass_end(renderer, screen_pass);
+    render_pass_end(renderer, render_pass);
+
+    // render_pass_begin(screen_pass);
+    // {
+    //     Texture* screen_texture = framebuffer_get_attachment(render_buffer, 0);
+    //     Material material = {
+    //         .texture_count = 1,
+    //     };
+    //     material.textures[0] = screen_texture;
+    //     RenderPacket packet = {
+    //         .pipeline = screen_pipeline,
+    //         .material = &material,
+    //         .vertex_count = 3,
+    //     };
+    //     render_pass_submit(screen_pass, &packet);
+    // }
+    // render_pass_end(renderer, screen_pass);
 }
 
 void sandbox_shutdown() {
-    framebuffer_destroy(render_buffer);
+    //framebuffer_destroy(render_buffer);
     shader_destroy(shader);
-    shader_destroy(screen_shader);
+    //shader_destroy(screen_shader);
     buffer_destroy(vertex_buffer);
     buffer_destroy(index_buffer);
     render_pipeline_destroy(base_pipeline);
-    render_pipeline_destroy(screen_pipeline);
-    //render_pass_destroy(render_pass);
-    render_pass_destroy(screen_pass);
+    //render_pipeline_destroy(screen_pipeline);
+    render_pass_destroy(render_pass);
+    //render_pass_destroy(screen_pass);
 }
 
 void application_init(ApplicationConfig* config) {

@@ -53,12 +53,32 @@ b8 render_pipeline_vulkan_create(RenderPipeline* pipeline, const RenderPipelineC
         };
     }
 
+    VkVertexInputBindingDescription binding_description = {
+        .binding = 0,
+        .stride = 0,
+        .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
+    };
+
+    VkVertexInputAttributeDescription attribute_descriptions[32];
+    u32 offset = 0;
+    for (u32 i = 0; i < shader->reflection.vertex_attribute_count; i++) {
+        ReflectedVertexAttribute* attribute = &shader->reflection.vertex_attributes[i];
+        attribute_descriptions[i] = (VkVertexInputAttributeDescription){
+            .location = attribute->location,
+            .binding = 0,
+            .format = vertex_attribute_type_to_vk(attribute->type),
+            .offset = offset,
+        };
+        offset += vertex_attribute_type_size(attribute->type);
+    }
+    binding_description.stride = offset;
+
     VkPipelineVertexInputStateCreateInfo vertex_input_info = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-        .vertexBindingDescriptionCount = 0,
-        .pVertexBindingDescriptions = NULL,
-        .vertexAttributeDescriptionCount = 0,
-        .pVertexAttributeDescriptions = NULL,
+        .vertexBindingDescriptionCount = 1,
+        .pVertexBindingDescriptions = &binding_description,
+        .vertexAttributeDescriptionCount = shader->reflection.vertex_attribute_count,
+        .pVertexAttributeDescriptions = attribute_descriptions,
     };
 
     VkPipelineInputAssemblyStateCreateInfo input_assembly_info = {

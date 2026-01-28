@@ -14,6 +14,7 @@ typedef struct RenderCmdBindBuffer RenderCmdBindBuffer;
 typedef struct RenderCmdBindTexture RenderCmdBindTexture;
 typedef struct RenderCmdDraw RenderCmdDraw;
 typedef struct RenderCmdDrawIndexed RenderCmdDrawIndexed;
+typedef struct RenderCmdSetViewport RenderCmdSetViewport;
 typedef struct RenderCmdSetShaderMat4 RenderCmdSetShaderMat4;
 typedef struct RenderCmdSetShaderIntArray RenderCmdSetShaderIntArray;
 
@@ -31,6 +32,7 @@ enum RenderCommandType {
     RENDER_CMD_BIND_TEXTURE,
     RENDER_CMD_DRAW,
     RENDER_CMD_DRAW_INDEXED,
+    RENDER_CMD_SET_VIEWPORT,
     RENDER_CMD_SET_SHADER_MAT4,
     RENDER_CMD_SET_SHADER_INT_ARRAY,
     RENDER_CMD_END_PASS,
@@ -90,6 +92,12 @@ struct RenderCmdBindTexture {
     u32 slot;
 };
 
+struct RenderCmdSetViewport {
+    RenderCommandHeader header;
+    i32 width;
+    i32 height;
+};
+
 struct RenderCmdSetShaderMat4 {
     RenderCommandHeader header;
     Matrix4 matrix;
@@ -115,6 +123,7 @@ void render_cmd_bind_pipeline(RenderCommandBuffer* buffer, struct RenderPipeline
 void render_cmd_bind_shader(RenderCommandBuffer* buffer, struct Shader* shader);
 void render_cmd_bind_buffer(RenderCommandBuffer* buffer, struct Buffer* input);
 void render_cmd_bind_texture(RenderCommandBuffer* buffer, struct Texture* texture, u32 slot);
+void render_cmd_set_viewport(RenderCommandBuffer* buffer, i32 width, i32 height);
 void render_cmd_shader_set_mat4(
     RenderCommandBuffer* buffer, struct Shader* shader, const char* name, Matrix4 matrix
 );

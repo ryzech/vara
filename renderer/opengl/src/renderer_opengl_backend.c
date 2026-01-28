@@ -28,19 +28,9 @@ static b8 renderer_opengl_create(RendererBackend* backend) {
     return true;
 }
 
-// Should likely just make this a RENDER_CMD instead of an immediate function.
-static void renderer_opengl_set_viewport(RendererBackend* backend, Vector2i viewport_size) {
-    // Calculate scaled size (framebuffer size).
-    // Should be the same regardless of window, so we query the main window.
-    OpenGLRendererState* state = backend->backend_data;
-    const f32 scale = state->window->pixel_density;
-    const i32 scaled_x = (i32)((f32)viewport_size.x * scale);
-    const i32 scaled_y = (i32)((f32)viewport_size.y * scale);
-
-    glViewport(0, 0, scaled_x, scaled_y);
-}
-
 static void renderer_opengl_submit(RendererBackend* backend, const RenderCommandBuffer* buffer) {
+    OpenGLRendererState* state = backend->backend_data;
+
     u8* cmd = buffer->buffer;
     const u8* end = buffer->buffer + buffer->used;
 
@@ -90,6 +80,16 @@ static void renderer_opengl_submit(RendererBackend* backend, const RenderCommand
                 );
                 break;
             }
+            case RENDER_CMD_SET_VIEWPORT: {
+                const RenderCmdSetViewport* viewport = (RenderCmdSetViewport*)cmd;
+                // Calculate scaled size (framebuffer size).
+                // Should be the same regardless of window, so we query the main window.
+                const f32 scale = state->window->pixel_density;
+                const i32 scaled_x = (i32)((f32)viewport->width * scale);
+                const i32 scaled_y = (i32)((f32)viewport->height * scale);
+                glViewport(0, 0, scaled_x, scaled_y);
+                break;
+            }
             case RENDER_CMD_SET_SHADER_MAT4: {
                 const RenderCmdSetShaderMat4* set_mat4 = (RenderCmdSetShaderMat4*)cmd;
                 shader_opengl_set_mat4(set_mat4->shader, set_mat4->name, set_mat4->matrix);
@@ -137,7 +137,6 @@ void renderer_opengl_init(RendererBackend* backend, VaraWindow* window) {
 
     // Core Renderer
     backend->renderer.create = renderer_opengl_create;
-    backend->renderer.set_viewport = renderer_opengl_set_viewport;
     backend->renderer.submit = renderer_opengl_submit;
     backend->renderer.destroy = renderer_opengl_destroy;
 
