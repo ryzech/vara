@@ -145,15 +145,16 @@ void sandbox_init(void) {
     };
     screen_pass = render_pass_create(renderer, &screen_pass_config);
 
-    const RenderPipelineConfig base_pipeline_config = {
-        .name = "base_pipeline",
-        .shader = shader,
-    };
-    base_pipeline = render_pipeline_create(renderer, &base_pipeline_config);
+    // const RenderPipelineConfig base_pipeline_config = {
+    //     .name = "base_pipeline",
+    //     .shader = shader,
+    // };
+    // base_pipeline = render_pipeline_create(renderer, &base_pipeline_config);
 
     const RenderPipelineConfig screen_pipeline_config = {
         .name = "screen_pipeline",
         .shader = screen_shader,
+        .pass = screen_pass,
     };
     screen_pipeline = render_pipeline_create(renderer, &screen_pipeline_config);
 

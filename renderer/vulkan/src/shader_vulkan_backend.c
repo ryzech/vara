@@ -9,16 +9,6 @@
 #include "vara/renderer/shader_vulkan_backend.h"
 #include "vara/renderer/vulkan_utils.h"
 
-typedef struct VulkanShaderStage {
-    ShaderStage stage;
-    VkShaderModule module;
-} VulkanShaderStage;
-
-typedef struct VulkanShaderState {
-    u32 stage_count;
-    VulkanShaderStage* stages;
-} VulkanShaderState;
-
 b8 shader_vulkan_create(Shader* shader, const ShaderConfig* config) {
     DEBUG("Creating shader program named('%s')", config->name);
     VulkanShaderState* state = vara_allocate(sizeof(VulkanShaderState));
@@ -42,6 +32,7 @@ b8 shader_vulkan_create(Shader* shader, const ShaderConfig* config) {
         VulkanShaderStage* dst = &state->stages[i];
 
         dst->stage = src->stage;
+        dst->entrypoint = "main";
 
         VkShaderModuleCreateInfo create_info = {
             .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
@@ -94,16 +85,4 @@ void shader_vulkan_set_int_array(Shader* shader, const char* name, const i32* ar
 }
 
 void shader_vulkan_dispatch(Shader* shader, i16 x, i16 y, i16 z) {
-}
-
-VkShaderModule shader_vulkan_get_module(Shader* shader, ShaderStage stage) {
-    VulkanShaderState* state = shader->backend_data;
-
-    for (u32 i = 0; i < state->stage_count; i++) {
-        if (state->stages[i].stage == stage) {
-            return state->stages[i].module;
-        }
-    }
-
-    return VK_NULL_HANDLE;
 }

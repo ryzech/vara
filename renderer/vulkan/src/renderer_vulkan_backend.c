@@ -163,6 +163,16 @@ static void renderer_vulkan_submit(RendererBackend* backend, const RenderCommand
                 render_pass_vulkan_end(end_pass->pass);
                 break;
             }
+            case RENDER_CMD_BIND_PIPELINE: {
+                const RenderCmdBindPipeline* bind_pipeline = (RenderCmdBindPipeline*)cmd;
+                render_pipeline_vulkan_bind(bind_pipeline->pipeline);
+                break;
+            }
+            // case RENDER_CMD_DRAW: {
+            //     const RenderCmdDraw* draw = (RenderCmdDraw*)cmd;
+            //     vkCmdDraw(frame->command_buffer, draw->vertex_count, 1, draw->first_vertex, 0);
+            //     break;
+            // }
             default: {
                 break;
             }

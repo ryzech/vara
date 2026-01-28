@@ -51,7 +51,7 @@ static QueueFamilyIndices vulkan_device_find_queue_families(
     VkQueueFamilyProperties properties[16];
     vkGetPhysicalDeviceQueueFamilyProperties(device, &property_count, properties);
 
-    for (u32 i = 0; i < array_length(properties); i++) {
+    for (u32 i = 0; i < property_count; i++) {
         VkQueueFamilyProperties property = properties[i];
         if (property.queueCount == 0) {
             continue;
@@ -189,12 +189,12 @@ b8 vulkan_device_create(VkInstance instance, VkSurfaceKHR surface, VulkanDevice*
     device->transfer_queue_index = indices.transfer;
     device->compute_queue_index = indices.compute;
 
-    f32 priority = 1.0f;
+    const f32 priorities[] = {1.0f};
     VkDeviceQueueCreateInfo queue_info = {
         .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
         .queueFamilyIndex = indices.graphics,
         .queueCount = 1,
-        .pQueuePriorities = &priority,
+        .pQueuePriorities = priorities,
     };
 
     VkPhysicalDeviceDriverProperties driver = {

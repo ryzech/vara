@@ -7,14 +7,6 @@
 #include "vara/renderer/swapchain_vulkan_backend.h"
 #include "vara/renderer/vulkan_utils.h"
 
-typedef struct VulkanRenderPassState {
-    VkRenderPass render_pass;
-    VkFramebuffer* framebuffers;
-    u32 framebuffer_count;
-    u32 current_framebuffer_index;
-    b8 active;
-} VulkanRenderPassState;
-
 static VkAttachmentLoadOp get_vulkan_load_op(AttachmentLoadOp load_op) {
     switch (load_op) {
         case ATTACHMENT_LOAD_OP_LOAD:

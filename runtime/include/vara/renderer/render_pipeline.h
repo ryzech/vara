@@ -7,6 +7,7 @@ typedef struct RenderPipeline RenderPipeline;
 typedef struct RenderPipelineConfig RenderPipelineConfig;
 
 struct Shader;
+struct RenderPass;
 struct VertexLayout;
 struct Framebuffer;
 struct Renderer;
@@ -15,6 +16,7 @@ struct RendererBackend;
 struct RenderPipelineConfig {
     const char* name;
     struct Shader* shader;
+    struct RenderPass* pass;
     struct VertexLayout* layout;
     DepthState depth;
     BlendState blend;
@@ -23,6 +25,7 @@ struct RenderPipelineConfig {
 struct RenderPipeline {
     const char* name;
     struct Shader* shader;
+    struct RenderPass* pass;
     struct VertexLayout* layout;
     DepthState depth;
     BlendState blend;

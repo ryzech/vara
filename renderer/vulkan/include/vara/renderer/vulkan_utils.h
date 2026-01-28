@@ -2,6 +2,29 @@
 
 #include <vara/core/logger.h>
 
+static VkFormat vertex_attribute_type_to_vk(VertexAttributeType type) {
+    switch (type) {
+        case VERTEX_ATTRIBUTE_FLOAT:
+            return VK_FORMAT_R32_SFLOAT;
+        case VERTEX_ATTRIBUTE_FLOAT2:
+            return VK_FORMAT_R32G32_SFLOAT;
+        case VERTEX_ATTRIBUTE_FLOAT3:
+            return VK_FORMAT_R32G32B32_SFLOAT;
+        case VERTEX_ATTRIBUTE_FLOAT4:
+            return VK_FORMAT_R32G32B32A32_SFLOAT;
+        case VERTEX_ATTRIBUTE_INT:
+            return VK_FORMAT_R32_SINT;
+        case VERTEX_ATTRIBUTE_INT2:
+            return VK_FORMAT_R32G32_SINT;
+        case VERTEX_ATTRIBUTE_INT3:
+            return VK_FORMAT_R32G32B32_SINT;
+        case VERTEX_ATTRIBUTE_INT4:
+            return VK_FORMAT_R32G32B32A32_SINT;
+        default:
+            return VK_FORMAT_UNDEFINED;
+    }
+}
+
 #define VK_CHECK(expr)                                                                             \
     {                                                                                              \
         VkResult result = expr;                                                                    \

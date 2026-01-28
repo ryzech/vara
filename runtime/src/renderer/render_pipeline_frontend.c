@@ -11,6 +11,7 @@ RenderPipeline* render_pipeline_create(Renderer* renderer, const RenderPipelineC
 
     pipeline->name = config->name;
     pipeline->shader = config->shader;
+    pipeline->pass = config->pass;
     pipeline->layout = config->layout;
     pipeline->depth = config->depth;
     pipeline->blend = config->blend;
