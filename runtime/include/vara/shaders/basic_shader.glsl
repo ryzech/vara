@@ -9,7 +9,7 @@ layout (location = 0) out vec4 vColor;
 layout (location = 1) out vec3 vWorldPos;
 layout (location = 2) out vec2 vTexCoord;
 
-layout (std140, set=0, binding=0) uniform CameraUBO {
+layout (std140, set = 0, binding = 0) uniform CameraUBO {
     mat4 view;
     mat4 projection;
 };

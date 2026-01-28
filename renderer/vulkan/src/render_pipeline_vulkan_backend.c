@@ -75,14 +75,33 @@ b8 render_pipeline_vulkan_create(RenderPipeline* pipeline, const RenderPipelineC
         .pScissors = NULL,
     };
 
+    VkPipelineRasterizationStateCreateInfo rasterization_info = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
+        .rasterizerDiscardEnable = VK_FALSE,
+        .polygonMode = VK_POLYGON_MODE_FILL,
+        .lineWidth = 1.0f,
+        .cullMode = VK_CULL_MODE_BACK_BIT,
+        .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
+        .depthClampEnable = VK_FALSE,
+        .depthBiasEnable = VK_FALSE,
+        .depthBiasConstantFactor = 0.0f,
+        .depthBiasClamp = 0.0f,
+        .depthBiasSlopeFactor = 0.0f,
+    };
+
+    VkPipelineMultisampleStateCreateInfo multisample_info = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+        .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
+        .sampleShadingEnable = VK_FALSE,
+    };
+
     VkDynamicState dynamic_states[] = {
         VK_DYNAMIC_STATE_VIEWPORT,
         VK_DYNAMIC_STATE_SCISSOR,
-        VK_DYNAMIC_STATE_LINE_WIDTH,
     };
     VkPipelineDynamicStateCreateInfo dynamic_state_info = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
-        .dynamicStateCount = 3,
+        .dynamicStateCount = 2,
         .pDynamicStates = dynamic_states,
     };
 
@@ -104,6 +123,8 @@ b8 render_pipeline_vulkan_create(RenderPipeline* pipeline, const RenderPipelineC
         .pVertexInputState = &vertex_input_info,
         .pInputAssemblyState = &input_assembly_info,
         .pViewportState = &viewport_info,
+        .pRasterizationState = &rasterization_info,
+        .pMultisampleState = &multisample_info,
         .pDynamicState = &dynamic_state_info,
         .layout = state->layout,
         .renderPass = pass->render_pass,

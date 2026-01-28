@@ -11,6 +11,43 @@
 
 static b8 glslang_initialized;
 
+static VertexAttributeType attribute_type_from_reflection(spvc_type type) {
+    spvc_basetype base = spvc_type_get_basetype(type);
+    u32 vec_size = spvc_type_get_vector_size(type);
+    switch (base) {
+        case SPVC_BASETYPE_FP32: {
+            switch (vec_size) {
+                case 1:
+                    return VERTEX_ATTRIBUTE_FLOAT;
+                case 2:
+                    return VERTEX_ATTRIBUTE_FLOAT2;
+                case 3:
+                    return VERTEX_ATTRIBUTE_FLOAT3;
+                case 4:
+                    return VERTEX_ATTRIBUTE_FLOAT4;
+                default:
+                    return VERTEX_ATTRIBUTE_FLOAT;
+            }
+        }
+        case SPVC_BASETYPE_INT32: {
+            switch (vec_size) {
+                case 1:
+                    return VERTEX_ATTRIBUTE_INT;
+                case 2:
+                    return VERTEX_ATTRIBUTE_INT2;
+                case 3:
+                    return VERTEX_ATTRIBUTE_INT3;
+                case 4:
+                    return VERTEX_ATTRIBUTE_INT4;
+                default:
+                    return VERTEX_ATTRIBUTE_INT;
+            }
+        }
+        default:
+            return VERTEX_ATTRIBUTE_FLOAT;
+    }
+}
+
 static glslang_stage_t stage_to_glslang(ShaderStage stage) {
     switch (stage) {
         case SHADER_STAGE_VERTEX:
@@ -69,7 +106,6 @@ static void* compile_glsl(ShaderSource* source, u32* out_size) {
     const size_t spirv_size = glslang_program_SPIRV_get_size(program);
     *out_size = spirv_size * sizeof(u32);
 
-
     void* bytecode = vara_allocate(*out_size);
     vara_copy_memory(bytecode, glslang_program_SPIRV_get_ptr(program), *out_size);
 
@@ -77,6 +113,127 @@ static void* compile_glsl(ShaderSource* source, u32* out_size) {
     glslang_shader_delete(shader);
 
     return bytecode;
+}
+
+static void reflect_spirv_stage(
+    const void* bytecode, u32 bytecode_size, ShaderStage stage, ReflectedShaderStage* out
+) {
+    vara_zero_memory(out, sizeof(*out));
+    out->stage = stage;
+
+    spvc_context context;
+    spvc_context_create(&context);
+    spvc_parsed_ir parsed;
+    if (spvc_context_parse_spirv(context, bytecode, bytecode_size / sizeof(u32), &parsed)
+        != SPVC_SUCCESS) {
+        spvc_context_destroy(context);
+        return;
+    }
+
+    spvc_compiler compiler;
+    spvc_context_create_compiler(
+        context, SPVC_BACKEND_NONE, parsed, SPVC_CAPTURE_MODE_TAKE_OWNERSHIP, &compiler
+    );
+
+    spvc_resources resources;
+    spvc_compiler_create_shader_resources(compiler, &resources);
+
+    {
+        const spvc_reflected_resource* resource;
+        size_t count;
+        spvc_resources_get_resource_list_for_type(
+            resources, SPVC_RESOURCE_TYPE_STAGE_INPUT, &resource, &count
+        );
+
+        for (u32 i = 0; i < count; i++) {
+            if (out->vertex_attribute_count >= 32) {
+                WARN("Shader has more Vertex Attributes than are allowed (max: 32).");
+                return;
+            }
+            const spvc_reflected_resource* input = &resource[i];
+            ReflectedVertexAttribute* attribute =
+                &out->vertex_attributes[out->vertex_attribute_count++];
+            vara_copy_memory(attribute->name, input->name, string_length(input->name) + 1);
+            attribute->location =
+                spvc_compiler_get_decoration(compiler, input->id, SpvDecorationLocation);
+            attribute->type = attribute_type_from_reflection(
+                spvc_compiler_get_type_handle(compiler, input->type_id)
+            );
+        }
+    }
+
+    {
+        const spvc_reflected_resource* resource;
+        size_t count;
+        spvc_resources_get_resource_list_for_type(
+            resources, SPVC_RESOURCE_TYPE_UNIFORM_BUFFER, &resource, &count
+        );
+
+        for (u32 i = 0; i < count; i++) {
+            const spvc_reflected_resource* ubo = &resource[i];
+            ReflectedDescriptor* descriptor = &out->descriptors[out->descriptor_count++];
+            descriptor->type = DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            vara_copy_memory(descriptor->name, ubo->name, string_length(ubo->name) + 1);
+            descriptor->set =
+                spvc_compiler_get_decoration(compiler, ubo->id, SpvDecorationDescriptorSet);
+            descriptor->binding =
+                spvc_compiler_get_decoration(compiler, ubo->id, SpvDecorationBinding);
+            descriptor->count = 1;
+            descriptor->stage_mask = stage;
+        }
+    }
+
+    {
+        const spvc_reflected_resource* resource;
+        size_t count;
+        spvc_resources_get_resource_list_for_type(
+            resources, SPVC_RESOURCE_TYPE_SAMPLED_IMAGE, &resource, &count
+        );
+
+        for (u32 i = 0; i < count; i++) {
+            const spvc_reflected_resource* image = &resource[i];
+            ReflectedDescriptor* descriptor = &out->descriptors[out->descriptor_count++];
+            descriptor->type = DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+            vara_copy_memory(descriptor->name, image->name, string_length(image->name) + 1);
+            descriptor->set =
+                spvc_compiler_get_decoration(compiler, image->id, SpvDecorationDescriptorSet);
+            descriptor->binding =
+                spvc_compiler_get_decoration(compiler, image->id, SpvDecorationBinding);
+            descriptor->count = 1;
+            descriptor->stage_mask = stage;
+        }
+    }
+
+    spvc_context_destroy(context);
+}
+
+static void merge_reflection_stage(ReflectedShader* out, ReflectedShaderStage* stage) {
+    for (u32 i = 0; i < stage->descriptor_count; i++) {
+        const ReflectedDescriptor* src = &stage->descriptors[i];
+
+        b8 found = false;
+        for (u32 j = 0; j < out->descriptor_count; j++) {
+            ReflectedDescriptor* dst = &out->descriptors[j];
+            if (dst->set == src->set && dst->type == src->type) {
+                dst->stage_mask |= src->stage_mask;
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            out->descriptors[out->descriptor_count++] = *src;
+        }
+    }
+
+    if (stage->stage == SHADER_STAGE_VERTEX) {
+        out->vertex_attribute_count = stage->vertex_attribute_count;
+        vara_copy_memory(
+            out->vertex_attributes,
+            stage->vertex_attributes,
+            sizeof(ReflectedVertexAttribute) * stage->vertex_attribute_count
+        );
+    }
 }
 
 static char* compile_spirv_to_glsl(const void* bytecode, u32 bytecode_size, u32 glsl_version) {
@@ -139,6 +296,10 @@ CompiledShader* shader_compiler_compile(
             shader_compiler_release(compiled);
             return NULL;
         }
+
+        ReflectedShaderStage stage_reflection;
+        reflect_spirv_stage(bytecode, bytecode_size, stage->stage, &stage_reflection);
+        merge_reflection_stage(&compiled->reflection, &stage_reflection);
 
         switch (backend->type) {
             case RENDERER_TYPE_OPENGL: {

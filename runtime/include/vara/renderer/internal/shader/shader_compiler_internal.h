@@ -2,6 +2,7 @@
 
 #include <vara/core/defines.h>
 
+#include "vara/renderer/internal/shader/shader_reflection_internal.h"
 #include "vara/renderer/shader.h"
 
 typedef struct CompiledShaderStage CompiledShaderStage;
@@ -19,6 +20,7 @@ struct CompiledShader {
     const char* name;
     CompiledShaderStage* stages;
     u16 stage_count;
+    ReflectedShader reflection;
 };
 
 CompiledShader* shader_compiler_compile(

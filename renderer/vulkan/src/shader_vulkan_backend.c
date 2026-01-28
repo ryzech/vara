@@ -25,6 +25,7 @@ b8 shader_vulkan_create(Shader* shader, const ShaderConfig* config) {
 
     state->stage_count = compiled->stage_count;
     state->stages = vara_allocate(sizeof(VulkanShaderStage) * state->stage_count);
+    vara_copy_memory(&state->reflection, &compiled->reflection, sizeof(ReflectedShader));
 
     VulkanRendererState* renderer = shader->backend->backend_data;
     for (u32 i = 0; i < compiled->stage_count; i++) {

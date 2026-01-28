@@ -2,10 +2,11 @@
 
 #include <vara/core/defines.h>
 
+#include "vara/renderer/render_types.h"
+
 // Forward declarations, in case they need access to each other.
 typedef enum BufferType BufferType;
 typedef enum BufferUsage BufferUsage;
-typedef enum VertexAttributeType VertexAttributeType;
 typedef struct VertexAttribute VertexAttribute;
 typedef struct VertexLayout VertexLayout;
 typedef struct BufferConfig BufferConfig;
@@ -24,18 +25,6 @@ enum BufferUsage {
     BUFFER_USAGE_STATIC,
     BUFFER_USAGE_DYNAMIC,
     BUFFER_USAGE_STREAM
-};
-
-// Should this be called IVEC4 and VEC4?
-enum VertexAttributeType {
-    VERTEX_ATTRIBUTE_FLOAT,
-    VERTEX_ATTRIBUTE_FLOAT2,
-    VERTEX_ATTRIBUTE_FLOAT3,
-    VERTEX_ATTRIBUTE_FLOAT4,
-    VERTEX_ATTRIBUTE_INT,
-    VERTEX_ATTRIBUTE_INT2,
-    VERTEX_ATTRIBUTE_INT3,
-    VERTEX_ATTRIBUTE_INT4
 };
 
 struct VertexAttribute {

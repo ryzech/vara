@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vara/core/defines.h>
+#include <vara/renderer/internal/shader/shader_reflection_internal.h>
 #include <vara/renderer/shader.h>
 
 #include "volk/volk.h"
@@ -14,6 +15,7 @@ typedef struct VulkanShaderStage {
 typedef struct VulkanShaderState {
     u32 stage_count;
     VulkanShaderStage* stages;
+    ReflectedShader reflection;
 } VulkanShaderState;
 
 b8 shader_vulkan_create(Shader* shader, const ShaderConfig* config);
