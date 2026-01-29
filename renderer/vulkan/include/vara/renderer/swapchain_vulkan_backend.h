@@ -3,10 +3,10 @@
 #include <vara/core/defines.h>
 #include <vara/renderer/swapchain.h>
 
-#include "volk/volk.h"
+#include "vara/renderer/vulkan_common.h"
 
 // Make this a configurable value.
-#define MAX_FRAMES_IN_FLIGHT 2
+#define MAX_FRAMES_IN_FLIGHT 3
 
 typedef struct VulkanSwapchainState VulkanSwapchainState;
 typedef struct VulkanFrame VulkanFrame;
@@ -30,6 +30,7 @@ struct VulkanSwapchainState {
     VulkanFrame frames[MAX_FRAMES_IN_FLIGHT];
     u32 current_frame;
     u32 image_index;
+    VkFence* images_in_flight;
 };
 
 b8 swapchain_vulkan_create(Swapchain* swapchain, const SwapchainConfig* config);
@@ -37,4 +38,3 @@ void swapchain_vulkan_destroy(Swapchain* swapchain);
 void swapchain_vulkan_present(Swapchain* swapchain);
 
 void swapchain_vulkan_begin_frame(Swapchain* swapchain);
-void swapchain_vulkan_end_frame(Swapchain* swapchain);

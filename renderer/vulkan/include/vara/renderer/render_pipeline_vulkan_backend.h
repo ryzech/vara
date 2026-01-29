@@ -3,7 +3,7 @@
 #include <vara/core/defines.h>
 #include <vara/renderer/render_pipeline.h>
 
-#include "volk/volk.h"
+#include "vara/renderer/vulkan_common.h"
 
 typedef struct VulkanPipelineState {
     VkPipeline pipeline;

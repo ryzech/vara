@@ -4,7 +4,7 @@
 #include <vara/renderer/internal/shader/shader_reflection_internal.h>
 #include <vara/renderer/shader.h>
 
-#include "volk/volk.h"
+#include "vara/renderer/vulkan_common.h"
 
 typedef struct VulkanShaderStage {
     ShaderStage stage;

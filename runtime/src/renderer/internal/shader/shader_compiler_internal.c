@@ -65,8 +65,8 @@ static void* compile_glsl(ShaderSource* source, u32* out_size) {
     const glslang_input_t input = {
         .language = GLSLANG_SOURCE_GLSL,
         .stage = stage_to_glslang(source->stage),
-        .client = GLSLANG_CLIENT_OPENGL,
-        .client_version = GLSLANG_TARGET_OPENGL_450,
+        .client = GLSLANG_CLIENT_VULKAN,
+        .client_version = GLSLANG_TARGET_VULKAN_1_2,
         .target_language = GLSLANG_TARGET_SPV,
         .target_language_version = GLSLANG_TARGET_SPV_1_6,
         .code = source->source,

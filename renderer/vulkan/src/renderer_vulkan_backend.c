@@ -7,6 +7,7 @@
 #include <vara/core/util/string.h>
 #include <vara/renderer/internal/renderer_internal.h>
 
+#include "vara/renderer/buffer_vulkan_backend.h"
 #include "vara/renderer/render_pass_vulkan_backend.h"
 #include "vara/renderer/render_pipeline_vulkan_backend.h"
 #include "vara/renderer/renderer_vulkan_backend.h"
@@ -14,6 +15,7 @@
 #include "vara/renderer/swapchain_vulkan_backend.h"
 #include "vara/renderer/vulkan_platform.h"
 #include "vara/renderer/vulkan_utils.h"
+
 /* clang-format off */
 #include <GLFW/glfw3.h>
 /* clang-format on */
@@ -87,13 +89,22 @@ static b8 renderer_vulkan_create(RendererBackend* backend) {
     array_destroy(required_extensions);
     array_destroy(optional_extensions);
 
+    const char* validation_layers[] = {
+        "VK_LAYER_KHRONOS_validation",
+    };
+
     const VkInstanceCreateInfo instance_info = {
         .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
         .pApplicationInfo = &application,
         .enabledExtensionCount = array_length(enabled_extensions),
         .ppEnabledExtensionNames = enabled_extensions,
+#if defined(VARA_DEBUG)
+        .enabledLayerCount = 1,
+        .ppEnabledLayerNames = validation_layers,
+#else
         .enabledLayerCount = 0,
-        .ppEnabledLayerNames = 0,
+        .ppEnabledLayerNames = NULL,
+#endif
 #if defined(VARA_PLATFORM_APPLE)
         .flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR,
 #endif
@@ -123,7 +134,27 @@ static b8 renderer_vulkan_create(RendererBackend* backend) {
         return false;
     }
 
-    // TODO initialize VMA for better memory management.
+    VmaAllocatorCreateInfo vma_info = {
+        .physicalDevice = state->device.physical_device,
+        .device = state->device.logical_device,
+        .instance = state->instance,
+        .vulkanApiVersion = VK_MAKE_API_VERSION(0, major, minor, patch),
+        .pAllocationCallbacks = state->allocator,
+    };
+
+    VmaVulkanFunctions vulkan_functions;
+    VkResult result = vmaImportVulkanFunctionsFromVolk(&vma_info, &vulkan_functions);
+    if (result != VK_SUCCESS) {
+        FATAL("Failed to retrieve vulkan functions from Volk.");
+        return false;
+    }
+    vma_info.pVulkanFunctions = &vulkan_functions;
+
+    result = vmaCreateAllocator(&vma_info, &state->vma_allocator);
+    if (result != VK_SUCCESS) {
+        FATAL("Failed to create VmaAllocator.");
+        return false;
+    }
 
     return true;
 }
@@ -134,6 +165,7 @@ static void renderer_vulkan_destroy(RendererBackend* backend) {
         return;
     }
 
+    vmaDestroyAllocator(state->vma_allocator);
     vulkan_device_destroy(&state->device);
     vkDestroySurfaceKHR(state->instance, state->surface, state->allocator);
     vkDestroyInstance(state->instance, state->allocator);
@@ -168,6 +200,30 @@ static void renderer_vulkan_submit(RendererBackend* backend, const RenderCommand
                 render_pipeline_vulkan_bind(bind_pipeline->pipeline);
                 break;
             }
+            case RENDER_CMD_BIND_BUFFER: {
+                const RenderCmdBindBuffer* bind_buffer = (RenderCmdBindBuffer*)cmd;
+                VulkanBufferState* buffer_state = bind_buffer->buffer->backend_data;
+
+                switch (bind_buffer->buffer->type) {
+                    case BUFFER_TYPE_VERTEX: {
+                        VkDeviceSize offset = 0;
+                        vkCmdBindVertexBuffers(
+                            frame->command_buffer, 0, 1, &buffer_state->buffer, &offset
+                        );
+                        break;
+                    }
+                    case BUFFER_TYPE_INDEX: {
+                        vkCmdBindIndexBuffer(
+                            frame->command_buffer, buffer_state->buffer, 0, VK_INDEX_TYPE_UINT32
+                        );
+                        break;
+                    }
+                    case BUFFER_TYPE_UNIFORM:
+                        break;
+                }
+
+                break;
+            }
             case RENDER_CMD_SET_VIEWPORT: {
                 const RenderCmdSetViewport* viewport = (RenderCmdSetViewport*)cmd;
                 VkViewport viewport_info = {
@@ -175,22 +231,29 @@ static void renderer_vulkan_submit(RendererBackend* backend, const RenderCommand
                     .y = 0,
                     .width = viewport->width,
                     .height = viewport->height,
+                    .minDepth = 0.0f,
+                    .maxDepth = 1.0f,
+                };
+                VkRect2D scissor_info = {
+                    .offset = {0, 0},
+                    .extent = swapchain->extent,
                 };
                 vkCmdSetViewport(frame->command_buffer, 0, 1, &viewport_info);
+                vkCmdSetScissor(frame->command_buffer, 0, 1, &scissor_info);
                 break;
             }
-            // case RENDER_CMD_DRAW_INDEXED: {
-            //     const RenderCmdDrawIndexed* draw_indexed = (RenderCmdDrawIndexed*)cmd;
-            //     vkCmdDrawIndexed(
-            //         frame->command_buffer,
-            //         draw_indexed->index_count,
-            //         1,
-            //         draw_indexed->first_index,
-            //         0,
-            //         0
-            //     );
-            //     break;
-            // }
+            case RENDER_CMD_DRAW_INDEXED: {
+                const RenderCmdDrawIndexed* draw_indexed = (RenderCmdDrawIndexed*)cmd;
+                vkCmdDrawIndexed(
+                    frame->command_buffer,
+                    draw_indexed->index_count,
+                    1,
+                    draw_indexed->first_index,
+                    0,
+                    0
+                );
+                break;
+            }
             case RENDER_CMD_DRAW: {
                 const RenderCmdDraw* draw = (RenderCmdDraw*)cmd;
                 vkCmdDraw(frame->command_buffer, draw->vertex_count, 1, draw->first_vertex, 0);
@@ -240,8 +303,6 @@ static void renderer_vulkan_end_frame(RendererBackend* backend) {
         .pSignalSemaphores = &frame->render_finished,
     };
     VK_CHECK(vkQueueSubmit(state->device.graphics_queue, 1, &submit_info, frame->in_flight));
-
-    swapchain_vulkan_end_frame(state->swapchain);
 }
 
 void renderer_vulkan_init(RendererBackend* backend, VaraWindow* window) {
@@ -288,6 +349,11 @@ void renderer_vulkan_init(RendererBackend* backend, VaraWindow* window) {
     backend->render_pipeline.create = render_pipeline_vulkan_create;
     backend->render_pipeline.destroy = render_pipeline_vulkan_destroy;
     backend->render_pipeline.bind = render_pipeline_vulkan_bind;
+
+    // Buffer
+    backend->buffer.create = buffer_vulkan_create;
+    backend->buffer.destroy = buffer_vulkan_destroy;
+    backend->buffer.set_data = buffer_vulkan_set_data;
 
     DEBUG("Creating RendererBackend named('%s')", backend->name);
 }

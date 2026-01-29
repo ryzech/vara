@@ -266,6 +266,7 @@ void sandbox_shutdown() {
     //shader_destroy(screen_shader);
     buffer_destroy(vertex_buffer);
     buffer_destroy(index_buffer);
+    buffer_destroy(ubo);
     render_pipeline_destroy(base_pipeline);
     //render_pipeline_destroy(screen_pipeline);
     render_pass_destroy(render_pass);

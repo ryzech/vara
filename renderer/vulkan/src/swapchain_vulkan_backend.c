@@ -141,6 +141,11 @@ b8 swapchain_vulkan_create(Swapchain* swapchain, const SwapchainConfig* config) 
         ));
     }
 
+    state->images_in_flight = array_sized(state->image_count, VkFence, NULL);
+    for (u32 i = 0; i < state->image_count; i++) {
+        state->images_in_flight[i] = VK_NULL_HANDLE;
+    }
+
     for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         VulkanFrame* frame = &state->frames[i];
 
@@ -195,9 +200,10 @@ void swapchain_vulkan_destroy(Swapchain* swapchain) {
     VulkanSwapchainState* state = swapchain->backend_data;
     VulkanRendererState* renderer = swapchain->backend->backend_data;
 
+    vkDeviceWaitIdle(renderer->device.logical_device);
+
     for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         const VulkanFrame* frame = &state->frames[i];
-
         vkDestroyCommandPool(
             renderer->device.logical_device, frame->command_pool, renderer->allocator
         );
@@ -210,7 +216,12 @@ void swapchain_vulkan_destroy(Swapchain* swapchain) {
         vkDestroyFence(renderer->device.logical_device, frame->in_flight, renderer->allocator);
     }
 
+    for (u32 i = 0; i < state->image_count; i++) {
+        vkDestroyImageView(renderer->device.logical_device, state->views[i], renderer->allocator);
+    }
+
     vkDestroySwapchainKHR(renderer->device.logical_device, state->swapchain, renderer->allocator);
+    array_destroy(state->images_in_flight);
     array_destroy(state->views);
     array_destroy(state->images);
     vara_free(state, sizeof(VulkanSwapchainState));
@@ -262,15 +273,20 @@ void swapchain_vulkan_begin_frame(Swapchain* swapchain) {
         VK_NULL_HANDLE,
         &state->image_index
     );
-    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
+    if (result == VK_ERROR_OUT_OF_DATE_KHR) {
         return;
     }
 
+    if (state->images_in_flight[state->image_index] != VK_NULL_HANDLE) {
+        vkWaitForFences(
+            renderer->device.logical_device,
+            1,
+            &state->images_in_flight[state->image_index],
+            VK_TRUE,
+            U64_MAX
+        );
+    }
+
+    state->images_in_flight[state->image_index] = frame->in_flight;
     VK_CHECK(vkResetFences(renderer->device.logical_device, 1, &frame->in_flight));
-}
-
-void swapchain_vulkan_end_frame(Swapchain* swapchain) {
-    if (!swapchain || !swapchain->backend_data) {
-        return;
-    }
 }

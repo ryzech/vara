@@ -115,6 +115,31 @@ b8 render_pipeline_vulkan_create(RenderPipeline* pipeline, const RenderPipelineC
         .sampleShadingEnable = VK_FALSE,
     };
 
+    VkPipelineColorBlendAttachmentState color_attachment = {
+        .blendEnable = VK_FALSE,
+        .srcColorBlendFactor = VK_BLEND_FACTOR_ONE,
+        .dstColorBlendFactor = VK_BLEND_FACTOR_ZERO,
+        .colorBlendOp = VK_BLEND_OP_ADD,
+        .srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE,
+        .dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO,
+        .alphaBlendOp = VK_BLEND_OP_ADD,
+        .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT
+                          | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
+    };
+    VkPipelineColorBlendStateCreateInfo color_blend_info = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
+        .logicOpEnable = VK_FALSE,
+        .attachmentCount = 1,
+        .pAttachments = &color_attachment,
+    };
+
+    VkPipelineDepthStencilStateCreateInfo depth_stencil_info = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
+        .depthTestEnable = VK_FALSE,
+        .depthWriteEnable = VK_FALSE,
+        .depthCompareOp = VK_COMPARE_OP_ALWAYS,
+    };
+
     VkDynamicState dynamic_states[] = {
         VK_DYNAMIC_STATE_VIEWPORT,
         VK_DYNAMIC_STATE_SCISSOR,
@@ -145,6 +170,8 @@ b8 render_pipeline_vulkan_create(RenderPipeline* pipeline, const RenderPipelineC
         .pViewportState = &viewport_info,
         .pRasterizationState = &rasterization_info,
         .pMultisampleState = &multisample_info,
+        .pColorBlendState = &color_blend_info,
+        .pDepthStencilState = &depth_stencil_info,
         .pDynamicState = &dynamic_state_info,
         .layout = state->layout,
         .renderPass = pass->render_pass,
@@ -173,6 +200,8 @@ void render_pipeline_vulkan_destroy(RenderPipeline* pipeline) {
 
     VulkanPipelineState* state = pipeline->backend_data;
     VulkanRendererState* renderer = pipeline->backend->backend_data;
+
+    vkDeviceWaitIdle(renderer->device.logical_device);
 
     vkDestroyPipeline(renderer->device.logical_device, state->pipeline, renderer->allocator);
     vkDestroyPipelineLayout(renderer->device.logical_device, state->layout, renderer->allocator);

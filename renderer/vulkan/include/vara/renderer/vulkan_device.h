@@ -2,7 +2,7 @@
 
 #include <vara/core/defines.h>
 
-#include "volk/volk.h"
+#include "vara/renderer/vulkan_common.h"
 
 typedef struct VulkanDevice VulkanDevice;
 typedef struct VulkanSurfaceInfo VulkanSurfaceInfo;

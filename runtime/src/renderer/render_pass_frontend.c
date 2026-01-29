@@ -103,6 +103,7 @@ void render_pass_begin(RenderPass* pass) {
     pass->packet_count = 0;
     render_cmd_buffer_reset(pass->command_buffer);
     render_cmd_begin_pass(pass->command_buffer, pass);
+    render_cmd_set_viewport(pass->command_buffer, 1400, 800);
 }
 
 void render_pass_end(Renderer* renderer, RenderPass* pass) {

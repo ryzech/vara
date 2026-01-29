@@ -133,6 +133,8 @@ void render_pass_vulkan_destroy(RenderPass* pass) {
     VulkanRenderPassState* state = pass->backend_data;
     VulkanRendererState* renderer = pass->backend->backend_data;
 
+    vkDeviceWaitIdle(renderer->device.logical_device);
+
     for (u32 i = 0; i < state->framebuffer_count; i++) {
         vkDestroyFramebuffer(
             renderer->device.logical_device, state->framebuffers[i], renderer->allocator
