@@ -13,6 +13,7 @@
 #include "vara/renderer/renderer_vulkan_backend.h"
 #include "vara/renderer/shader_vulkan_backend.h"
 #include "vara/renderer/swapchain_vulkan_backend.h"
+#include "vara/renderer/texture_vulkan_backend.h"
 #include "vara/renderer/vulkan_platform.h"
 #include "vara/renderer/vulkan_utils.h"
 
@@ -187,7 +188,7 @@ static void renderer_vulkan_submit(RendererBackend* backend, const RenderCommand
         switch (header->type) {
             case RENDER_CMD_BEGIN_PASS: {
                 const RenderCmdBeginPass* begin_pass = (RenderCmdBeginPass*)cmd;
-                render_pass_vulkan_begin(begin_pass->pass);
+                render_pass_vulkan_begin(begin_pass->pass, begin_pass->target);
                 break;
             }
             case RENDER_CMD_END_PASS: {
@@ -354,6 +355,11 @@ void renderer_vulkan_init(RendererBackend* backend, VaraWindow* window) {
     backend->buffer.create = buffer_vulkan_create;
     backend->buffer.destroy = buffer_vulkan_destroy;
     backend->buffer.set_data = buffer_vulkan_set_data;
+
+    // Texture
+    backend->texture.create = texture_vulkan_create;
+    backend->texture.destroy = texture_vulkan_destroy;
+    backend->texture.set_data = texture_vulkan_set_data;
 
     DEBUG("Creating RendererBackend named('%s')", backend->name);
 }

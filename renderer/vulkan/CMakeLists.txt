@@ -7,6 +7,7 @@ set(VULKAN_RENDERER_SOURCES src/volk/volk.c src/renderer_vulkan_backend.c
         src/render_pipeline_vulkan_backend.c
         src/vma/vk_mem_alloc.cpp
         src/buffer_vulkan_backend.c
+        src/texture_vulkan_backend.c
 )
 
 add_library(vara-vulkan-renderer STATIC ${VULKAN_RENDERER_SOURCES})

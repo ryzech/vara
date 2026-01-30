@@ -7,11 +7,11 @@
 #include <vara/core/platform/platform.h>
 #include <vara/material/material.h>
 #include <vara/renderer/buffer.h>
-#include <vara/renderer/framebuffer.h>
 #include <vara/renderer/render_command.h>
 #include <vara/renderer/render_packet.h>
 #include <vara/renderer/render_pass.h>
 #include <vara/renderer/render_pipeline.h>
+#include <vara/renderer/render_target.h>
 #include <vara/renderer/shader.h>
 #include <vara/renderer/texture.h>
 #include <vara/shaders/basic_shader.glsl.gen.h>
@@ -20,12 +20,8 @@
 static Buffer* index_buffer;
 static Buffer* vertex_buffer;
 static Shader* shader;
-static Shader* screen_shader;
 static RenderPass* render_pass;
-static RenderPass* screen_pass;
-static Framebuffer* render_buffer;
 static RenderPipeline* base_pipeline;
-static RenderPipeline* screen_pipeline;
 static Buffer* ubo;
 
 static Camera* camera;
@@ -40,10 +36,6 @@ static b8 on_window_resize(i16 event_code, void* sender, const EventData* event)
     const i32 width = event->i32[0];
     const i32 height = event->i32[1];
     const Vector2i size = {width, height};
-
-    // Needs the physical size in pixels rather than logical.
-    // const VaraWindow* window = application_get_window();
-    // framebuffer_resize(render_buffer, window->framebuffer_width, window->framebuffer_height);
 
     camera_update(camera, size);
     return false;
@@ -95,55 +87,16 @@ void sandbox_init(void) {
     };
     shader = shader_create(renderer, &shader_config);
 
-    // ShaderSource screen_sources[] = {
-    //     {.stage = SHADER_STAGE_VERTEX, .source = screen_quad_vertex_source},
-    //     {.stage = SHADER_STAGE_FRAGMENT, .source = screen_quad_fragment_source},
-    // };
-    // const ShaderConfig screen_shader_config = {
-    //     .name = "screen_shader",
-    //     .stages = screen_sources,
-    //     .stage_count = 2,
-    // };
-    // screen_shader = shader_create(renderer, &screen_shader_config);
-
-    // const VaraWindow* window = application_get_window();
-    // FramebufferAttachmentConfig attachments[] = {
-    //     {.type = FRAMEBUFFER_ATTACHMENT_COLOR, .format = FRAMEBUFFER_FORMAT_RGBA8},
-    //     {.type = FRAMEBUFFER_ATTACHMENT_DEPTH, .format = FRAMEBUFFER_FORMAT_DEPTH24_STENCIL8},
-    // };
-    // const FramebufferConfig fb_config = {
-    //     .name = "offscreen_fb",
-    //     .attachments = attachments,
-    //     .attachment_count = 2,
-    //     .width = window->framebuffer_width,
-    //     .height = window->framebuffer_height,
-    //     .samples = 1,
-    // };
-    // render_buffer = framebuffer_create(renderer, &fb_config);
-
     RenderPassAttachment color = {
         .load = ATTACHMENT_LOAD_OP_CLEAR,
         .clear = vec4(0.1f, 0.1f, 0.1f, 1.0f),
     };
     const RenderPassConfig pass_config = {
         .name = "main_pass",
-        .target = NULL,
         .color_attachments = &color,
         .color_attachment_count = 1,
     };
     render_pass = render_pass_create(renderer, &pass_config);
-
-    // RenderPassAttachment screen_color = {
-    //     .load = ATTACHMENT_LOAD_OP_CLEAR,
-    //     .clear = vec4(0.2f, 0.2f, 0.2f, 1.0f),
-    // };
-    // const RenderPassConfig screen_pass_config = {
-    //     .name = "screen_pass",
-    //     .target = NULL,
-    //     .color_attachments = &screen_color,
-    //     .color_attachment_count = 1,
-    // };
-    // screen_pass = render_pass_create(renderer, &screen_pass_config);
 
     const RenderPipelineConfig base_pipeline_config = {
         .name = "base_pipeline",
@@ -151,13 +104,6 @@ void sandbox_init(void) {
         .pass = render_pass,
     };
     base_pipeline = render_pipeline_create(renderer, &base_pipeline_config);
-
-    // const RenderPipelineConfig screen_pipeline_config = {
-    //     .name = "screen_pipeline",
-    //     .shader = screen_shader,
-    //     .pass = screen_pass,
-    // };
-    // screen_pipeline = render_pipeline_create(renderer, &screen_pipeline_config);
 
     camera = camera_create();
     camera_update(
@@ -224,7 +170,7 @@ void sandbox_update(f32 delta_time) {
     }
 
     Renderer* renderer = application_get_renderer();
-    render_pass_begin(render_pass);
+    render_pass_begin(render_pass, NULL);
     {
         // This needs majorly cleaned up.
         const CameraUBO ubo_data = {
@@ -242,35 +188,15 @@ void sandbox_update(f32 delta_time) {
         render_pass_submit(render_pass, &packet);
     }
     render_pass_end(renderer, render_pass);
-
-    // render_pass_begin(screen_pass);
-    // {
-    //     Texture* screen_texture = framebuffer_get_attachment(render_buffer, 0);
-    //     Material material = {
-    //         .texture_count = 1,
-    //     };
-    //     material.textures[0] = screen_texture;
-    //     RenderPacket packet = {
-    //         .pipeline = screen_pipeline,
-    //         .material = &material,
-    //         .vertex_count = 3,
-    //     };
-    //     render_pass_submit(screen_pass, &packet);
-    // }
-    // render_pass_end(renderer, screen_pass);
 }
 
 void sandbox_shutdown() {
-    //framebuffer_destroy(render_buffer);
     shader_destroy(shader);
-    //shader_destroy(screen_shader);
     buffer_destroy(vertex_buffer);
     buffer_destroy(index_buffer);
     buffer_destroy(ubo);
     render_pipeline_destroy(base_pipeline);
-    //render_pipeline_destroy(screen_pipeline);
     render_pass_destroy(render_pass);
-    //render_pass_destroy(screen_pass);
 }
 
 void application_init(ApplicationConfig* config) {

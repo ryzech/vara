@@ -4,11 +4,11 @@
 #include <vara/core/platform/platform_graphics_types.h>
 
 #include "vara/renderer/internal/renderer_buffer_internal.h"
-#include "vara/renderer/internal/renderer_framebuffer_internal.h"
 #include "vara/renderer/internal/renderer_pass_internal.h"
 #include "vara/renderer/internal/renderer_pipeline_internal.h"
 #include "vara/renderer/internal/renderer_shader_internal.h"
 #include "vara/renderer/internal/renderer_swapchain_internal.h"
+#include "vara/renderer/internal/renderer_target_internal.h"
 #include "vara/renderer/internal/renderer_texture_internal.h"
 #include "vara/renderer/render_command.h"
 
@@ -30,7 +30,7 @@ struct RendererBackend {
     RendererBackendVT renderer;
     ShaderBackendVT shader;
     BufferBackendVT buffer;
-    FramebufferBackendVT framebuffer;
+    RenderTargetBackendVT render_target;
     RenderPassBackendVT render_pass;
     RenderPipelineBackendVT render_pipeline;
     TextureBackendVT texture;

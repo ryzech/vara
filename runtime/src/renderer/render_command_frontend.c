@@ -4,6 +4,7 @@
 #include "vara/renderer/buffer.h"
 #include "vara/renderer/render_command.h"
 #include "vara/renderer/render_pass.h"
+#include "vara/renderer/render_target.h"
 #include "vara/renderer/render_pipeline.h"
 #include "vara/renderer/shader.h"
 #include "vara/renderer/texture.h"
@@ -42,11 +43,12 @@ void render_cmd_buffer_reset(RenderCommandBuffer* buffer) {
     buffer->used = 0;
 }
 
-void render_cmd_begin_pass(RenderCommandBuffer* buffer, RenderPass* pass) {
+void render_cmd_begin_pass(RenderCommandBuffer* buffer, RenderPass* pass, RenderTarget* target) {
     RenderCmdBeginPass* cmd = render_cmd_allocate(buffer, sizeof(RenderCmdBeginPass));
     cmd->header.type = RENDER_CMD_BEGIN_PASS;
     cmd->header.size = sizeof(RenderCmdBeginPass);
     cmd->pass = pass;
+    cmd->target = target;
 }
 
 void render_cmd_end_pass(RenderCommandBuffer* buffer, RenderPass* pass) {

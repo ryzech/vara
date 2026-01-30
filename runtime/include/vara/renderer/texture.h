@@ -53,4 +53,3 @@ void texture_destroy(Texture* texture);
 void texture_bind(Texture* texture, u32 slot);
 void texture_unbind(Texture* texture);
 void texture_set_data(Texture* texture, void* data, size_t size);
-u32 texture_get_id(Texture* texture);

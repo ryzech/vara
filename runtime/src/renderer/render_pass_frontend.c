@@ -8,6 +8,15 @@
 #include "vara/renderer/render_pass.h"
 #include "vara/renderer/renderer.h"
 
+static b8 render_pass_validate_target(RenderPass* pass, RenderTarget* target) {
+    if (!target) {
+        ERROR("RenderPass named('%s') called with NULL RenderTarget", pass->name);
+        return false;
+    }
+
+    return true;
+}
+
 static void render_pass_build_commands(RenderPass* pass) {
     RenderCommandBuffer* buffer = pass->command_buffer;
     for (u32 i = 0; i < pass->packet_count; i++) {
@@ -40,7 +49,6 @@ RenderPass* render_pass_create(Renderer* renderer, const RenderPassConfig* confi
     vara_zero_memory(pass, sizeof(RenderPass));
 
     pass->name = config->name;
-    pass->target = config->target;
 
     pass->color_attachment_count = config->color_attachment_count;
     if (config->color_attachment_count > 0) {
@@ -99,11 +107,15 @@ void render_pass_destroy(RenderPass* pass) {
     }
 }
 
-void render_pass_begin(RenderPass* pass) {
+void render_pass_begin(RenderPass* pass, RenderTarget* target) {
+    if (!render_pass_validate_target(pass, target)) {
+        return;
+    }
+
     pass->packet_count = 0;
     render_cmd_buffer_reset(pass->command_buffer);
-    render_cmd_begin_pass(pass->command_buffer, pass);
-    render_cmd_set_viewport(pass->command_buffer, 1400, 800);
+    render_cmd_begin_pass(pass->command_buffer, pass, target);
+    render_cmd_set_viewport(pass->command_buffer, target->width, target->height);
 }
 
 void render_pass_end(Renderer* renderer, RenderPass* pass) {

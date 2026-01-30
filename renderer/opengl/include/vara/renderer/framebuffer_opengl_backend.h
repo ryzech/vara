@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vara/core/defines.h>
-#include <vara/renderer/framebuffer.h>
+#include <vara/renderer/render_target.h>
 
 b8 framebuffer_opengl_create(Framebuffer* buffer, const FramebufferConfig* config);
 void framebuffer_opengl_destroy(Framebuffer* buffer);

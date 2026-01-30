@@ -102,13 +102,3 @@ void texture_set_data(Texture* texture, void* data, size_t size) {
         texture->backend->texture.set_data(texture, data, size);
     }
 }
-
-u32 texture_get_id(Texture* texture) {
-    if (texture) {
-        if (texture->backend->texture.get_id) {
-            return texture->backend->texture.get_id(texture);
-        }
-    }
-
-    return 0;
-}

@@ -33,10 +33,12 @@ struct VulkanSwapchainState {
 
     VkSemaphore* render_finished;
     VkFence* images_in_flight;
+
+    RenderTarget* target;
 };
 
 b8 swapchain_vulkan_create(Swapchain* swapchain, const SwapchainConfig* config);
 void swapchain_vulkan_destroy(Swapchain* swapchain);
-void swapchain_vulkan_present(Swapchain* swapchain);
 
+void swapchain_vulkan_present(Swapchain* swapchain);
 void swapchain_vulkan_begin_frame(Swapchain* swapchain);

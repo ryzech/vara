@@ -48,6 +48,19 @@ static u32 vertex_attribute_type_size(VertexAttributeType type) {
     }
 }
 
+static VkFormat format_to_vk(TextureFormat format) {
+    switch (format) {
+        case TEXTURE_FORMAT_R:
+            return VK_FORMAT_R8_UNORM;
+        case TEXTURE_FORMAT_RGB:
+            return VK_FORMAT_R8G8B8A8_UNORM;
+        case TEXTURE_FORMAT_RGBA:
+            return VK_FORMAT_R8G8B8A8_UNORM;
+        default:
+            return VK_FORMAT_R8G8B8A8_UNORM;
+    }
+}
+
 #define VK_CHECK(expr)                                                                             \
     {                                                                                              \
         VkResult result = expr;                                                                    \

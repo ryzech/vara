@@ -11,7 +11,7 @@ typedef enum AttachmentStoreOp AttachmentStoreOp;
 typedef struct RenderPassAttachment RenderPassAttachment;
 
 // Redeclaration's so we don't have to include header.
-struct Framebuffer;
+struct RenderTarget;
 struct RenderCommandBuffer;
 struct Renderer;
 struct RendererBackend;
@@ -36,7 +36,6 @@ struct RenderPassAttachment {
 
 struct RenderPassConfig {
     const char* name;
-    struct Framebuffer* target;
     RenderPassAttachment* color_attachments;
     u32 color_attachment_count;
     RenderPassAttachment* depth_stencil_attachment;
@@ -44,11 +43,9 @@ struct RenderPassConfig {
 
 struct RenderPass {
     const char* name;
-    struct Framebuffer* target;
     RenderPassAttachment* color_attachments;
     u32 color_attachment_count;
     RenderPassAttachment* depth_stencil_attachment;
-
     struct RenderPacket* packets;
     u32 packet_count;
     u32 packet_capacity;
@@ -60,6 +57,6 @@ struct RenderPass {
 RenderPass* render_pass_create(struct Renderer* renderer, const RenderPassConfig* config);
 void render_pass_destroy(RenderPass* pass);
 
-void render_pass_begin(RenderPass* pass);
+void render_pass_begin(RenderPass* pass, struct RenderTarget* target);
 void render_pass_end(struct Renderer* renderer, RenderPass* pass);
 void render_pass_submit(RenderPass* pass, struct RenderPacket* packet);

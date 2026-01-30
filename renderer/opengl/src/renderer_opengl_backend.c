@@ -9,7 +9,6 @@
 #include <vara/renderer/internal/renderer_internal.h>
 
 #include "vara/renderer/buffer_opengl_backend.h"
-#include "vara/renderer/framebuffer_opengl_backend.h"
 #include "vara/renderer/render_pass_opengl_backend.h"
 #include "vara/renderer/render_pipeline_opengl_backend.h"
 #include "vara/renderer/shader_opengl_backend.h"
@@ -40,7 +39,7 @@ static void renderer_opengl_submit(RendererBackend* backend, const RenderCommand
         switch (header->type) {
             case RENDER_CMD_BEGIN_PASS: {
                 const RenderCmdBeginPass* begin_pass = (RenderCmdBeginPass*)cmd;
-                render_pass_opengl_begin(begin_pass->pass);
+                render_pass_opengl_begin(begin_pass->pass, begin_pass->target);
                 break;
             }
             case RENDER_CMD_END_PASS: {
@@ -168,14 +167,13 @@ void renderer_opengl_init(RendererBackend* backend, VaraWindow* window) {
     backend->texture.bind = texture_opengl_bind;
     backend->texture.unbind = texture_opengl_unbind;
     backend->texture.set_data = texture_opengl_set_data;
-    backend->texture.get_id = texture_opengl_get_id;
 
-    // Framebuffer API
-    backend->framebuffer.create = framebuffer_opengl_create;
-    backend->framebuffer.destroy = framebuffer_opengl_destroy;
-    backend->framebuffer.bind = framebuffer_opengl_bind;
-    backend->framebuffer.unbind = framebuffer_opengl_unbind;
-    backend->framebuffer.resize = framebuffer_opengl_resize;
+    // Framebuffer API (Need to refactor for RenderTarget once finished)
+    // backend->framebuffer.create = framebuffer_opengl_create;
+    // backend->framebuffer.destroy = framebuffer_opengl_destroy;
+    // backend->framebuffer.bind = framebuffer_opengl_bind;
+    // backend->framebuffer.unbind = framebuffer_opengl_unbind;
+    // backend->framebuffer.resize = framebuffer_opengl_resize;
 
     // Pipeline API
     backend->render_pipeline.create = render_pipeline_opengl_create;

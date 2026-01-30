@@ -22,6 +22,7 @@ struct Buffer;
 struct Shader;
 struct Texture;
 struct RenderPass;
+struct RenderTarget;
 struct RenderPipeline;
 
 enum RenderCommandType {
@@ -52,6 +53,7 @@ struct RenderCommandBuffer {
 struct RenderCmdBeginPass {
     RenderCommandHeader header;
     struct RenderPass* pass;
+    struct RenderTarget* target;
 };
 
 struct RenderCmdEndPass {
@@ -117,7 +119,9 @@ RenderCommandBuffer* render_cmd_buffer_create(void);
 void render_cmd_buffer_destroy(RenderCommandBuffer* buffer);
 void render_cmd_buffer_reset(RenderCommandBuffer* buffer);
 
-void render_cmd_begin_pass(RenderCommandBuffer* buffer, struct RenderPass* pass);
+void render_cmd_begin_pass(
+    RenderCommandBuffer* buffer, struct RenderPass* pass, struct RenderTarget* target
+);
 void render_cmd_end_pass(RenderCommandBuffer* buffer, struct RenderPass* pass);
 void render_cmd_bind_pipeline(RenderCommandBuffer* buffer, struct RenderPipeline* pipeline);
 void render_cmd_bind_shader(RenderCommandBuffer* buffer, struct Shader* shader);

@@ -146,13 +146,3 @@ void texture_opengl_set_data(Texture* texture, void* data, size_t size) {
         data
     );
 }
-
-u32 texture_opengl_get_id(Texture* texture) {
-    if (!texture || !texture->backend_data) {
-        return 0;
-    }
-
-    OpenGLTextureState* texture_state = texture->backend_data;
-
-    return texture_state->id;
-}

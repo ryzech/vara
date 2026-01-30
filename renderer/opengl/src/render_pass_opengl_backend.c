@@ -1,8 +1,8 @@
 #include <glad/gl.h>
 #include <vara/core/logger.h>
 #include <vara/core/memory/memory.h>
+#include <vara/renderer/render_target.h>
 
-#include "vara/renderer/framebuffer_opengl_backend.h"
 #include "vara/renderer/render_pass_opengl_backend.h"
 
 typedef struct OpenGLRenderPassState {
@@ -31,7 +31,7 @@ void render_pass_opengl_destroy(RenderPass* pass) {
     pass->backend_data = NULL;
 }
 
-void render_pass_opengl_begin(RenderPass* pass) {
+void render_pass_opengl_begin(RenderPass* pass, RenderTarget* target) {
     if (!pass || !pass->backend_data) {
         return;
     }
@@ -43,9 +43,9 @@ void render_pass_opengl_begin(RenderPass* pass) {
         return;
     }
 
-    if (pass->target) {
-        framebuffer_opengl_bind(pass->target);
-    }
+    // if (pass->target) {
+    //     framebuffer_opengl_bind(pass->target);
+    // }
 
     for (u32 i = 0; i < pass->color_attachment_count; i++) {
         const RenderPassAttachment* attachment = &pass->color_attachments[i];
@@ -82,9 +82,9 @@ void render_pass_opengl_end(RenderPass* pass) {
         return;
     }
 
-    if (pass->target) {
-        framebuffer_opengl_unbind(pass->target);
-    }
+    // if (pass->target) {
+    //     framebuffer_opengl_unbind(pass->target);
+    // }
 
     render_pass_state->active = false;
 }

@@ -3,6 +3,7 @@
 #include <vara/renderer/internal/renderer_internal.h>
 
 #include "vara/renderer/render_pass_vulkan_backend.h"
+#include "vara/renderer/render_target_vulkan_backend.h"
 #include "vara/renderer/renderer_vulkan_backend.h"
 #include "vara/renderer/swapchain_vulkan_backend.h"
 #include "vara/renderer/vulkan_utils.h"
@@ -43,85 +44,71 @@ b8 render_pass_vulkan_create(RenderPass* pass, const RenderPassConfig* config) {
     pass->backend_data = state;
     VulkanRendererState* renderer = pass->backend->backend_data;
 
-    if (pass->target) {
+    VkAttachmentDescription attachments[8];
+    VkAttachmentReference color_refs[8];
+    u32 attachment_index = 0;
 
-    } else {
-        VulkanSwapchainState* swapchain = renderer->swapchain->backend_data;
-
-        VkAttachmentDescription color_attachment = {
-            .format = swapchain->image_format.format,
+    for (u32 i = 0; i < pass->color_attachment_count; i++) {
+        attachments[attachment_index] = (VkAttachmentDescription){
+            .format = VK_FORMAT_UNDEFINED,
             .samples = VK_SAMPLE_COUNT_1_BIT,
-            .loadOp = get_vulkan_load_op(config->color_attachments[0].load),
-            .storeOp = get_vulkan_store_op(config->color_attachments[0].store),
+            .loadOp = get_vulkan_load_op(pass->color_attachments[i].load),
+            .storeOp = get_vulkan_store_op(pass->color_attachments[i].store),
             .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
             .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-            .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+            .initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            .finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         };
-        VkAttachmentReference color_attachment_reference = {
-            .attachment = 0,
+
+        color_refs[i] = (VkAttachmentReference){
+            .attachment = attachment_index,
             .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         };
 
-        VkSubpassDescription subpass = {
-            .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-            .colorAttachmentCount = 1,
-            .pColorAttachments = &color_attachment_reference,
-        };
-        VkSubpassDependency subpass_dependency = {
-            .srcSubpass = VK_SUBPASS_EXTERNAL,
-            .dstSubpass = 0,
-            .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            .srcAccessMask = 0,
-            .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            .dstAccessMask =
-                VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-        };
-
-        VkRenderPassCreateInfo render_pass_info = {
-            .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-            .attachmentCount = 1,
-            .pAttachments = &color_attachment,
-            .subpassCount = 1,
-            .pSubpasses = &subpass,
-            .dependencyCount = 1,
-            .pDependencies = &subpass_dependency,
-        };
-
-        vkCreateRenderPass(
-            renderer->device.logical_device,
-            &render_pass_info,
-            renderer->allocator,
-            &state->render_pass
-        );
-
-        state->framebuffer_count = swapchain->image_count;
-        state->framebuffers = vara_allocate(sizeof(VkFramebuffer) * state->framebuffer_count);
-
-        for (u32 i = 0; i < state->framebuffer_count; i++) {
-            VkImageView attachments[] = {swapchain->views[i]};
-
-            VkFramebufferCreateInfo fb_info = {
-                .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-                .renderPass = state->render_pass,
-                .attachmentCount = 1,
-                .pAttachments = attachments,
-                .width = swapchain->extent.width,
-                .height = swapchain->extent.height,
-                .layers = 1,
-            };
-
-            VK_CHECK(vkCreateFramebuffer(
-                renderer->device.logical_device,
-                &fb_info,
-                renderer->allocator,
-                &state->framebuffers[i]
-            ));
-        }
+        attachment_index++;
     }
 
-    state->active = false;
+    VkAttachmentReference depth_ref = {};
+    if (pass->depth_stencil_attachment) {
+        attachments[attachment_index] = (VkAttachmentDescription){
+            .format = VK_FORMAT_UNDEFINED,
+            .samples = VK_SAMPLE_COUNT_1_BIT,
+            .loadOp = get_vulkan_load_op(pass->depth_stencil_attachment->load),
+            .storeOp = get_vulkan_store_op(pass->depth_stencil_attachment->store),
+            .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+            .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+            .initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+            .finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+        };
 
+        depth_ref = (VkAttachmentReference){
+            .attachment = attachment_index,
+            .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+        };
+
+        attachment_index++;
+    }
+
+    VkSubpassDescription subpass = {
+        .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+        .colorAttachmentCount = pass->color_attachment_count,
+        .pColorAttachments = color_refs,
+        .pDepthStencilAttachment = state->has_depth ? &depth_ref : NULL,
+    };
+
+    VkRenderPassCreateInfo info = {
+        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+        .attachmentCount = attachment_index,
+        .pAttachments = attachments,
+        .subpassCount = 1,
+        .pSubpasses = &subpass,
+    };
+
+    VK_CHECK(vkCreateRenderPass(
+        renderer->device.logical_device, &info, renderer->allocator, &state->render_pass
+    ));
+
+    state->active = false;
     return true;
 }
 
@@ -135,19 +122,12 @@ void render_pass_vulkan_destroy(RenderPass* pass) {
 
     vkDeviceWaitIdle(renderer->device.logical_device);
 
-    for (u32 i = 0; i < state->framebuffer_count; i++) {
-        vkDestroyFramebuffer(
-            renderer->device.logical_device, state->framebuffers[i], renderer->allocator
-        );
-    }
-    vara_free(state->framebuffers, sizeof(VkFramebuffer) * state->framebuffer_count);
-
     vkDestroyRenderPass(renderer->device.logical_device, state->render_pass, renderer->allocator);
     vara_free(state, sizeof(VulkanRenderPassState));
     pass->backend_data = NULL;
 }
 
-void render_pass_vulkan_begin(RenderPass* pass) {
+void render_pass_vulkan_begin(RenderPass* pass, RenderTarget* target) {
     if (!pass || !pass->backend_data) {
         return;
     }
@@ -162,34 +142,39 @@ void render_pass_vulkan_begin(RenderPass* pass) {
     VulkanRendererState* renderer = pass->backend->backend_data;
     VulkanSwapchainState* swapchain = renderer->swapchain->backend_data;
     VulkanFrame* frame = &swapchain->frames[swapchain->current_frame];
-    state->current_framebuffer_index = swapchain->image_index;
 
-    VkClearValue clear_value;
-    if (pass->color_attachment_count > 0) {
-        const Vector4 clear = pass->color_attachments[0].clear;
-        clear_value.color = (VkClearColorValue){{clear.x, clear.y, clear.z, clear.w}};
-    } else {
-        clear_value.color = (VkClearColorValue){{0.0f, 0.0f, 0.0f, 1.0f}};
+    VkClearValue clear_value[8];
+    u32 clear_count = 0;
+
+    for (u32 i = 0; i < pass->color_attachment_count; i++) {
+        Vector4 c = pass->color_attachments[i].clear;
+        clear_value[clear_count++].color = (VkClearColorValue){{
+            c.x,
+            c.y,
+            c.z,
+            c.w,
+        }};
     }
 
-    VkExtent2D extent;
-    if (pass->target) {
-        extent = (VkExtent2D){pass->target->width, pass->target->height};
-    } else {
-        extent = swapchain->extent;
+    if (pass->depth_stencil_attachment) {
+        clear_value[clear_count++].depthStencil = (VkClearDepthStencilValue){
+            1.0f,
+            0,
+        };
     }
 
+    VulkanRenderTargetState* target_state = target->backend_data;
     VkRenderPassBeginInfo render_pass_begin = {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
         .renderPass = state->render_pass,
-        .framebuffer = state->framebuffers[swapchain->image_index],
+        .framebuffer = target_state->framebuffer,
         .renderArea =
             {
                 .offset = {0, 0},
-                .extent = extent,
+                .extent = {target->width, target->height},
             },
-        .clearValueCount = 1,
-        .pClearValues = &clear_value,
+        .clearValueCount = clear_count,
+        .pClearValues = clear_value,
     };
 
     vkCmdBeginRenderPass(frame->command_buffer, &render_pass_begin, VK_SUBPASS_CONTENTS_INLINE);
