@@ -6,7 +6,7 @@
 #include "vara/renderer/vulkan_common.h"
 
 // Make this a configurable value.
-#define MAX_FRAMES_IN_FLIGHT 3
+#define MAX_FRAMES_IN_FLIGHT 2
 
 typedef struct VulkanSwapchainState VulkanSwapchainState;
 typedef struct VulkanFrame VulkanFrame;
@@ -15,7 +15,6 @@ struct VulkanFrame {
     VkCommandPool command_pool;
     VkCommandBuffer command_buffer;
     VkSemaphore image_available;
-    VkSemaphore render_finished;
     VkFence in_flight;
 };
 
@@ -24,12 +23,15 @@ struct VulkanSwapchainState {
     VkSurfaceFormatKHR image_format;
     VkPresentModeKHR present_mode;
     VkExtent2D extent;
+
     u32 image_count;
     VkImage* images;
     VkImageView* views;
     VulkanFrame frames[MAX_FRAMES_IN_FLIGHT];
     u32 current_frame;
     u32 image_index;
+
+    VkSemaphore* render_finished;
     VkFence* images_in_flight;
 };
 

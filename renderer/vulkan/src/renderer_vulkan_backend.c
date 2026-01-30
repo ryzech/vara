@@ -300,7 +300,7 @@ static void renderer_vulkan_end_frame(RendererBackend* backend) {
         .commandBufferCount = 1,
         .pCommandBuffers = &frame->command_buffer,
         .signalSemaphoreCount = 1,
-        .pSignalSemaphores = &frame->render_finished,
+        .pSignalSemaphores = &swapchain->render_finished[swapchain->image_index],
     };
     VK_CHECK(vkQueueSubmit(state->device.graphics_queue, 1, &submit_info, frame->in_flight));
 }

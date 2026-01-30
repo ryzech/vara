@@ -12,9 +12,9 @@ typedef struct VulkanRendererState VulkanRendererState;
 struct VulkanRendererState {
     VaraWindow* window;
     VkInstance instance;
-    VkAllocationCallbacks* allocator;
-    VmaAllocator vma_allocator;
     VkSurfaceKHR surface;
     VulkanDevice device;
+    VkAllocationCallbacks* allocator;
+    VmaAllocator vma_allocator;
     Swapchain* swapchain;
 };

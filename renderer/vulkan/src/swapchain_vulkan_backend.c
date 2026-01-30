@@ -32,12 +32,24 @@ static VkPresentModeKHR choose_present_mode(VkPresentModeKHR* modes, b8 vsync) {
     return VK_PRESENT_MODE_IMMEDIATE_KHR;
 }
 
+static b8 swapchain_vulkan_recreate(Swapchain* swapchain) {
+    VulkanRendererState* renderer = swapchain->backend->backend_data;
+
+    const SwapchainConfig config = {
+        .window = swapchain->window,
+        .vsync = swapchain->vsync,
+    };
+
+    swapchain_vulkan_destroy(swapchain);
+    return swapchain_vulkan_create(swapchain, &config);
+}
+
 b8 swapchain_vulkan_create(Swapchain* swapchain, const SwapchainConfig* config) {
     if (!swapchain || !config) {
         return false;
     }
 
-    DEBUG("Creating Swapchain for VaraWindow named('%s')", config->window->name);
+    TRACE("Creating Swapchain for VaraWindow named('%s')", config->window->name);
     VulkanSwapchainState* state = vara_allocate(sizeof(VulkanSwapchainState));
     vara_zero_memory(state, sizeof(VulkanSwapchainState));
     if (!state) {
@@ -141,8 +153,19 @@ b8 swapchain_vulkan_create(Swapchain* swapchain, const SwapchainConfig* config) 
         ));
     }
 
+    VkSemaphoreCreateInfo semaphore_info = {
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+    };
+
+    state->render_finished = array_sized(state->image_count, VkSemaphore, NULL);
     state->images_in_flight = array_sized(state->image_count, VkFence, NULL);
     for (u32 i = 0; i < state->image_count; i++) {
+        VK_CHECK(vkCreateSemaphore(
+            renderer->device.logical_device,
+            &semaphore_info,
+            renderer->allocator,
+            &state->render_finished[i]
+        ));
         state->images_in_flight[i] = VK_NULL_HANDLE;
     }
 
@@ -168,20 +191,11 @@ b8 swapchain_vulkan_create(Swapchain* swapchain, const SwapchainConfig* config) 
             renderer->device.logical_device, &command_buffer_info, &frame->command_buffer
         ));
 
-        VkSemaphoreCreateInfo semaphore_info = {
-            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-        };
         VK_CHECK(vkCreateSemaphore(
             renderer->device.logical_device,
             &semaphore_info,
             renderer->allocator,
             &frame->image_available
-        ));
-        VK_CHECK(vkCreateSemaphore(
-            renderer->device.logical_device,
-            &semaphore_info,
-            renderer->allocator,
-            &frame->render_finished
         ));
 
         VkFenceCreateInfo fence_info = {
@@ -202,6 +216,7 @@ void swapchain_vulkan_destroy(Swapchain* swapchain) {
 
     vkDeviceWaitIdle(renderer->device.logical_device);
 
+    TRACE("Destroying Swapchain for VaraWindow named('%s')", swapchain->window->name);
     for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         const VulkanFrame* frame = &state->frames[i];
         vkDestroyCommandPool(
@@ -210,17 +225,18 @@ void swapchain_vulkan_destroy(Swapchain* swapchain) {
         vkDestroySemaphore(
             renderer->device.logical_device, frame->image_available, renderer->allocator
         );
-        vkDestroySemaphore(
-            renderer->device.logical_device, frame->render_finished, renderer->allocator
-        );
         vkDestroyFence(renderer->device.logical_device, frame->in_flight, renderer->allocator);
     }
 
     for (u32 i = 0; i < state->image_count; i++) {
+        vkDestroySemaphore(
+            renderer->device.logical_device, state->render_finished[i], renderer->allocator
+        );
         vkDestroyImageView(renderer->device.logical_device, state->views[i], renderer->allocator);
     }
 
     vkDestroySwapchainKHR(renderer->device.logical_device, state->swapchain, renderer->allocator);
+    array_destroy(state->render_finished);
     array_destroy(state->images_in_flight);
     array_destroy(state->views);
     array_destroy(state->images);
@@ -234,18 +250,22 @@ void swapchain_vulkan_present(Swapchain* swapchain) {
 
     VulkanSwapchainState* state = swapchain->backend_data;
     VulkanRendererState* renderer = swapchain->backend->backend_data;
-    VulkanFrame* frame = &state->frames[state->current_frame];
 
     VkPresentInfoKHR present_info = {
         .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
         .waitSemaphoreCount = 1,
-        .pWaitSemaphores = &frame->render_finished,
+        .pWaitSemaphores = &state->render_finished[state->image_index],
         .swapchainCount = 1,
         .pSwapchains = &state->swapchain,
         .pImageIndices = &state->image_index,
     };
 
-    vkQueuePresentKHR(renderer->device.present_queue, &present_info);
+    VkResult result = vkQueuePresentKHR(renderer->device.present_queue, &present_info);
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
+        // if (!swapchain_vulkan_recreate(swapchain)) {
+        //     FATAL("Failed to recreate Swapchain!");
+        // }
+    }
     state->current_frame = (state->current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
