@@ -12,9 +12,17 @@ struct Renderer;
 struct RendererBackend;
 
 enum TextureFormat {
-    TEXTURE_FORMAT_R,
-    TEXTURE_FORMAT_RGB,
-    TEXTURE_FORMAT_RGBA,
+    TEXTURE_FORMAT_R8,
+    TEXTURE_FORMAT_RG8,
+    TEXTURE_FORMAT_RGB8,
+    TEXTURE_FORMAT_RGBA8,
+    TEXTURE_FORMAT_R16,
+    TEXTURE_FORMAT_RG16,
+    TEXTURE_FORMAT_RGB16,
+    TEXTURE_FORMAT_RGBA16,
+    TEXTURE_FORMAT_D32,
+    TEXTURE_FORMAT_D24,
+    TEXTURE_FORMAT_S8,
 };
 
 enum TextureFilter {
@@ -33,6 +41,7 @@ struct TextureConfig {
     u32 samples;
     TextureFormat format;
     TextureFilter filter;
+    TextureWrap wrap;
 };
 
 struct Texture {
@@ -41,6 +50,7 @@ struct Texture {
     void* backend_data;
     TextureFormat format;
     TextureFilter filter;
+    TextureWrap wrap;
     struct RendererBackend* backend;
 };
 

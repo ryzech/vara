@@ -38,13 +38,13 @@ RenderTarget* render_target_create(Renderer* renderer, const RenderTargetConfig*
 
             switch (src->type) {
                 case RENDER_TARGET_ATTACHMENT_COLOR:
-                    tex_config.format = TEXTURE_FORMAT_RGBA;
+                    tex_config.format = TEXTURE_FORMAT_RGBA8;
                     break;
                 case RENDER_TARGET_ATTACHMENT_DEPTH:
-                    tex_config.format = TEXTURE_FORMAT_R;
+                    tex_config.format = TEXTURE_FORMAT_D24;
                     break;
                 case RENDER_TARGET_ATTACHMENT_DEPTH_STENCIL:
-                    tex_config.format = TEXTURE_FORMAT_R;
+                    tex_config.format = TEXTURE_FORMAT_S8;
                     break;
             }
 

@@ -25,5 +25,4 @@ struct Swapchain {
 
 Swapchain* swapchain_create(struct Renderer* renderer, const SwapchainConfig* config);
 void swapchain_destroy(Swapchain* swapchain);
-
 void swapchain_present(Swapchain* swapchain);

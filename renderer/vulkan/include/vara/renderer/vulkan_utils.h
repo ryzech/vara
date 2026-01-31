@@ -50,12 +50,28 @@ static u32 vertex_attribute_type_size(VertexAttributeType type) {
 
 static VkFormat format_to_vk(TextureFormat format) {
     switch (format) {
-        case TEXTURE_FORMAT_R:
+        case TEXTURE_FORMAT_R8:
             return VK_FORMAT_R8_UNORM;
-        case TEXTURE_FORMAT_RGB:
+        case TEXTURE_FORMAT_RG8:
+            return VK_FORMAT_R8G8_UNORM;
+        case TEXTURE_FORMAT_RGB8:
+            return VK_FORMAT_R8G8B8_UNORM;
+        case TEXTURE_FORMAT_RGBA8:
             return VK_FORMAT_R8G8B8A8_UNORM;
-        case TEXTURE_FORMAT_RGBA:
-            return VK_FORMAT_R8G8B8A8_UNORM;
+        case TEXTURE_FORMAT_R16:
+            return VK_FORMAT_R16_UNORM;
+        case TEXTURE_FORMAT_RG16:
+            return VK_FORMAT_R16G16_UNORM;
+        case TEXTURE_FORMAT_RGB16:
+            return VK_FORMAT_R16G16B16_UNORM;
+        case TEXTURE_FORMAT_RGBA16:
+            return VK_FORMAT_R16G16B16A16_UNORM;
+        case TEXTURE_FORMAT_D24:
+            return VK_FORMAT_D16_UNORM_S8_UINT;
+        case TEXTURE_FORMAT_D32:
+            return VK_FORMAT_D24_UNORM_S8_UINT;
+        case TEXTURE_FORMAT_S8:
+            return VK_FORMAT_S8_UINT;
         default:
             return VK_FORMAT_R8G8B8A8_UNORM;
     }

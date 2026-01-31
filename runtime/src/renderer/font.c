@@ -62,7 +62,7 @@ Font* font_load(Renderer* renderer, const char* path, const f32 font_size) {
     const TextureConfig font_texture_config = {
         .width = width,
         .height = height,
-        .format = TEXTURE_FORMAT_RGBA,
+        .format = TEXTURE_FORMAT_RGBA8,
         .filter = TEXTURE_FILTER_LINEAR,
         .samples = 1,
     };

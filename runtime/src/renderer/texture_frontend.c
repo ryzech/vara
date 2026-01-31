@@ -15,6 +15,7 @@ Texture* texture_create(Renderer* renderer, const TextureConfig* config) {
     texture->samples = config->samples;
     texture->format = config->format;
     texture->filter = config->filter;
+    texture->wrap = config->wrap;
 
     RendererBackend* backend = renderer_backend_get(renderer);
     texture->backend = backend;
@@ -44,10 +45,10 @@ Texture* texture_load_file(Renderer* renderer, const TextureConfig* config, cons
     TextureFormat format;
     switch (channels) {
         case 3:
-            format = TEXTURE_FORMAT_RGB;
+            format = TEXTURE_FORMAT_RGB8;
             break;
         case 4:
-            format = TEXTURE_FORMAT_RGBA;
+            format = TEXTURE_FORMAT_RGBA8;
             break;
         default:
             stbi_image_free(data);

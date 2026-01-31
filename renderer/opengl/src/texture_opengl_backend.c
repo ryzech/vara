@@ -4,24 +4,56 @@
 
 static GLenum texture_format_to_gl(TextureFormat format) {
     switch (format) {
-        case TEXTURE_FORMAT_R:
+        case TEXTURE_FORMAT_R8:
             return GL_RED;
-        case TEXTURE_FORMAT_RGB:
+        case TEXTURE_FORMAT_RG8:
+            return GL_RG;
+        case TEXTURE_FORMAT_RGB8:
             return GL_RGB;
-        case TEXTURE_FORMAT_RGBA:
+        case TEXTURE_FORMAT_RGBA8:
             return GL_RGBA;
+        case TEXTURE_FORMAT_R16:
+            return GL_RED;
+        case TEXTURE_FORMAT_RG16:
+            return GL_RG;
+        case TEXTURE_FORMAT_RGB16:
+            return GL_RGB;
+        case TEXTURE_FORMAT_RGBA16:
+            return GL_RGBA;
+        case TEXTURE_FORMAT_D24:
+            return GL_DEPTH_COMPONENT;
+        case TEXTURE_FORMAT_D32:
+            return GL_DEPTH_COMPONENT;
+        case TEXTURE_FORMAT_S8:
+            return GL_STENCIL_INDEX;
     }
     return GL_RGBA;
 }
 
 static GLint texture_format_to_internal_gl(TextureFormat format) {
     switch (format) {
-        case TEXTURE_FORMAT_R:
+        case TEXTURE_FORMAT_R8:
             return GL_R8;
-        case TEXTURE_FORMAT_RGB:
+        case TEXTURE_FORMAT_RG8:
+            return GL_RG8;
+        case TEXTURE_FORMAT_RGB8:
             return GL_RGB8;
-        case TEXTURE_FORMAT_RGBA:
+        case TEXTURE_FORMAT_RGBA8:
             return GL_RGBA8;
+        case TEXTURE_FORMAT_R16:
+            return GL_R16;
+        case TEXTURE_FORMAT_RG16:
+            return GL_RG16;
+        case TEXTURE_FORMAT_RGB16:
+            return GL_RGB16;
+        case TEXTURE_FORMAT_RGBA16:
+            return GL_RGBA16;
+        case TEXTURE_FORMAT_D24:
+            return GL_DEPTH_COMPONENT24;
+        case TEXTURE_FORMAT_D32:
+            return GL_DEPTH_COMPONENT32;
+        case TEXTURE_FORMAT_S8:
+            return GL_STENCIL_INDEX8;
     }
     return GL_RGBA8;
 }

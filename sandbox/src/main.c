@@ -4,18 +4,13 @@
 #include <vara/core/event/event.h>
 #include <vara/core/input/input.h>
 #include <vara/core/math/math.h>
-#include <vara/core/platform/platform.h>
-#include <vara/material/material.h>
 #include <vara/renderer/buffer.h>
 #include <vara/renderer/render_command.h>
 #include <vara/renderer/render_packet.h>
 #include <vara/renderer/render_pass.h>
 #include <vara/renderer/render_pipeline.h>
-#include <vara/renderer/render_target.h>
 #include <vara/renderer/shader.h>
-#include <vara/renderer/texture.h>
 #include <vara/shaders/basic_shader.glsl.gen.h>
-#include <vara/shaders/screen_quad.glsl.gen.h>
 
 static Buffer* index_buffer;
 static Buffer* vertex_buffer;

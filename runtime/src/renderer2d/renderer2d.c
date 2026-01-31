@@ -224,7 +224,7 @@ Renderer2D* renderer2d_create(Renderer* backend, const Renderer2DConfig* config)
     TextureConfig default_texture_config = {
         .width = 1,
         .height = 1,
-        .format = TEXTURE_FORMAT_RGBA,
+        .format = TEXTURE_FORMAT_RGBA8,
         .filter = TEXTURE_FILTER_LINEAR,
     };
     default_texture = texture_create(r2d->renderer, &default_texture_config);
