@@ -54,6 +54,7 @@ struct RenderPass {
     void* backend_data;
 };
 
+RenderPass* _render_pass_create(struct RendererBackend* backend, const RenderPassConfig* config);
 RenderPass* render_pass_create(struct Renderer* renderer, const RenderPassConfig* config);
 void render_pass_destroy(RenderPass* pass);
 

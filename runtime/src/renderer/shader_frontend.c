@@ -6,13 +6,11 @@
 #include "vara/renderer/renderer.h"
 #include "vara/renderer/shader.h"
 
-Shader* shader_create(Renderer* renderer, const ShaderConfig* config) {
+Shader* _shader_create(RendererBackend* backend, const ShaderConfig* config) {
     Shader* shader = vara_allocate(sizeof(Shader));
     vara_zero_memory(shader, sizeof(Shader));
 
     shader->name = config->name;
-
-    RendererBackend* backend = renderer_backend_get(renderer);
     shader->backend = backend;
 
     if (shader->backend->shader.create) {
@@ -24,6 +22,10 @@ Shader* shader_create(Renderer* renderer, const ShaderConfig* config) {
     }
 
     return shader;
+}
+
+Shader* shader_create(Renderer* renderer, const ShaderConfig* config) {
+    return _shader_create(renderer->backend, config);
 }
 
 void shader_destroy(Shader* shader) {

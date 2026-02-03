@@ -6,7 +6,7 @@
 #include "vara/renderer/texture.h"
 #include "vendor/stb/stb_image.h"
 
-Texture* texture_create(Renderer* renderer, const TextureConfig* config) {
+Texture* _texture_create(RendererBackend* backend, const TextureConfig* config) {
     Texture* texture = vara_allocate(sizeof(Texture));
     vara_zero_memory(texture, sizeof(Texture));
 
@@ -16,8 +16,6 @@ Texture* texture_create(Renderer* renderer, const TextureConfig* config) {
     texture->format = config->format;
     texture->filter = config->filter;
     texture->wrap = config->wrap;
-
-    RendererBackend* backend = renderer_backend_get(renderer);
     texture->backend = backend;
 
     if (texture->backend->texture.create) {
@@ -28,6 +26,10 @@ Texture* texture_create(Renderer* renderer, const TextureConfig* config) {
     }
 
     return texture;
+}
+
+Texture* texture_create(Renderer* renderer, const TextureConfig* config) {
+    return _texture_create(renderer->backend, config);
 }
 
 Texture* texture_load_file(Renderer* renderer, const TextureConfig* config, const char* file) {

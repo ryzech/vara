@@ -60,6 +60,7 @@ struct Buffer {
     struct RendererBackend* backend;
 };
 
+Buffer* _buffer_create(struct RendererBackend* backend, const BufferConfig* config);
 Buffer* buffer_create(struct Renderer* renderer, const BufferConfig* config);
 void buffer_destroy(Buffer* buffer);
 

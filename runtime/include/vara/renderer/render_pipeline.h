@@ -33,6 +33,9 @@ struct RenderPipeline {
     struct RendererBackend* backend;
 };
 
+RenderPipeline* _render_pipeline_create(
+    struct RendererBackend* backend, const RenderPipelineConfig* config
+);
 RenderPipeline* render_pipeline_create(
     struct Renderer* renderer, const RenderPipelineConfig* config
 );

@@ -6,7 +6,7 @@
 #include "vara/renderer/internal/renderer_internal.h"
 #include "vara/renderer/renderer.h"
 
-Buffer* buffer_create(Renderer* renderer, const BufferConfig* config) {
+Buffer* _buffer_create(RendererBackend* backend, const BufferConfig* config) {
     Buffer* buffer = vara_allocate(sizeof(Buffer));
     vara_zero_memory(buffer, sizeof(Buffer));
 
@@ -43,7 +43,6 @@ Buffer* buffer_create(Renderer* renderer, const BufferConfig* config) {
         }
     }
 
-    RendererBackend* backend = renderer_backend_get(renderer);
     buffer->backend = backend;
 
     if (buffer->backend->buffer.create) {
@@ -54,6 +53,10 @@ Buffer* buffer_create(Renderer* renderer, const BufferConfig* config) {
     }
 
     return buffer;
+}
+
+Buffer* buffer_create(Renderer* renderer, const BufferConfig* config) {
+    return _buffer_create(renderer->backend, config);
 }
 
 void buffer_destroy(Buffer* buffer) {

@@ -5,7 +5,7 @@
 #include "vara/renderer/render_target.h"
 #include "vara/renderer/renderer.h"
 
-RenderTarget* render_target_create(Renderer* renderer, const RenderTargetConfig* config) {
+RenderTarget* _render_target_create(RendererBackend* backend, const RenderTargetConfig* config) {
     RenderTarget* target = vara_allocate(sizeof(RenderTarget));
     vara_zero_memory(target, sizeof(RenderTarget));
 
@@ -28,36 +28,9 @@ RenderTarget* render_target_create(Renderer* renderer, const RenderTargetConfig*
 
         if (src->texture) {
             dst->texture = src->texture;
-        } else {
-            TextureConfig tex_config = {
-                .width = config->width,
-                .height = config->height,
-                .samples = config->samples,
-                .filter = TEXTURE_FILTER_LINEAR,
-            };
-
-            switch (src->type) {
-                case RENDER_TARGET_ATTACHMENT_COLOR:
-                    tex_config.format = TEXTURE_FORMAT_RGBA8;
-                    break;
-                case RENDER_TARGET_ATTACHMENT_DEPTH:
-                    tex_config.format = TEXTURE_FORMAT_D24;
-                    break;
-                case RENDER_TARGET_ATTACHMENT_DEPTH_STENCIL:
-                    tex_config.format = TEXTURE_FORMAT_S8;
-                    break;
-            }
-
-            dst->texture = texture_create(renderer, &tex_config);
-            if (!dst->texture) {
-                ERROR("Failed to create Texture for RenderTarget attachment('%u')", i);
-                render_target_destroy(target);
-                return NULL;
-            }
         }
     }
 
-    RendererBackend* backend = renderer_backend_get(renderer);
     target->backend = backend;
 
     if (target->backend->render_target.create) {
@@ -68,6 +41,10 @@ RenderTarget* render_target_create(Renderer* renderer, const RenderTargetConfig*
     }
 
     return target;
+}
+
+RenderTarget* render_target_create(Renderer* renderer, const RenderTargetConfig* config) {
+    return _render_target_create(renderer->backend, config);
 }
 
 void render_target_destroy(RenderTarget* target) {

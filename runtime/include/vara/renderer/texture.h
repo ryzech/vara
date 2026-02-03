@@ -54,6 +54,7 @@ struct Texture {
     struct RendererBackend* backend;
 };
 
+Texture* _texture_create(struct RendererBackend* backend, const TextureConfig* config);
 Texture* texture_create(struct Renderer* renderer, const TextureConfig* config);
 Texture* texture_load_file(
     struct Renderer* renderer, const TextureConfig* config, const char* file

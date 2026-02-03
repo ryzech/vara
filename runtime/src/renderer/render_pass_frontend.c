@@ -44,7 +44,7 @@ static void render_pass_build_commands(RenderPass* pass) {
     }
 }
 
-RenderPass* render_pass_create(Renderer* renderer, const RenderPassConfig* config) {
+RenderPass* _render_pass_create(RendererBackend* backend, const RenderPassConfig* config) {
     RenderPass* pass = vara_allocate(sizeof(RenderPass));
     vara_zero_memory(pass, sizeof(RenderPass));
 
@@ -70,7 +70,6 @@ RenderPass* render_pass_create(Renderer* renderer, const RenderPassConfig* confi
         );
     }
 
-    RendererBackend* backend = renderer_backend_get(renderer);
     pass->backend = backend;
 
     pass->packet_capacity = 256;
@@ -86,6 +85,10 @@ RenderPass* render_pass_create(Renderer* renderer, const RenderPassConfig* confi
     }
 
     return pass;
+}
+
+RenderPass* render_pass_create(Renderer* renderer, const RenderPassConfig* config) {
+    return _render_pass_create(renderer->backend, config);
 }
 
 void render_pass_destroy(RenderPass* pass) {

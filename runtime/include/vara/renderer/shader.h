@@ -36,6 +36,7 @@ struct Shader {
     struct RendererBackend* backend;
 };
 
+Shader* _shader_create(struct RendererBackend* backend, const ShaderConfig* config);
 Shader* shader_create(struct Renderer* renderer, const ShaderConfig* config);
 void shader_destroy(Shader* shader);
 

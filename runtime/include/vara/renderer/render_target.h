@@ -47,6 +47,9 @@ struct RenderTarget {
     struct RendererBackend* backend;
 };
 
+RenderTarget* _render_target_create(
+    struct RendererBackend* backend, const RenderTargetConfig* config
+);
 RenderTarget* render_target_create(struct Renderer* renderer, const RenderTargetConfig* config);
 void render_target_destroy(RenderTarget* target);
 
