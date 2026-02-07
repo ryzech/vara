@@ -42,3 +42,13 @@ void swapchain_present(Swapchain* swapchain) {
         }
     }
 }
+
+RenderTarget* swapchain_get_current_target(Swapchain* swapchain) {
+    if (swapchain) {
+        if (swapchain->backend->swapchain.get_current_target) {
+            return swapchain->backend->swapchain.get_current_target(swapchain);
+        }
+    }
+
+    return NULL;
+}

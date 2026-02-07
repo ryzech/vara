@@ -6,6 +6,7 @@
 #include "vara/renderer/render_target_vulkan_backend.h"
 #include "vara/renderer/renderer_vulkan_backend.h"
 #include "vara/renderer/swapchain_vulkan_backend.h"
+#include "vara/renderer/texture_vulkan_backend.h"
 #include "vara/renderer/vulkan_utils.h"
 
 static VkAttachmentLoadOp get_vulkan_load_op(AttachmentLoadOp load_op) {
@@ -50,14 +51,14 @@ b8 render_pass_vulkan_create(RenderPass* pass, const RenderPassConfig* config) {
 
     for (u32 i = 0; i < pass->color_attachment_count; i++) {
         attachments[attachment_index] = (VkAttachmentDescription){
-            .format = VK_FORMAT_UNDEFINED,
+            .format = VK_FORMAT_B8G8R8A8_UNORM,
             .samples = VK_SAMPLE_COUNT_1_BIT,
             .loadOp = get_vulkan_load_op(pass->color_attachments[i].load),
             .storeOp = get_vulkan_store_op(pass->color_attachments[i].store),
             .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
             .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            .initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            .finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
         };
 
         color_refs[i] = (VkAttachmentReference){
@@ -68,32 +69,10 @@ b8 render_pass_vulkan_create(RenderPass* pass, const RenderPassConfig* config) {
         attachment_index++;
     }
 
-    VkAttachmentReference depth_ref = {};
-    if (pass->depth_stencil_attachment) {
-        attachments[attachment_index] = (VkAttachmentDescription){
-            .format = VK_FORMAT_UNDEFINED,
-            .samples = VK_SAMPLE_COUNT_1_BIT,
-            .loadOp = get_vulkan_load_op(pass->depth_stencil_attachment->load),
-            .storeOp = get_vulkan_store_op(pass->depth_stencil_attachment->store),
-            .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-            .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            .initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-            .finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-        };
-
-        depth_ref = (VkAttachmentReference){
-            .attachment = attachment_index,
-            .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-        };
-
-        attachment_index++;
-    }
-
     VkSubpassDescription subpass = {
         .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
         .colorAttachmentCount = pass->color_attachment_count,
         .pColorAttachments = color_refs,
-        .pDepthStencilAttachment = state->has_depth ? &depth_ref : NULL,
     };
 
     VkRenderPassCreateInfo info = {
@@ -142,6 +121,48 @@ void render_pass_vulkan_begin(RenderPass* pass, RenderTarget* target) {
     VulkanRendererState* renderer = pass->backend->backend_data;
     VulkanSwapchainState* swapchain = renderer->swapchain->backend_data;
     VulkanFrame* frame = &swapchain->frames[swapchain->current_frame];
+    VulkanRenderTargetState* target_state = target->backend_data;
+
+    if (target_state->framebuffer == VK_NULL_HANDLE
+        || target_state->compatible_pass != state->render_pass) {
+        if (target_state->framebuffer != VK_NULL_HANDLE) {
+            vkDestroyFramebuffer(
+                renderer->device.logical_device, target_state->framebuffer, renderer->allocator
+            );
+        }
+
+        VkImageView attachments[8];
+        u32 attachment_count = 0;
+
+        for (u32 i = 0; i < target->attachment_count; i++) {
+            Texture* texture = target->attachments[i].texture;
+            if (!texture || !texture->backend_data) {
+                ERROR("RenderTarget attachment %u has invalid texture!", i);
+                return;
+            }
+
+            VulkanTextureState* texture_state = texture->backend_data;
+            attachments[attachment_count++] = texture_state->view;
+
+            VkFramebufferCreateInfo fb_info = {
+                .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+                .renderPass = state->render_pass,
+                .attachmentCount = attachment_count,
+                .pAttachments = attachments,
+                .width = target->width,
+                .height = target->height,
+                .layers = 1,
+            };
+            VK_CHECK(vkCreateFramebuffer(
+                renderer->device.logical_device,
+                &fb_info,
+                renderer->allocator,
+                &target_state->framebuffer
+            ));
+
+            target_state->compatible_pass = state->render_pass;
+        }
+    }
 
     VkClearValue clear_value[8];
     u32 clear_count = 0;
@@ -163,7 +184,6 @@ void render_pass_vulkan_begin(RenderPass* pass, RenderTarget* target) {
         };
     }
 
-    VulkanRenderTargetState* target_state = target->backend_data;
     VkRenderPassBeginInfo render_pass_begin = {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
         .renderPass = state->render_pass,

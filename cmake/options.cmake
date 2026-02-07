@@ -5,7 +5,6 @@ cmake_policy(SET CMP0156 NEW)
 add_compile_options(-Wall -Wextra -Werror)
 add_compile_options(
         -Wno-gnu-zero-variadic-macro-arguments
-        -Wno-pedantic
         -Wno-unused-variable
         -Wno-unused-parameter
         -Wno-missing-field-initializers

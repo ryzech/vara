@@ -12,6 +12,8 @@
 #include <vara/renderer/shader.h>
 #include <vara/shaders/basic_shader.glsl.gen.h>
 
+#include "vara/renderer/swapchain.h"
+
 static Buffer* index_buffer;
 static Buffer* vertex_buffer;
 static Shader* shader;
@@ -165,7 +167,7 @@ void sandbox_update(f32 delta_time) {
     }
 
     Renderer* renderer = application_get_renderer();
-    render_pass_begin(render_pass, NULL);
+    render_pass_begin(render_pass, swapchain_get_current_target(renderer->swapchain));
     {
         // This needs majorly cleaned up.
         const CameraUBO ubo_data = {

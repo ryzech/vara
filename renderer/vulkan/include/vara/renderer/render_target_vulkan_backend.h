@@ -7,6 +7,9 @@
 
 typedef struct VulkanRenderTargetState {
     VkFramebuffer framebuffer;
+    u32 attachment_count;
+    VkImageView* attachments;
+    VkRenderPass compatible_pass;
 } VulkanRenderTargetState;
 
 b8 render_target_vulkan_create(RenderTarget* target, const RenderTargetConfig* config);

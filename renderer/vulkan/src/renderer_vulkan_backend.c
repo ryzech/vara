@@ -10,6 +10,7 @@
 #include "vara/renderer/buffer_vulkan_backend.h"
 #include "vara/renderer/render_pass_vulkan_backend.h"
 #include "vara/renderer/render_pipeline_vulkan_backend.h"
+#include "vara/renderer/render_target_vulkan_backend.h"
 #include "vara/renderer/renderer_vulkan_backend.h"
 #include "vara/renderer/shader_vulkan_backend.h"
 #include "vara/renderer/swapchain_vulkan_backend.h"
@@ -330,6 +331,7 @@ void renderer_vulkan_init(RendererBackend* backend, VaraWindow* window) {
     backend->swapchain.create = swapchain_vulkan_create;
     backend->swapchain.destroy = swapchain_vulkan_destroy;
     backend->swapchain.present = swapchain_vulkan_present;
+    backend->swapchain.get_current_target = swapchain_vulkan_get_current_target;
 
     // Render Pass
     backend->render_pass.create = render_pass_vulkan_create;
@@ -360,6 +362,11 @@ void renderer_vulkan_init(RendererBackend* backend, VaraWindow* window) {
     backend->texture.create = texture_vulkan_create;
     backend->texture.destroy = texture_vulkan_destroy;
     backend->texture.set_data = texture_vulkan_set_data;
+
+    // Render Target
+    backend->render_target.create = render_target_vulkan_create;
+    backend->render_target.destroy = render_target_vulkan_destroy;
+    backend->render_target.resize = render_target_vulkan_resize;
 
     DEBUG("Creating RendererBackend named('%s')", backend->name);
 }

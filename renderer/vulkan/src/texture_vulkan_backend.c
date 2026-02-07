@@ -45,7 +45,7 @@ b8 texture_vulkan_create(Texture* texture, const TextureConfig* config) {
     };
 
     VmaAllocationCreateInfo allocation_info = {
-        .usage = VMA_MEMORY_USAGE_CPU_TO_GPU,
+        .usage = VMA_MEMORY_USAGE_GPU_ONLY,
     };
 
     VK_CHECK(vmaCreateImage(
@@ -105,12 +105,13 @@ void texture_vulkan_set_data(Texture* texture, void* data, size_t size) {
     VulkanTextureState* state = texture->backend_data;
     VulkanRendererState* renderer = texture->backend->backend_data;
 
-    void* mapped = NULL;
-    vmaMapMemory(renderer->vma_allocator, state->allocation, &mapped);
-    vara_copy_memory(mapped, data, size);
-    vmaUnmapMemory(renderer->vma_allocator, state->allocation);
+    // void* mapped = NULL;
+    // vmaMapMemory(renderer->vma_allocator, state->allocation, &mapped);
+    // vara_copy_memory(mapped, data, size);
+    // vmaUnmapMemory(renderer->vma_allocator, state->allocation);
 }
 
+// FIX: return a Texture pointer instead.
 b8 texture_vulkan_wrap_image(Texture* texture, VkImage image, VkFormat format, VkExtent2D extent) {
     if (!texture || !image) {
         return false;

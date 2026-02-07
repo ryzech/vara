@@ -6,6 +6,7 @@
 
 #include "vara/renderer/renderer_vulkan_backend.h"
 #include "vara/renderer/swapchain_vulkan_backend.h"
+#include "vara/renderer/texture_vulkan_backend.h"
 #include "vara/renderer/vulkan_utils.h"
 
 static VkSurfaceFormatKHR choose_surface_format(VkSurfaceFormatKHR* formats) {
@@ -153,6 +154,44 @@ b8 swapchain_vulkan_create(Swapchain* swapchain, const SwapchainConfig* config) 
         ));
     }
 
+    state->attachment_textures = array_sized(state->image_count, Texture*, NULL);
+    for (u32 i = 0; i < state->image_count; i++) {
+        TextureConfig texture_config = {
+            .width = state->extent.width,
+            .height = state->extent.height,
+            .format = TEXTURE_FORMAT_RGBA8,
+            .filter = TEXTURE_FILTER_LINEAR,
+            .samples = 1,
+        };
+
+        Texture* texture = _texture_create(swapchain->backend, &texture_config);
+        VulkanTextureState* texture_state = texture->backend_data;
+        texture_state->image = state->images[i];
+        texture_state->view = state->views[i];
+        texture_state->owned = false;
+
+        state->attachment_textures[i] = texture;
+    }
+
+    state->targets = array_sized(state->image_count, RenderTarget*, NULL);
+    for (u32 i = 0; i < state->image_count; i++) {
+        RenderTargetAttachmentConfig color_attachment = {
+            .type = RENDER_TARGET_ATTACHMENT_COLOR,
+            .texture = state->attachment_textures[i],
+        };
+
+        RenderTargetConfig target_config = {
+            .name = "Swapchain Target",
+            .width = state->extent.width,
+            .height = state->extent.height,
+            .samples = 1,
+            .attachment_count = 1,
+            .attachments = &color_attachment,
+        };
+
+        state->targets[i] = _render_target_create(swapchain->backend, &target_config);
+    }
+
     VkSemaphoreCreateInfo semaphore_info = {
         .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
     };
@@ -217,6 +256,24 @@ void swapchain_vulkan_destroy(Swapchain* swapchain) {
     vkDeviceWaitIdle(renderer->device.logical_device);
 
     TRACE("Destroying Swapchain for VaraWindow named('%s')", swapchain->window->name);
+    if (state->targets) {
+        for (u32 i = 0; i < state->image_count; i++) {
+            if (state->targets[i]) {
+                render_target_destroy(state->targets[i]);
+            }
+        }
+        array_destroy(state->targets);
+    }
+
+    if (state->attachment_textures) {
+        for (u32 i = 0; i < state->image_count; i++) {
+            if (state->attachment_textures[i]) {
+                texture_destroy(state->attachment_textures[i]);
+            }
+        }
+        array_destroy(state->attachment_textures);
+    }
+
     for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         const VulkanFrame* frame = &state->frames[i];
         vkDestroyCommandPool(
@@ -232,7 +289,6 @@ void swapchain_vulkan_destroy(Swapchain* swapchain) {
         vkDestroySemaphore(
             renderer->device.logical_device, state->render_finished[i], renderer->allocator
         );
-        vkDestroyImageView(renderer->device.logical_device, state->views[i], renderer->allocator);
     }
 
     vkDestroySwapchainKHR(renderer->device.logical_device, state->swapchain, renderer->allocator);
@@ -309,4 +365,9 @@ void swapchain_vulkan_begin_frame(Swapchain* swapchain) {
 
     state->images_in_flight[state->image_index] = frame->in_flight;
     VK_CHECK(vkResetFences(renderer->device.logical_device, 1, &frame->in_flight));
+}
+
+RenderTarget* swapchain_vulkan_get_current_target(Swapchain* swapchain) {
+    VulkanSwapchainState* state = swapchain->backend_data;
+    return state->targets[state->image_index];
 }
