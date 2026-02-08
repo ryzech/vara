@@ -230,9 +230,9 @@ static void renderer_vulkan_submit(RendererBackend* backend, const RenderCommand
                 const RenderCmdSetViewport* viewport = (RenderCmdSetViewport*)cmd;
                 VkViewport viewport_info = {
                     .x = 0,
-                    .y = 0,
+                    .y = viewport->height,
                     .width = viewport->width,
-                    .height = viewport->height,
+                    .height = -viewport->height,
                     .minDepth = 0.0f,
                     .maxDepth = 1.0f,
                 };

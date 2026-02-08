@@ -44,6 +44,7 @@ b8 render_pass_vulkan_create(RenderPass* pass, const RenderPassConfig* config) {
 
     pass->backend_data = state;
     VulkanRendererState* renderer = pass->backend->backend_data;
+    VulkanSwapchainState* swapchain = renderer->swapchain->backend_data;
 
     VkAttachmentDescription attachments[8];
     VkAttachmentReference color_refs[8];
@@ -51,7 +52,7 @@ b8 render_pass_vulkan_create(RenderPass* pass, const RenderPassConfig* config) {
 
     for (u32 i = 0; i < pass->color_attachment_count; i++) {
         attachments[attachment_index] = (VkAttachmentDescription){
-            .format = VK_FORMAT_B8G8R8A8_UNORM,
+            .format = swapchain->image_format.format,
             .samples = VK_SAMPLE_COUNT_1_BIT,
             .loadOp = get_vulkan_load_op(pass->color_attachments[i].load),
             .storeOp = get_vulkan_store_op(pass->color_attachments[i].store),
@@ -143,25 +144,25 @@ void render_pass_vulkan_begin(RenderPass* pass, RenderTarget* target) {
 
             VulkanTextureState* texture_state = texture->backend_data;
             attachments[attachment_count++] = texture_state->view;
-
-            VkFramebufferCreateInfo fb_info = {
-                .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-                .renderPass = state->render_pass,
-                .attachmentCount = attachment_count,
-                .pAttachments = attachments,
-                .width = target->width,
-                .height = target->height,
-                .layers = 1,
-            };
-            VK_CHECK(vkCreateFramebuffer(
-                renderer->device.logical_device,
-                &fb_info,
-                renderer->allocator,
-                &target_state->framebuffer
-            ));
-
-            target_state->compatible_pass = state->render_pass;
         }
+
+        VkFramebufferCreateInfo fb_info = {
+            .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+            .renderPass = state->render_pass,
+            .attachmentCount = attachment_count,
+            .pAttachments = attachments,
+            .width = target->width,
+            .height = target->height,
+            .layers = 1,
+        };
+        VK_CHECK(vkCreateFramebuffer(
+            renderer->device.logical_device,
+            &fb_info,
+            renderer->allocator,
+            &target_state->framebuffer
+        ));
+
+        target_state->compatible_pass = state->render_pass;
     }
 
     VkClearValue clear_value[8];

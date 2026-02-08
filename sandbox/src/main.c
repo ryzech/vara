@@ -42,10 +42,10 @@ void sandbox_init(void) {
     event_register(EVENT_WINDOW_RESIZE, on_window_resize);
 
     Renderer* renderer = application_get_renderer();
-    Vertex vertices[] = {
-        {.position = vec3(0.0f, 0.5f, 0.0f)},
-        {.position = vec3(-0.5f, -0.5f, 0.0f)},
-        {.position = vec3(0.5f, -0.5f, 0.0f)},
+    Vector3 vertices[] = {
+        vec3(0.0f, 0.5f, 0.5f),
+        vec3(-0.5f, -0.5f, 0.5f),
+        vec3(0.5f, -0.5f, 0.5f),
     };
     u32 indices[] = {0, 1, 2};
 
@@ -53,12 +53,12 @@ void sandbox_init(void) {
         {.location = 0, .type = VERTEX_ATTRIBUTE_FLOAT3, .offset = 0, .normalized = false},
     };
     VertexLayout layout = {
-        .attributes = attributes, .attribute_count = 1, .stride = sizeof(Vertex)
+        .attributes = attributes, .attribute_count = 1, .stride = sizeof(Vector3)
     };
 
     const BufferConfig vertex_buffer_config = {
         .type = BUFFER_TYPE_VERTEX,
-        .usage = BUFFER_USAGE_STATIC,
+        .usage = BUFFER_USAGE_DYNAMIC,
         .layout = &layout,
         .data = vertices,
         .size = sizeof(vertices)
@@ -67,7 +67,7 @@ void sandbox_init(void) {
 
     const BufferConfig index_buffer_config = {
         .type = BUFFER_TYPE_INDEX,
-        .usage = BUFFER_USAGE_STATIC,
+        .usage = BUFFER_USAGE_DYNAMIC,
         .data = indices,
         .size = sizeof(indices)
     };
@@ -86,6 +86,7 @@ void sandbox_init(void) {
 
     RenderPassAttachment color = {
         .load = ATTACHMENT_LOAD_OP_CLEAR,
+        .store = ATTACHMENT_STORE_OP_STORE,
         .clear = vec4(0.1f, 0.1f, 0.1f, 1.0f),
     };
     const RenderPassConfig pass_config = {
@@ -180,8 +181,8 @@ void sandbox_update(f32 delta_time) {
             .index_buffer = index_buffer,
             .index_count = 3,
         };
-        buffer_set_data(ubo, &ubo_data, sizeof(ubo_data), 0);
-        render_cmd_bind_buffer(render_pass->command_buffer, ubo);
+        // buffer_set_data(ubo, &ubo_data, sizeof(ubo_data), 0);
+        // render_cmd_bind_buffer(render_pass->command_buffer, ubo);
         render_pass_submit(render_pass, &packet);
     }
     render_pass_end(renderer, render_pass);

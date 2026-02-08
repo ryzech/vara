@@ -64,6 +64,14 @@ b8 buffer_vulkan_create(Buffer* buffer, const BufferConfig* config) {
         return false;
     }
 
+    if (config->data && config->size > 0) {
+        if (config->usage == BUFFER_USAGE_STATIC) {
+            buffer_vulkan_set_data(buffer, config->data, config->size, 0);
+        } else {
+            buffer_vulkan_set_data(buffer, config->data, config->size, 0);
+        }
+    }
+
     return true;
 }
 
@@ -84,11 +92,9 @@ void buffer_vulkan_destroy(Buffer* buffer) {
 }
 
 void buffer_vulkan_bind(Buffer* buffer) {
-
 }
 
 void buffer_vulkan_unbind(Buffer* buffer) {
-
 }
 
 void buffer_vulkan_set_data(Buffer* buffer, const void* data, size_t size, size_t offset) {

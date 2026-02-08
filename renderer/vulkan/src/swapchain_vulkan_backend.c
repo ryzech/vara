@@ -318,9 +318,9 @@ void swapchain_vulkan_present(Swapchain* swapchain) {
 
     VkResult result = vkQueuePresentKHR(renderer->device.present_queue, &present_info);
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
-        // if (!swapchain_vulkan_recreate(swapchain)) {
-        //     FATAL("Failed to recreate Swapchain!");
-        // }
+        if (!swapchain_vulkan_recreate(swapchain)) {
+            FATAL("Failed to recreate Swapchain!");
+        }
     }
     state->current_frame = (state->current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
