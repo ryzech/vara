@@ -204,26 +204,7 @@ static void renderer_vulkan_submit(RendererBackend* backend, const RenderCommand
             }
             case RENDER_CMD_BIND_BUFFER: {
                 const RenderCmdBindBuffer* bind_buffer = (RenderCmdBindBuffer*)cmd;
-                VulkanBufferState* buffer_state = bind_buffer->buffer->backend_data;
-
-                switch (bind_buffer->buffer->type) {
-                    case BUFFER_TYPE_VERTEX: {
-                        VkDeviceSize offset = 0;
-                        vkCmdBindVertexBuffers(
-                            frame->command_buffer, 0, 1, &buffer_state->buffer, &offset
-                        );
-                        break;
-                    }
-                    case BUFFER_TYPE_INDEX: {
-                        vkCmdBindIndexBuffer(
-                            frame->command_buffer, buffer_state->buffer, 0, VK_INDEX_TYPE_UINT32
-                        );
-                        break;
-                    }
-                    case BUFFER_TYPE_UNIFORM:
-                        break;
-                }
-
+                buffer_vulkan_bind(bind_buffer->buffer);
                 break;
             }
             case RENDER_CMD_SET_VIEWPORT: {

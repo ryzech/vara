@@ -46,6 +46,80 @@ b8 shader_vulkan_create(Shader* shader, const ShaderConfig* config) {
         ));
     }
 
+    if (compiled->reflection.descriptor_count > 0) {
+        VkDescriptorSetLayoutBinding bindings[4][32];
+        u32 binding_counts[4] = {0};
+
+        for (u32 i = 0; i < compiled->reflection.descriptor_count; i++) {
+            ReflectedDescriptor* descriptor = &compiled->reflection.descriptors[i];
+            u32 set = descriptor->set;
+
+            if (set >= 4) {
+                continue;
+            }
+
+            u32 index = binding_counts[set]++;
+
+            VkDescriptorType type;
+            switch (descriptor->type) {
+                case DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+                    type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                    break;
+                case DESCRIPTOR_TYPE_STORAGE_BUFFER:
+                    type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+                    break;
+                case DESCRIPTOR_TYPE_SAMPLED_IMAGE:
+                    type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                    break;
+                case DESCRIPTOR_TYPE_STORAGE_IMAGE:
+                    type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+                    break;
+                default:
+                    type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            }
+
+            VkShaderStageFlags stage_flags = 0;
+            if (descriptor->stage_mask & SHADER_STAGE_VERTEX) {
+                stage_flags |= VK_SHADER_STAGE_VERTEX_BIT;
+            }
+            if (descriptor->stage_mask & SHADER_STAGE_FRAGMENT) {
+                stage_flags |= VK_SHADER_STAGE_FRAGMENT_BIT;
+            }
+            if (descriptor->stage_mask & SHADER_STAGE_COMPUTE) {
+                stage_flags |= VK_SHADER_STAGE_COMPUTE_BIT;
+            }
+
+            bindings[set][index] = (VkDescriptorSetLayoutBinding){
+                .binding = descriptor->binding,
+                .descriptorType = type,
+                .descriptorCount = descriptor->count,
+                .stageFlags = stage_flags,
+                .pImmutableSamplers = NULL,
+            };
+        }
+
+        state->descriptor_set_layout_count = 0;
+        for (u32 i = 0; i < 4; i++) {
+            if (binding_counts[i] == 0) {
+                continue;
+            }
+
+            VkDescriptorSetLayoutCreateInfo layout_info = {
+                .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+                .bindingCount = binding_counts[i],
+                .pBindings = bindings[i],
+            };
+            VK_CHECK(vkCreateDescriptorSetLayout(
+                renderer->device.logical_device,
+                &layout_info,
+                renderer->allocator,
+                &state->descriptor_set_layouts[i]
+            ));
+
+            state->descriptor_set_layout_count++;
+        }
+    }
+
     shader_compiler_release(compiled);
 
     shader->backend_data = state;
@@ -59,6 +133,12 @@ void shader_vulkan_destroy(Shader* shader) {
 
     VulkanShaderState* state = shader->backend_data;
     VulkanRendererState* renderer = shader->backend->backend_data;
+
+    for (u32 i = 0; i < state->descriptor_set_layout_count; i++) {
+        vkDestroyDescriptorSetLayout(
+            renderer->device.logical_device, state->descriptor_set_layouts[i], renderer->allocator
+        );
+    }
 
     for (u32 i = 0; i < state->stage_count; i++) {
         if (state->stages[i].module) {

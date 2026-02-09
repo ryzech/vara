@@ -6,7 +6,7 @@ layout (location = 0) in vec3 aPos;
 layout (location = 0) out vec4 vColor;
 layout (location = 1) out vec3 vWorldPos;
 
-//layout (std140, set = 0, binding = 0) uniform CameraUBO {
+//layout (set = 0, binding = 0) uniform CameraUBO {
 //    mat4 view;
 //    mat4 projection;
 //};

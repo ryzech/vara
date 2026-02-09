@@ -152,8 +152,8 @@ b8 render_pipeline_vulkan_create(RenderPipeline* pipeline, const RenderPipelineC
 
     VkPipelineLayoutCreateInfo layout_info = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-        .setLayoutCount = 0,
-        .pSetLayouts = NULL,
+        .setLayoutCount = shader->descriptor_set_layout_count,
+        .pSetLayouts = shader->descriptor_set_layouts,
         .pushConstantRangeCount = 0,
         .pPushConstantRanges = NULL,
     };

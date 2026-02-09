@@ -32,6 +32,7 @@ b8 buffer_vulkan_create(Buffer* buffer, const BufferConfig* config) {
 
     buffer->backend_data = state;
     state->size = config->size;
+    state->descriptor_set = VK_NULL_HANDLE;
 
     VkBufferUsageFlags usage = type_to_vk_usage(config->type);
     usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
@@ -92,6 +93,28 @@ void buffer_vulkan_destroy(Buffer* buffer) {
 }
 
 void buffer_vulkan_bind(Buffer* buffer) {
+    if (!buffer || !buffer->backend_data) {
+        return;
+    }
+
+    VulkanBufferState* state = buffer->backend_data;
+    VulkanRendererState* renderer = buffer->backend->backend_data;
+    VulkanSwapchainState* swapchain = renderer->swapchain->backend_data;
+    VulkanFrame* frame = &swapchain->frames[swapchain->current_frame];
+
+    switch (buffer->type) {
+        case BUFFER_TYPE_VERTEX: {
+            VkDeviceSize offset = 0;
+            vkCmdBindVertexBuffers(frame->command_buffer, 0, 1, &state->buffer, &offset);
+            break;
+        }
+        case BUFFER_TYPE_INDEX: {
+            vkCmdBindIndexBuffer(frame->command_buffer, state->buffer, 0, VK_INDEX_TYPE_UINT32);
+            break;
+        }
+        case BUFFER_TYPE_UNIFORM:
+            break;
+    }
 }
 
 void buffer_vulkan_unbind(Buffer* buffer) {

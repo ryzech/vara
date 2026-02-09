@@ -16,6 +16,8 @@ typedef struct VulkanShaderState {
     u32 stage_count;
     VulkanShaderStage* stages;
     ReflectedShader reflection;
+    u32 descriptor_set_layout_count;
+    VkDescriptorSetLayout descriptor_set_layouts[4];
 } VulkanShaderState;
 
 b8 shader_vulkan_create(Shader* shader, const ShaderConfig* config);
