@@ -17,4 +17,5 @@ struct VulkanRendererState {
     VkAllocationCallbacks* allocator;
     VmaAllocator vma_allocator;
     Swapchain* swapchain;
+    VkDescriptorPool descriptor_pool;
 };

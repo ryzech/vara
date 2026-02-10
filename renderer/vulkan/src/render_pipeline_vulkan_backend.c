@@ -4,6 +4,7 @@
 #include <vara/core/util/array.h>
 #include <vara/renderer/internal/renderer_internal.h>
 
+#include "vara/renderer/buffer_vulkan_backend.h"
 #include "vara/renderer/render_pass_vulkan_backend.h"
 #include "vara/renderer/render_pipeline_vulkan_backend.h"
 #include "vara/renderer/renderer_vulkan_backend.h"
@@ -51,6 +52,19 @@ b8 render_pipeline_vulkan_create(RenderPipeline* pipeline, const RenderPipelineC
             .pName = stage->entrypoint,
             .pSpecializationInfo = NULL,
         };
+    }
+
+    state->descriptor_set_count = shader->descriptor_set_layout_count;
+    if (state->descriptor_set_count > 0) {
+        const VkDescriptorSetAllocateInfo alloc_info = {
+            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+            .descriptorPool = renderer->descriptor_pool,
+            .descriptorSetCount = state->descriptor_set_count,
+            .pSetLayouts = shader->descriptor_set_layouts,
+        };
+        VK_CHECK(vkAllocateDescriptorSets(
+            renderer->device.logical_device, &alloc_info, state->descriptor_sets
+        ));
     }
 
     VkVertexInputBindingDescription binding_description = {
@@ -221,4 +235,44 @@ void render_pipeline_vulkan_bind(RenderPipeline* pipeline) {
     VulkanFrame* frame = &swapchain->frames[swapchain->current_frame];
 
     vkCmdBindPipeline(frame->command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, state->pipeline);
+}
+
+void render_pipeline_vulkan_bind_buffer(RenderPipeline* pipeline, Buffer* buffer) {
+    if (!pipeline || !buffer) {
+        return;
+    }
+
+    VulkanPipelineState* state = pipeline->backend_data;
+    VulkanBufferState* buffer_state = buffer->backend_data;
+    VulkanRendererState* renderer = pipeline->backend->backend_data;
+    VulkanSwapchainState* swapchain = renderer->swapchain->backend_data;
+    VulkanFrame* frame = &swapchain->frames[swapchain->current_frame];
+
+    const VkDescriptorBufferInfo buffer_info = {
+        .buffer = buffer_state->buffer,
+        .offset = 0,
+        .range = buffer_state->size,
+    };
+
+    const VkWriteDescriptorSet write = {
+        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        .dstSet = state->descriptor_sets[0],
+        .dstBinding = buffer->binding,
+        .dstArrayElement = 0,
+        .descriptorCount = 1,
+        .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        .pBufferInfo = &buffer_info,
+    };
+    vkUpdateDescriptorSets(renderer->device.logical_device, 1, &write, 0, NULL);
+
+    vkCmdBindDescriptorSets(
+        frame->command_buffer,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        state->layout,
+        0,
+        state->descriptor_set_count,
+        state->descriptor_sets,
+        0,
+        NULL
+    );
 }

@@ -11,7 +11,6 @@ typedef struct VulkanBufferState {
     VkDeviceSize size;
     VkBufferUsageFlags usage;
     VkMemoryPropertyFlags memory_properties;
-    VkDescriptorSet descriptor_set;
 } VulkanBufferState;
 
 b8 buffer_vulkan_create(Buffer* buffer, const BufferConfig* config);

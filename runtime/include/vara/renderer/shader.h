@@ -13,6 +13,7 @@ struct Renderer;
 struct RendererBackend;
 
 enum ShaderStage {
+    SHADER_STAGE_NONE,
     SHADER_STAGE_VERTEX,
     SHADER_STAGE_FRAGMENT,
     SHADER_STAGE_COMPUTE

@@ -158,6 +158,25 @@ static b8 renderer_vulkan_create(RendererBackend* backend) {
         return false;
     }
 
+    VkDescriptorPoolSize pool_sizes[] = {
+        {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 128},
+        {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 128},
+    };
+    const VkDescriptorPoolCreateInfo pool_info = {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
+        .maxSets = 512,
+        .poolSizeCount = 2,
+        .pPoolSizes = pool_sizes,
+    };
+    result = vkCreateDescriptorPool(
+        state->device.logical_device, &pool_info, state->allocator, &state->descriptor_pool
+    );
+    if (result != VK_SUCCESS) {
+        FATAL("Failed to create VkDescriptorPool.");
+        return false;
+    }
+
     return true;
 }
 
@@ -167,6 +186,7 @@ static void renderer_vulkan_destroy(RendererBackend* backend) {
         return;
     }
 
+    vkDestroyDescriptorPool(state->device.logical_device, state->descriptor_pool, state->allocator);
     vmaDestroyAllocator(state->vma_allocator);
     vulkan_device_destroy(&state->device);
     vkDestroySurfaceKHR(state->instance, state->surface, state->allocator);
@@ -205,6 +225,11 @@ static void renderer_vulkan_submit(RendererBackend* backend, const RenderCommand
             case RENDER_CMD_BIND_BUFFER: {
                 const RenderCmdBindBuffer* bind_buffer = (RenderCmdBindBuffer*)cmd;
                 buffer_vulkan_bind(bind_buffer->buffer);
+                break;
+            }
+            case RENDER_CMD_BIND_UNIFORM_BUFFER: {
+                const RenderCmdBindUniformBuffer* bind_uniform = (RenderCmdBindUniformBuffer*)cmd;
+                render_pipeline_vulkan_bind_buffer(bind_uniform->pipeline, bind_uniform->buffer);
                 break;
             }
             case RENDER_CMD_SET_VIEWPORT: {

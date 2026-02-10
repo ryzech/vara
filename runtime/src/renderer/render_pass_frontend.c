@@ -30,6 +30,10 @@ static void render_pass_build_commands(RenderPass* pass) {
             }
         }
 
+        for (u32 j = 0; j < packet->uniform_buffer_count; j++) {
+            render_cmd_bind_uniform_buffer(buffer, packet->pipeline, packet->uniform_buffers[j]);
+        }
+
         // Should we allow non-indexed drawing?
         if (packet->vertex_buffer && packet->index_buffer && packet->index_count > 0) {
             render_cmd_bind_buffer(buffer, packet->vertex_buffer);

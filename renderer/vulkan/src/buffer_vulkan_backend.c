@@ -32,7 +32,6 @@ b8 buffer_vulkan_create(Buffer* buffer, const BufferConfig* config) {
 
     buffer->backend_data = state;
     state->size = config->size;
-    state->descriptor_set = VK_NULL_HANDLE;
 
     VkBufferUsageFlags usage = type_to_vk_usage(config->type);
     usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;

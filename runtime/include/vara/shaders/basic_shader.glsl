@@ -6,17 +6,16 @@ layout (location = 0) in vec3 aPos;
 layout (location = 0) out vec4 vColor;
 layout (location = 1) out vec3 vWorldPos;
 
-//layout (set = 0, binding = 0) uniform CameraUBO {
-//    mat4 view;
-//    mat4 projection;
-//};
+layout (set = 0, binding = 0) uniform CameraUBO {
+    mat4 view;
+    mat4 projection;
+};
 
 void main() {
     vec4 worldPos = vec4(aPos, 1.0);
     vWorldPos = worldPos.xyz;
     vColor = vec4(0.5, 0.5, 0.5, 1.0);
-    //gl_Position = projection * view * worldPos;
-    gl_Position = worldPos;
+    gl_Position = projection * view * worldPos;
 }
 
 #[fragment]

@@ -4,8 +4,8 @@
 #include "vara/renderer/buffer.h"
 #include "vara/renderer/render_command.h"
 #include "vara/renderer/render_pass.h"
-#include "vara/renderer/render_target.h"
 #include "vara/renderer/render_pipeline.h"
+#include "vara/renderer/render_target.h"
 #include "vara/renderer/shader.h"
 #include "vara/renderer/texture.h"
 
@@ -76,6 +76,17 @@ void render_cmd_bind_buffer(RenderCommandBuffer* buffer, Buffer* input) {
     RenderCmdBindBuffer* cmd = render_cmd_allocate(buffer, sizeof(RenderCmdBindBuffer));
     cmd->header.type = RENDER_CMD_BIND_BUFFER;
     cmd->header.size = sizeof(RenderCmdBindBuffer);
+    cmd->buffer = input;
+}
+
+void render_cmd_bind_uniform_buffer(
+    RenderCommandBuffer* buffer, RenderPipeline* pipeline, Buffer* input
+) {
+    RenderCmdBindUniformBuffer* cmd =
+        render_cmd_allocate(buffer, sizeof(RenderCmdBindUniformBuffer));
+    cmd->header.type = RENDER_CMD_BIND_UNIFORM_BUFFER;
+    cmd->header.size = sizeof(RenderCmdBindUniformBuffer);
+    cmd->pipeline = pipeline;
     cmd->buffer = input;
 }
 
