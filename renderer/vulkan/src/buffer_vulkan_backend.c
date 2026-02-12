@@ -91,34 +91,6 @@ void buffer_vulkan_destroy(Buffer* buffer) {
     buffer->backend_data = NULL;
 }
 
-void buffer_vulkan_bind(Buffer* buffer) {
-    if (!buffer || !buffer->backend_data) {
-        return;
-    }
-
-    VulkanBufferState* state = buffer->backend_data;
-    VulkanRendererState* renderer = buffer->backend->backend_data;
-    VulkanSwapchainState* swapchain = renderer->swapchain->backend_data;
-    VulkanFrame* frame = &swapchain->frames[swapchain->current_frame];
-
-    switch (buffer->type) {
-        case BUFFER_TYPE_VERTEX: {
-            VkDeviceSize offset = 0;
-            vkCmdBindVertexBuffers(frame->command_buffer, 0, 1, &state->buffer, &offset);
-            break;
-        }
-        case BUFFER_TYPE_INDEX: {
-            vkCmdBindIndexBuffer(frame->command_buffer, state->buffer, 0, VK_INDEX_TYPE_UINT32);
-            break;
-        }
-        case BUFFER_TYPE_UNIFORM:
-            break;
-    }
-}
-
-void buffer_vulkan_unbind(Buffer* buffer) {
-}
-
 void buffer_vulkan_set_data(Buffer* buffer, const void* data, size_t size, size_t offset) {
     if (!buffer || !buffer->backend_data) {
         return;

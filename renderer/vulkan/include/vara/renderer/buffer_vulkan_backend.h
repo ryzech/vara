@@ -15,6 +15,4 @@ typedef struct VulkanBufferState {
 
 b8 buffer_vulkan_create(Buffer* buffer, const BufferConfig* config);
 void buffer_vulkan_destroy(Buffer* buffer);
-void buffer_vulkan_bind(Buffer* buffer);
-void buffer_vulkan_unbind(Buffer* buffer);
 void buffer_vulkan_set_data(Buffer* buffer, const void* data, size_t size, size_t offset);

@@ -72,11 +72,18 @@ void render_cmd_bind_shader(RenderCommandBuffer* buffer, Shader* shader) {
     cmd->shader = shader;
 }
 
-void render_cmd_bind_buffer(RenderCommandBuffer* buffer, Buffer* input) {
-    RenderCmdBindBuffer* cmd = render_cmd_allocate(buffer, sizeof(RenderCmdBindBuffer));
-    cmd->header.type = RENDER_CMD_BIND_BUFFER;
-    cmd->header.size = sizeof(RenderCmdBindBuffer);
-    cmd->buffer = input;
+void render_cmd_bind_vertex_buffer(RenderCommandBuffer* buffer, Buffer* vertex_buffer) {
+    RenderCmdBindVertexBuffer* cmd = render_cmd_allocate(buffer, sizeof(RenderCmdBindVertexBuffer));
+    cmd->header.type = RENDER_CMD_BIND_VERTEX_BUFFER;
+    cmd->header.size = sizeof(RenderCmdBindVertexBuffer);
+    cmd->vertex_buffer = vertex_buffer;
+}
+
+void render_cmd_bind_index_buffer(RenderCommandBuffer* buffer, Buffer* index_buffer) {
+    RenderCmdBindIndexBuffer* cmd = render_cmd_allocate(buffer, sizeof(RenderCmdBindIndexBuffer));
+    cmd->header.type = RENDER_CMD_BIND_INDEX_BUFFER;
+    cmd->header.size = sizeof(RenderCmdBindIndexBuffer);
+    cmd->index_buffer = index_buffer;
 }
 
 void render_cmd_bind_uniform_buffer(
@@ -87,7 +94,7 @@ void render_cmd_bind_uniform_buffer(
     cmd->header.type = RENDER_CMD_BIND_UNIFORM_BUFFER;
     cmd->header.size = sizeof(RenderCmdBindUniformBuffer);
     cmd->pipeline = pipeline;
-    cmd->buffer = input;
+    cmd->uniform_buffer = input;
 }
 
 void render_cmd_bind_texture(RenderCommandBuffer* buffer, Texture* texture, u32 slot) {
@@ -118,6 +125,14 @@ void render_cmd_set_viewport(RenderCommandBuffer* buffer, i32 width, i32 height)
     RenderCmdSetViewport* cmd = render_cmd_allocate(buffer, sizeof(RenderCmdSetViewport));
     cmd->header.type = RENDER_CMD_SET_VIEWPORT;
     cmd->header.size = sizeof(RenderCmdSetViewport);
+    cmd->width = width;
+    cmd->height = height;
+}
+
+void render_cmd_set_scissor(RenderCommandBuffer* buffer, i32 width, i32 height) {
+    RenderCmdSetScissor* cmd = render_cmd_allocate(buffer, sizeof(RenderCmdSetScissor));
+    cmd->header.type = RENDER_CMD_SET_SCISSOR;
+    cmd->header.size = sizeof(RenderCmdSetScissor);
     cmd->width = width;
     cmd->height = height;
 }

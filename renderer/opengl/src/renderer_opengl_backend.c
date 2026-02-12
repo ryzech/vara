@@ -57,9 +57,14 @@ static void renderer_opengl_submit(RendererBackend* backend, const RenderCommand
                 shader_opengl_bind(bind_shader->shader);
                 break;
             }
-            case RENDER_CMD_BIND_BUFFER: {
-                const RenderCmdBindBuffer* bind_buffer = (RenderCmdBindBuffer*)cmd;
-                buffer_opengl_bind(bind_buffer->buffer);
+            case RENDER_CMD_BIND_VERTEX_BUFFER: {
+                const RenderCmdBindVertexBuffer* bind_buffer = (RenderCmdBindVertexBuffer*)cmd;
+                buffer_opengl_bind(bind_buffer->vertex_buffer);
+                break;
+            }
+            case RENDER_CMD_BIND_INDEX_BUFFER: {
+                const RenderCmdBindIndexBuffer* bind_buffer = (RenderCmdBindIndexBuffer*)cmd;
+                buffer_opengl_bind(bind_buffer->index_buffer);
                 break;
             }
             case RENDER_CMD_BIND_TEXTURE: {

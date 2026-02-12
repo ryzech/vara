@@ -10,12 +10,14 @@ typedef struct RenderCmdBeginPass RenderCmdBeginPass;
 typedef struct RenderCmdEndPass RenderCmdEndPass;
 typedef struct RenderCmdBindPipeline RenderCmdBindPipeline;
 typedef struct RenderCmdBindShader RenderCmdBindShader;
-typedef struct RenderCmdBindBuffer RenderCmdBindBuffer;
+typedef struct RenderCmdBindVertexBuffer RenderCmdBindVertexBuffer;
+typedef struct RenderCmdBindIndexBuffer RenderCmdBindIndexBuffer;
 typedef struct RenderCmdBindUniformBuffer RenderCmdBindUniformBuffer;
 typedef struct RenderCmdBindTexture RenderCmdBindTexture;
 typedef struct RenderCmdDraw RenderCmdDraw;
 typedef struct RenderCmdDrawIndexed RenderCmdDrawIndexed;
 typedef struct RenderCmdSetViewport RenderCmdSetViewport;
+typedef struct RenderCmdSetScissor RenderCmdSetScissor;
 typedef struct RenderCmdSetShaderMat4 RenderCmdSetShaderMat4;
 typedef struct RenderCmdSetShaderIntArray RenderCmdSetShaderIntArray;
 
@@ -30,12 +32,14 @@ enum RenderCommandType {
     RENDER_CMD_BEGIN_PASS,
     RENDER_CMD_BIND_PIPELINE,
     RENDER_CMD_BIND_SHADER,
-    RENDER_CMD_BIND_BUFFER,
+    RENDER_CMD_BIND_VERTEX_BUFFER,
+    RENDER_CMD_BIND_INDEX_BUFFER,
     RENDER_CMD_BIND_UNIFORM_BUFFER,
     RENDER_CMD_BIND_TEXTURE,
     RENDER_CMD_DRAW,
     RENDER_CMD_DRAW_INDEXED,
     RENDER_CMD_SET_VIEWPORT,
+    RENDER_CMD_SET_SCISSOR,
     RENDER_CMD_SET_SHADER_MAT4,
     RENDER_CMD_SET_SHADER_INT_ARRAY,
     RENDER_CMD_END_PASS,
@@ -85,17 +89,23 @@ struct RenderCmdBindShader {
     struct Shader* shader;
 };
 
-struct RenderCmdBindBuffer {
+struct RenderCmdBindVertexBuffer {
     RenderCommandHeader header;
-    struct Buffer* buffer;
+    struct Buffer* vertex_buffer;
+};
+
+struct RenderCmdBindIndexBuffer {
+    RenderCommandHeader header;
+    struct Buffer* index_buffer;
 };
 
 struct RenderCmdBindUniformBuffer {
     RenderCommandHeader header;
     struct RenderPipeline* pipeline;
-    struct Buffer* buffer;
+    struct Buffer* uniform_buffer;
 };
 
+// Remove after adding resource group bindings.
 struct RenderCmdBindTexture {
     RenderCommandHeader header;
     struct Texture* texture;
@@ -108,6 +118,13 @@ struct RenderCmdSetViewport {
     i32 height;
 };
 
+struct RenderCmdSetScissor {
+    RenderCommandHeader header;
+    i32 width;
+    i32 height;
+};
+
+// Remove after adding resource group bindings.
 struct RenderCmdSetShaderMat4 {
     RenderCommandHeader header;
     Matrix4 matrix;
@@ -115,6 +132,7 @@ struct RenderCmdSetShaderMat4 {
     const char* name;
 };
 
+// Remove after adding resource group bindings.
 struct RenderCmdSetShaderIntArray {
     RenderCommandHeader header;
     i32 array[32];
@@ -133,12 +151,14 @@ void render_cmd_begin_pass(
 void render_cmd_end_pass(RenderCommandBuffer* buffer, struct RenderPass* pass);
 void render_cmd_bind_pipeline(RenderCommandBuffer* buffer, struct RenderPipeline* pipeline);
 void render_cmd_bind_shader(RenderCommandBuffer* buffer, struct Shader* shader);
-void render_cmd_bind_buffer(RenderCommandBuffer* buffer, struct Buffer* input);
+void render_cmd_bind_vertex_buffer(RenderCommandBuffer* buffer, struct Buffer* vertex_buffer);
+void render_cmd_bind_index_buffer(RenderCommandBuffer* buffer, struct Buffer* index_buffer);
 void render_cmd_bind_uniform_buffer(
     RenderCommandBuffer* buffer, struct RenderPipeline* pipeline, struct Buffer* input
 );
 void render_cmd_bind_texture(RenderCommandBuffer* buffer, struct Texture* texture, u32 slot);
 void render_cmd_set_viewport(RenderCommandBuffer* buffer, i32 width, i32 height);
+void render_cmd_set_scissor(RenderCommandBuffer* buffer, i32 width, i32 height);
 void render_cmd_shader_set_mat4(
     RenderCommandBuffer* buffer, struct Shader* shader, const char* name, Matrix4 matrix
 );

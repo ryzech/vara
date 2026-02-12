@@ -36,12 +36,12 @@ static void render_pass_build_commands(RenderPass* pass) {
 
         // Should we allow non-indexed drawing?
         if (packet->vertex_buffer && packet->index_buffer && packet->index_count > 0) {
-            render_cmd_bind_buffer(buffer, packet->vertex_buffer);
-            render_cmd_bind_buffer(buffer, packet->index_buffer);
+            render_cmd_bind_vertex_buffer(buffer, packet->vertex_buffer);
+            render_cmd_bind_index_buffer(buffer, packet->index_buffer);
             render_cmd_draw_indexed(buffer, packet->index_count, packet->first_index);
         } else if (packet->vertex_count > 0) {
             if (packet->vertex_buffer) {
-                render_cmd_bind_buffer(buffer, packet->vertex_buffer);
+                render_cmd_bind_vertex_buffer(buffer, packet->vertex_buffer);
             }
             render_cmd_draw(buffer, packet->vertex_count, packet->first_vertex);
         }
@@ -123,6 +123,7 @@ void render_pass_begin(RenderPass* pass, RenderTarget* target) {
     render_cmd_buffer_reset(pass->command_buffer);
     render_cmd_begin_pass(pass->command_buffer, pass, target);
     render_cmd_set_viewport(pass->command_buffer, target->width, target->height);
+    render_cmd_set_scissor(pass->command_buffer, target->width, target->height);
 }
 
 void render_pass_end(Renderer* renderer, RenderPass* pass) {

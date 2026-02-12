@@ -222,14 +222,26 @@ static void renderer_vulkan_submit(RendererBackend* backend, const RenderCommand
                 render_pipeline_vulkan_bind(bind_pipeline->pipeline);
                 break;
             }
-            case RENDER_CMD_BIND_BUFFER: {
-                const RenderCmdBindBuffer* bind_buffer = (RenderCmdBindBuffer*)cmd;
-                buffer_vulkan_bind(bind_buffer->buffer);
+            case RENDER_CMD_BIND_VERTEX_BUFFER: {
+                const RenderCmdBindVertexBuffer* bind_buffer = (RenderCmdBindVertexBuffer*)cmd;
+                const VulkanBufferState* buffer_state = bind_buffer->vertex_buffer->backend_data;
+                VkDeviceSize offset = 0;
+                vkCmdBindVertexBuffers(frame->command_buffer, 0, 1, &buffer_state->buffer, &offset);
+                break;
+            }
+            case RENDER_CMD_BIND_INDEX_BUFFER: {
+                const RenderCmdBindIndexBuffer* bind_buffer = (RenderCmdBindIndexBuffer*)cmd;
+                const VulkanBufferState* buffer_state = bind_buffer->index_buffer->backend_data;
+                vkCmdBindIndexBuffer(
+                    frame->command_buffer, buffer_state->buffer, 0, VK_INDEX_TYPE_UINT32
+                );
                 break;
             }
             case RENDER_CMD_BIND_UNIFORM_BUFFER: {
                 const RenderCmdBindUniformBuffer* bind_uniform = (RenderCmdBindUniformBuffer*)cmd;
-                render_pipeline_vulkan_bind_buffer(bind_uniform->pipeline, bind_uniform->buffer);
+                render_pipeline_vulkan_bind_buffer(
+                    bind_uniform->pipeline, bind_uniform->uniform_buffer
+                );
                 break;
             }
             case RENDER_CMD_SET_VIEWPORT: {
@@ -242,11 +254,15 @@ static void renderer_vulkan_submit(RendererBackend* backend, const RenderCommand
                     .minDepth = 0.0f,
                     .maxDepth = 1.0f,
                 };
+                vkCmdSetViewport(frame->command_buffer, 0, 1, &viewport_info);
+                break;
+            }
+            case RENDER_CMD_SET_SCISSOR: {
+                const RenderCmdSetScissor* scissor = (RenderCmdSetScissor*)cmd;
                 VkRect2D scissor_info = {
                     .offset = {0, 0},
-                    .extent = swapchain->extent,
+                    .extent = {scissor->width, scissor->height},
                 };
-                vkCmdSetViewport(frame->command_buffer, 0, 1, &viewport_info);
                 vkCmdSetScissor(frame->command_buffer, 0, 1, &scissor_info);
                 break;
             }

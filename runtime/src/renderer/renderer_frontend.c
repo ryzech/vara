@@ -71,6 +71,7 @@ void renderer_on_window_resize(Renderer* renderer, Vector2i new_size) {
         render_cmd_set_viewport(
             renderer_get_frame_command_buffer(renderer), new_size.x, new_size.y
         );
+        render_cmd_set_scissor(renderer_get_frame_command_buffer(renderer), new_size.x, new_size.y);
     }
 }
 
