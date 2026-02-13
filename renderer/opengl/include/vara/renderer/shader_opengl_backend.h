@@ -1,7 +1,13 @@
 #pragma once
 
 #include <vara/core/defines.h>
+#include <vara/renderer/internal/shader/shader_reflection_internal.h>
 #include <vara/renderer/shader.h>
+
+typedef struct OpenGLShaderState {
+    GLuint shader_program;
+    ReflectedShader reflection;
+} OpenGLShaderState;
 
 b8 shader_opengl_create(Shader* shader, const ShaderConfig* config);
 void shader_opengl_destroy(Shader* shader);

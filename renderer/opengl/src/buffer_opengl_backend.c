@@ -109,33 +109,33 @@ b8 buffer_opengl_create(Buffer* buffer, const BufferConfig* config) {
         glBindBufferBase(buffer_state->target, config->binding, buffer_state->id);
     }
 
-    if (config->type == BUFFER_TYPE_VERTEX && config->layout) {
-        glGenVertexArrays(1, &buffer_state->vao);
-        glBindVertexArray(buffer_state->vao);
-
-        glBindBuffer(GL_ARRAY_BUFFER, buffer_state->id);
-
-        const VertexLayout* layout = config->layout;
-        for (u32 i = 0; i < layout->attribute_count; i++) {
-            const VertexAttribute* attribute = &layout->attributes[i];
-
-            GLenum gl_type;
-            GLint component_count;
-            attribute_to_gl_attribute(attribute->type, &gl_type, &component_count);
-
-            glEnableVertexAttribArray(attribute->location);
-            glVertexAttribPointer(
-                attribute->location,
-                component_count,
-                gl_type,
-                attribute->normalized ? GL_TRUE : GL_FALSE,
-                (GLsizei)layout->stride,
-                (void*)(u64)attribute->offset
-            );
-        }
-
-        glBindVertexArray(0);
-    }
+    // if (config->type == BUFFER_TYPE_VERTEX && config->layout) {
+    //     glGenVertexArrays(1, &buffer_state->vao);
+    //     glBindVertexArray(buffer_state->vao);
+    //
+    //     glBindBuffer(GL_ARRAY_BUFFER, buffer_state->id);
+    //
+    //     const VertexLayout* layout = config->layout;
+    //     for (u32 i = 0; i < layout->attribute_count; i++) {
+    //         const VertexAttribute* attribute = &layout->attributes[i];
+    //
+    //         GLenum gl_type;
+    //         GLint component_count;
+    //         attribute_to_gl_attribute(attribute->type, &gl_type, &component_count);
+    //
+    //         glEnableVertexAttribArray(attribute->location);
+    //         glVertexAttribPointer(
+    //             attribute->location,
+    //             component_count,
+    //             gl_type,
+    //             attribute->normalized ? GL_TRUE : GL_FALSE,
+    //             (GLsizei)layout->stride,
+    //             (void*)(u64)attribute->offset
+    //         );
+    //     }
+    //
+    //     glBindVertexArray(0);
+    // }
 
     glBindBuffer(buffer_state->target, 0);
 

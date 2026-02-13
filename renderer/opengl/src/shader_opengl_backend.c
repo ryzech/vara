@@ -1,29 +1,89 @@
 #include <glad/gl.h>
 #include <vara/core/logger.h>
 #include <vara/core/memory/memory.h>
+#include <vara/renderer/internal/renderer_internal.h>
+#include <vara/renderer/internal/shader/shader_compiler_internal.h>
 
-#include "vara/renderer/shader_compiler_opengl.h"
 #include "vara/renderer/shader_opengl_backend.h"
-
-typedef struct OpenGLShaderState {
-    GLuint shader_program;
-} OpenGLShaderState;
 
 b8 shader_opengl_create(Shader* shader, const ShaderConfig* config) {
     DEBUG("Creating shader program named('%s')", config->name);
-    OpenGLShaderState* shader_state = vara_allocate(sizeof(OpenGLShaderState));
-    vara_zero_memory(shader_state, sizeof(OpenGLShaderState));
-    if (!shader_state) {
+    OpenGLShaderState* state = vara_allocate(sizeof(OpenGLShaderState));
+    vara_zero_memory(state, sizeof(OpenGLShaderState));
+    if (!state) {
         return false;
     }
 
-    shader_state->shader_program = shader_compiler_opengl_compile(config);
-    if (shader_state->shader_program == 0) {
-        vara_free(shader_state, sizeof(OpenGLShaderState));
+    CompiledShader* compiled = shader_compiler_compile(config, shader->backend);
+    if (!compiled) {
+        ERROR("Failed to compile shader named('%s')", config->name);
         return false;
     }
 
-    shader->backend_data = shader_state;
+    vara_copy_memory(&state->reflection, &compiled->reflection, sizeof(ReflectedShader));
+
+    const GLuint program = glCreateProgram();
+    for (u32 i = 0; i < compiled->stage_count; i++) {
+        CompiledShaderStage* stage = &compiled->stages[i];
+
+        GLenum gl_stage;
+        switch (stage->stage) {
+            case SHADER_STAGE_VERTEX:
+                gl_stage = GL_VERTEX_SHADER;
+                break;
+            case SHADER_STAGE_FRAGMENT:
+                gl_stage = GL_FRAGMENT_SHADER;
+                break;
+            case SHADER_STAGE_COMPUTE:
+                gl_stage = GL_COMPUTE_SHADER;
+                break;
+            default:
+                gl_stage = GL_VERTEX_SHADER;
+                break;
+        }
+
+        const GLuint gl_shader = glCreateShader(gl_stage);
+        const char* source = stage->bytecode;
+        glShaderSource(gl_shader, 1, &source, NULL);
+        glCompileShader(gl_shader);
+
+        GLint success;
+        glGetShaderiv(gl_shader, GL_COMPILE_STATUS, &success);
+        if (!success) {
+            char info[1024];
+            glGetShaderInfoLog(gl_shader, sizeof(info), NULL, info);
+            ERROR("OpenGL shader compile error:\n%s", info);
+
+            glDeleteShader(gl_shader);
+            glDeleteProgram(program);
+            shader_compiler_release(compiled);
+            vara_free(state, sizeof(OpenGLShaderState));
+            return false;
+        }
+
+        glAttachShader(program, gl_shader);
+        glDeleteShader(gl_shader);
+    }
+
+    glLinkProgram(program);
+
+    GLint success;
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    if (!success) {
+        char info[1024];
+        glGetProgramInfoLog(program, sizeof(info), NULL, info);
+        ERROR("OpenGL program link error:\n%s", info);
+
+        glDeleteProgram(program);
+        shader_compiler_release(compiled);
+        vara_free(state, sizeof(OpenGLShaderState));
+        return false;
+    }
+
+    state->shader_program = program;
+    shader_compiler_release(compiled);
+
+    shader->backend_data = state;
     return true;
 }
 
@@ -32,13 +92,12 @@ void shader_opengl_destroy(Shader* shader) {
         return;
     }
 
-    OpenGLShaderState* shader_state = shader->backend_data;
-    if (shader_state->shader_program) {
-        shader_compiler_opengl_delete(shader_state->shader_program);
-        shader_state->shader_program = 0;
+    OpenGLShaderState* state = shader->backend_data;
+    if (state->shader_program) {
+        glDeleteProgram(state->shader_program);
     }
 
-    vara_free(shader_state, sizeof(OpenGLShaderState));
+    vara_free(state, sizeof(OpenGLShaderState));
     shader->backend_data = NULL;
 }
 

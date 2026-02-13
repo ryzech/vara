@@ -5,6 +5,8 @@
 typedef enum CompareOp CompareOp;
 typedef enum BlendFactor BlendFactor;
 typedef enum VertexAttributeType VertexAttributeType;
+typedef struct VertexLayout VertexLayout;
+typedef struct VertexAttribute VertexAttribute;
 typedef struct DepthState DepthState;
 typedef struct BlendState BlendState;
 
@@ -41,6 +43,19 @@ enum VertexAttributeType {
     VERTEX_ATTRIBUTE_INT2,
     VERTEX_ATTRIBUTE_INT3,
     VERTEX_ATTRIBUTE_INT4
+};
+
+struct VertexAttribute {
+    VertexAttributeType type;
+    u32 offset;
+    u32 location;
+    b8 normalized;
+};
+
+struct VertexLayout {
+    VertexAttribute* attributes;
+    size_t attribute_count;
+    size_t stride;
 };
 
 struct DepthState {

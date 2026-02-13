@@ -14,35 +14,6 @@ Buffer* _buffer_create(RendererBackend* backend, const BufferConfig* config) {
     buffer->usage = config->usage;
     buffer->size = config->size;
     buffer->binding = config->binding;
-
-    // Calculate element count.
-    switch (config->type) {
-        case BUFFER_TYPE_VERTEX:
-            buffer->element_count = config->size / config->layout->stride;
-            break;
-        case BUFFER_TYPE_INDEX:
-            buffer->element_count = config->size / sizeof(u32);
-            break;
-        default:
-            buffer->element_count = config->size;
-            break;
-    }
-
-    if (config->layout) {
-        buffer->layout.stride = config->layout->stride;
-        buffer->layout.attribute_count = config->layout->attribute_count;
-
-        if (config->layout->attribute_count > 0) {
-            buffer->layout.attributes =
-                vara_allocate(sizeof(VertexAttribute) * config->layout->attribute_count);
-            vara_copy_memory(
-                buffer->layout.attributes,
-                config->layout->attributes,
-                sizeof(VertexAttribute) * config->layout->attribute_count
-            );
-        }
-    }
-
     buffer->backend = backend;
 
     if (buffer->backend->buffer.create) {
@@ -63,12 +34,6 @@ void buffer_destroy(Buffer* buffer) {
     if (buffer) {
         if (buffer->backend->buffer.destroy) {
             buffer->backend->buffer.destroy(buffer);
-        }
-
-        if (buffer->layout.attributes) {
-            vara_free(
-                buffer->layout.attributes, sizeof(VertexAttribute) * buffer->layout.attribute_count
-            );
         }
         vara_free(buffer, sizeof(Buffer));
     }
@@ -93,18 +58,6 @@ void buffer_set_data(Buffer* buffer, const void* data, size_t size, size_t offse
 
     if (offset + size > buffer->size) {
         return;
-    }
-
-    switch (buffer->type) {
-        case BUFFER_TYPE_VERTEX:
-            buffer->element_count = buffer->size / buffer->layout.stride;
-            break;
-        case BUFFER_TYPE_INDEX:
-            buffer->element_count = buffer->size / sizeof(u32);
-            break;
-        default:
-            buffer->element_count = buffer->size;
-            break;
     }
 
     if (buffer->backend->buffer.set_data) {

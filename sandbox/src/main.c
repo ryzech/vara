@@ -49,17 +49,9 @@ void sandbox_init(void) {
     };
     u32 indices[] = {0, 1, 2};
 
-    VertexAttribute attributes[] = {
-        {.location = 0, .type = VERTEX_ATTRIBUTE_FLOAT3, .offset = 0, .normalized = false},
-    };
-    VertexLayout layout = {
-        .attributes = attributes, .attribute_count = 1, .stride = sizeof(Vector3)
-    };
-
     const BufferConfig vertex_buffer_config = {
         .type = BUFFER_TYPE_VERTEX,
         .usage = BUFFER_USAGE_DYNAMIC,
-        .layout = &layout,
         .data = vertices,
         .size = sizeof(vertices)
     };

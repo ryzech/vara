@@ -7,8 +7,6 @@
 // Forward declarations, in case they need access to each other.
 typedef enum BufferType BufferType;
 typedef enum BufferUsage BufferUsage;
-typedef struct VertexAttribute VertexAttribute;
-typedef struct VertexLayout VertexLayout;
 typedef struct BufferConfig BufferConfig;
 typedef struct Buffer Buffer;
 
@@ -27,21 +25,7 @@ enum BufferUsage {
     BUFFER_USAGE_STREAM
 };
 
-struct VertexAttribute {
-    VertexAttributeType type;
-    u32 offset;
-    u32 location;
-    b8 normalized;
-};
-
-struct VertexLayout {
-    VertexAttribute* attributes;
-    size_t attribute_count;
-    size_t stride;
-};
-
 struct BufferConfig {
-    VertexLayout* layout;
     size_t size;
     const void* data;
     BufferType type;
@@ -50,13 +34,11 @@ struct BufferConfig {
 };
 
 struct Buffer {
-    VertexLayout layout;
-    size_t element_count;
-    size_t size;
-    void* backend_data;
     BufferType type;
     BufferUsage usage;
+    size_t size;
     u32 binding;
+    void* backend_data;
     struct RendererBackend* backend;
 };
 

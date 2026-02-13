@@ -1,6 +1,7 @@
 #include <glad/gl.h>
 #include <vara/core/logger.h>
 #include <vara/core/memory/memory.h>
+#include <vara/renderer/internal/renderer_internal.h>
 
 #include "vara/renderer/render_pipeline_opengl_backend.h"
 #include "vara/renderer/shader_opengl_backend.h"
