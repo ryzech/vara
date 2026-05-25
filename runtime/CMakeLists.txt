@@ -25,6 +25,5 @@ include(${CMAKE_SOURCE_DIR}/cmake/generate_shader.cmake)
 generate_shader_headers(vara-runtime ${CMAKE_CURRENT_SOURCE_DIR}/include/vara/shaders)
 
 target_include_directories(vara-runtime PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_include_directories(vara-runtime PUBLIC ${FREETYPE_INCLUDE_DIRS})
-target_link_libraries(vara-runtime PRIVATE ${FREETYPE_LIBRARIES} glslang::glslang glslang-default-resource-limits spirv-cross-c)
+target_link_libraries(vara-runtime PRIVATE Freetype::Freetype glslang::glslang glslang-default-resource-limits spirv-cross-c)
 target_link_libraries(vara-runtime PUBLIC vara-core flecs::flecs_static)

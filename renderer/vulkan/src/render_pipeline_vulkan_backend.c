@@ -56,15 +56,17 @@ b8 render_pipeline_vulkan_create(RenderPipeline* pipeline, const RenderPipelineC
 
     state->descriptor_set_count = shader->descriptor_set_layout_count;
     if (state->descriptor_set_count > 0) {
-        const VkDescriptorSetAllocateInfo alloc_info = {
-            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-            .descriptorPool = renderer->descriptor_pool,
-            .descriptorSetCount = state->descriptor_set_count,
-            .pSetLayouts = shader->descriptor_set_layouts,
-        };
-        VK_CHECK(vkAllocateDescriptorSets(
-            renderer->device.logical_device, &alloc_info, state->descriptor_sets
-        ));
+        for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            const VkDescriptorSetAllocateInfo alloc_info = {
+                .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+                .descriptorPool = renderer->descriptor_pool,
+                .descriptorSetCount = state->descriptor_set_count,
+                .pSetLayouts = shader->descriptor_set_layouts,
+            };
+            VK_CHECK(vkAllocateDescriptorSets(
+                renderer->device.logical_device, &alloc_info, state->descriptor_sets[i]
+            ));
+        }
     }
 
     VkVertexInputBindingDescription binding_description = {
@@ -248,6 +250,7 @@ void render_pipeline_vulkan_bind_buffer(RenderPipeline* pipeline, Buffer* buffer
     VulkanSwapchainState* swapchain = renderer->swapchain->backend_data;
     VulkanFrame* frame = &swapchain->frames[swapchain->current_frame];
 
+    u32 frame_index = swapchain->current_frame;
     const VkDescriptorBufferInfo buffer_info = {
         .buffer = buffer_state->buffer,
         .offset = 0,
@@ -256,7 +259,7 @@ void render_pipeline_vulkan_bind_buffer(RenderPipeline* pipeline, Buffer* buffer
 
     const VkWriteDescriptorSet write = {
         .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-        .dstSet = state->descriptor_sets[0],
+        .dstSet = state->descriptor_sets[frame_index][0],
         .dstBinding = buffer->binding,
         .dstArrayElement = 0,
         .descriptorCount = 1,
@@ -271,7 +274,7 @@ void render_pipeline_vulkan_bind_buffer(RenderPipeline* pipeline, Buffer* buffer
         state->layout,
         0,
         state->descriptor_set_count,
-        state->descriptor_sets,
+        state->descriptor_sets[frame_index],
         0,
         NULL
     );

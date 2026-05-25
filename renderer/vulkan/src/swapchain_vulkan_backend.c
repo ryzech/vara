@@ -162,13 +162,13 @@ b8 swapchain_vulkan_create(Swapchain* swapchain, const SwapchainConfig* config) 
             .format = TEXTURE_FORMAT_RGBA8,
             .filter = TEXTURE_FILTER_LINEAR,
             .samples = 1,
+            .swapchain_image = true,
         };
 
         Texture* texture = _texture_create(swapchain->backend, &texture_config);
         VulkanTextureState* texture_state = texture->backend_data;
         texture_state->image = state->images[i];
         texture_state->view = state->views[i];
-        texture_state->owned = false;
 
         state->attachment_textures[i] = texture;
     }

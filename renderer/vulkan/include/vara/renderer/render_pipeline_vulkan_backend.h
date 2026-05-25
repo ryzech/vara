@@ -9,7 +9,7 @@ typedef struct VulkanPipelineState {
     VkPipeline pipeline;
     VkPipelineLayout layout;
     u32 descriptor_set_count;
-    VkDescriptorSet descriptor_sets[4];
+    VkDescriptorSet descriptor_sets[MAX_FRAMES_IN_FLIGHT][4];
 } VulkanPipelineState;
 
 b8 render_pipeline_vulkan_create(RenderPipeline* pipeline, const RenderPipelineConfig* config);

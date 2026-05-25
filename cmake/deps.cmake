@@ -10,14 +10,17 @@ if (NOT glfw3_FOUND)
     FetchContent_MakeAvailable(glfw3)
 endif ()
 
-find_package(Freetype 2.14.1 QUIET)
+find_package(Freetype 2.14.3 QUIET)
 if (NOT Freetype_FOUND)
     FetchContent_Declare(
             Freetype
             DOWNLOAD_EXTRACT_TIMESTAMP OFF
-            URL https://github.com/freetype/freetype/archive/refs/tags/VER-2-14-1.zip
+            URL https://github.com/freetype/freetype/archive/refs/tags/VER-2-14-3.zip
     )
-    FetchContent_MakeAvailable(freetype)
+    FetchContent_MakeAvailable(Freetype)
+    if (TARGET freetype AND NOT TARGET Freetype::Freetype)
+        add_library(Freetype::Freetype ALIAS freetype)
+    endif ()
 endif ()
 
 find_package(flecs 4.1.3 QUIET)

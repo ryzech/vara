@@ -24,8 +24,14 @@ b8 texture_vulkan_create(Texture* texture, const TextureConfig* config) {
     state->extent.height = config->height;
     state->samples = config->samples;
     state->format = format_to_vk(config->format);
-    state->usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
     state->aspect = VK_IMAGE_ASPECT_COLOR_BIT;
+
+    if (config->swapchain_image) {
+        state->owned = false;
+        return true;
+    }
+
+    state->usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
     state->owned = true;
 
     VulkanRendererState* renderer = texture->backend->backend_data;

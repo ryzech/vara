@@ -37,6 +37,7 @@ enum TextureWrap {
 };
 
 struct TextureConfig {
+    b8 swapchain_image;
     u32 width, height;
     u32 samples;
     TextureFormat format;

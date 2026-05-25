@@ -40,6 +40,27 @@ b8 render_target_vulkan_create(RenderTarget* target, const RenderTargetConfig* c
 }
 
 void render_target_vulkan_destroy(RenderTarget* target) {
+    if (!target || !target->backend_data) {
+        return;
+    }
+
+    VulkanRenderTargetState* state = target->backend_data;
+    VulkanRendererState* renderer = target->backend->backend_data;
+
+    if (state->framebuffer != VK_NULL_HANDLE) {
+        vkDestroyFramebuffer(
+            renderer->device.logical_device, state->framebuffer, renderer->allocator
+        );
+        state->framebuffer = VK_NULL_HANDLE;
+    }
+
+    if (state->attachments) {
+        vara_free(state->attachments, sizeof(VkImageView) * state->attachment_count);
+        state->attachments = NULL;
+    }
+
+    vara_free(state, sizeof(VulkanRenderTargetState));
+    target->backend_data = NULL;
 }
 
 void render_target_vulkan_resize(RenderTarget* target, u32 width, u32 height) {

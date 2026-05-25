@@ -5,9 +5,6 @@
 
 #include "vara/renderer/vulkan_common.h"
 
-// Make this a configurable value.
-#define MAX_FRAMES_IN_FLIGHT 2
-
 typedef struct VulkanSwapchainState VulkanSwapchainState;
 typedef struct VulkanFrame VulkanFrame;
 
