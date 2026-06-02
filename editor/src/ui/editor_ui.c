@@ -4,14 +4,28 @@
 #include <vara/core/math/math.h>
 #include <vara/core/platform/platform.h>
 #include <vara/core/util/string.h>
-#include <vara/renderer2d/renderer2d.h>
+#include <vara/renderer/buffer.h>
+#include <vara/renderer/render_command.h>
+#include <vara/renderer/render_packet.h>
+#include <vara/renderer/render_pass.h>
+#include <vara/renderer/render_pipeline.h>
 
 #include "editor/editor_panel.h"
 #include "editor/editor_ui.h"
 
 static Editor* editor;
 
-b8 editor_ui_create(RenderContext* render_context) {
+extern RenderPass* ui_pass;
+extern RenderPipeline* ui_pipeline;
+extern Buffer* ui_vertex_buffer;
+extern Buffer* ui_index_buffer;
+
+typedef struct UIPushConstants {
+    Matrix4 projection;
+    Matrix4 model;
+} UIPushConstants;
+
+b8 editor_ui_create(Renderer* renderer) {
     editor = platform_allocate(sizeof(Editor));
     platform_zero_memory(editor, sizeof(Editor));
 
@@ -19,8 +33,6 @@ b8 editor_ui_create(RenderContext* render_context) {
         FATAL("Failed to create Editor Context!");
         return false;
     }
-
-    editor->context = render_context;
 
     // Start with 64 type capacity.
     editor->max_types = 64;
@@ -130,17 +142,45 @@ static void editor_panel_draw(Panel* panel) {
         editor_panel_draw(panel->children[0]);
         editor_panel_draw(panel->children[1]);
     } else {
-        const Vector2 size = {
+        Vector2 size = {
             panel->bounds.max.x - panel->bounds.min.x,
             panel->bounds.max.y - panel->bounds.min.y,
         };
+
         Vector4 background;
         if (panel == editor->hovered_panel) {
             background = (Vector4){0.30f, 0.30f, 0.30f, 1.0f};
         } else {
             background = (Vector4){0.25f, 0.25f, 0.25f, 1.0f};
         }
-        renderer2d_draw_rect(editor->context->r2d, panel->bounds.min, size, background, 0);
+
+        Geometry2D quad = geometry_generate_quad(size, vec2_zero(), vec2_one(), background);
+        buffer_set_data(ui_vertex_buffer, quad.vertices, sizeof(Vertex) * quad.vertex_count, 0);
+        buffer_set_data(ui_index_buffer, quad.indices, sizeof(u32) * quad.index_count, 0);
+
+        const Vector2i window_size = platform_window_get_size(application_get_window());
+        Matrix4 projection =
+            mat4_ortho(0.0f, (f32)window_size.x, (f32)window_size.y, 0.0f, -1.0f, 1.0f);
+        Matrix4 model = mat4_translation(vec3(panel->bounds.min.x, panel->bounds.min.y, 0.0f));
+
+        UIPushConstants push = {
+            .projection = projection,
+            .model = model,
+        };
+
+        render_cmd_push_constants(
+            ui_pass->command_buffer, ui_pipeline, 0, sizeof(UIPushConstants), &push
+        );
+        RenderPacket packet = {
+            .pipeline = ui_pipeline,
+            .vertex_buffer = ui_vertex_buffer,
+            .index_buffer = ui_index_buffer,
+            .index_count = quad.index_count,
+            .vertex_count = quad.vertex_count,
+        };
+        render_pass_submit(ui_pass, &packet);
+        geometry_destroy(&quad);
+
         if (panel->type) {
             if (panel->type->draw) {
                 panel->type->draw(panel);

@@ -167,14 +167,14 @@ void sandbox_update(f32 delta_time) {
             .view = camera_get_view(camera),
             .projection = camera_get_projection(camera),
         };
-        buffer_set_data(ubo, &ubo_data, sizeof(ubo_data), 0);
+        render_cmd_push_constants(
+            render_pass->command_buffer, base_pipeline, 0, sizeof(ubo_data), &ubo_data
+        );
         RenderPacket packet = {
             .pipeline = base_pipeline,
             .vertex_buffer = vertex_buffer,
             .index_buffer = index_buffer,
             .index_count = 3,
-            .uniform_buffer_count = 1,
-            .uniform_buffers = &ubo,
         };
         render_pass_submit(render_pass, &packet);
     }

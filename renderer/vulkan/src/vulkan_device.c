@@ -242,13 +242,18 @@ b8 vulkan_device_create(VkInstance instance, VkSurfaceKHR surface, VulkanDevice*
 }
 
 void vulkan_device_destroy(VulkanDevice* device) {
-    if (!device || !device->logical_device) {
+    if (!device) {
         return;
     }
 
-    vkDeviceWaitIdle(device->logical_device);
-    // Get allocator callbacks somehow?
-    vkDestroyDevice(device->logical_device, NULL);
+    if (device->logical_device != VK_NULL_HANDLE) {
+        vkDeviceWaitIdle(device->logical_device);
+        // Get allocator callbacks somehow?
+        vkDestroyDevice(device->logical_device, NULL);
+        device->logical_device = VK_NULL_HANDLE;
+    }
     array_destroy(device->surface_info.formats);
     array_destroy(device->surface_info.present_modes);
+
+    device->physical_device = VK_NULL_HANDLE;
 }

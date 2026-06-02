@@ -29,7 +29,7 @@ struct Editor {
     struct RenderContext* context;
 };
 
-b8 editor_ui_create(struct RenderContext* render_context);
+b8 editor_ui_create(struct Renderer* renderer);
 void editor_ui_destroy(void);
 
 void editor_ui_set_bounds(Vector2 min, Vector2 max);

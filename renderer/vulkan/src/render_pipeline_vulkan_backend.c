@@ -166,12 +166,18 @@ b8 render_pipeline_vulkan_create(RenderPipeline* pipeline, const RenderPipelineC
         .pDynamicStates = dynamic_states,
     };
 
+    VkPushConstantRange push_constant_info = {
+        .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+        .offset = 0,
+        .size = sizeof(Matrix4) * 2,
+    };
+
     VkPipelineLayoutCreateInfo layout_info = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
         .setLayoutCount = shader->descriptor_set_layout_count,
         .pSetLayouts = shader->descriptor_set_layouts,
-        .pushConstantRangeCount = 0,
-        .pPushConstantRanges = NULL,
+        .pushConstantRangeCount = 1,
+        .pPushConstantRanges = &push_constant_info,
     };
     VK_CHECK(vkCreatePipelineLayout(
         renderer->device.logical_device, &layout_info, renderer->allocator, &state->layout

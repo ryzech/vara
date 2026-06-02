@@ -186,11 +186,28 @@ static void renderer_vulkan_destroy(RendererBackend* backend) {
         return;
     }
 
-    vkDestroyDescriptorPool(state->device.logical_device, state->descriptor_pool, state->allocator);
-    vmaDestroyAllocator(state->vma_allocator);
+    if (state->descriptor_pool != VK_NULL_HANDLE) {
+        vkDestroyDescriptorPool(state->device.logical_device, state->descriptor_pool, state->allocator);
+        state->descriptor_pool = VK_NULL_HANDLE;
+    }
+
+    if (state->vma_allocator) {
+        vmaDestroyAllocator(state->vma_allocator);
+        state->vma_allocator = NULL;
+    }
+
     vulkan_device_destroy(&state->device);
-    vkDestroySurfaceKHR(state->instance, state->surface, state->allocator);
-    vkDestroyInstance(state->instance, state->allocator);
+
+    if (state->surface != VK_NULL_HANDLE) {
+        vkDestroySurfaceKHR(state->instance, state->surface, state->allocator);
+        state->surface = VK_NULL_HANDLE;
+    }
+
+    if (state->instance != VK_NULL_HANDLE) {
+        vkDestroyInstance(state->instance, state->allocator);
+        state->instance = VK_NULL_HANDLE;
+    }
+
     volkFinalize();
     vara_free(state, sizeof(VulkanRendererState));
 }
@@ -241,6 +258,19 @@ static void renderer_vulkan_submit(RendererBackend* backend, const RenderCommand
                 const RenderCmdBindUniformBuffer* bind_uniform = (RenderCmdBindUniformBuffer*)cmd;
                 render_pipeline_vulkan_bind_buffer(
                     bind_uniform->pipeline, bind_uniform->uniform_buffer
+                );
+                break;
+            }
+            case RENDER_CMD_PUSH_CONSTANTS: {
+                const RenderCmdPushConstants* push_constants = (RenderCmdPushConstants*)cmd;
+                const VulkanPipelineState* pipeline_state = push_constants->pipeline->backend_data;
+                vkCmdPushConstants(
+                    frame->command_buffer,
+                    pipeline_state->layout,
+                    VK_SHADER_STAGE_VERTEX_BIT,
+                    push_constants->offset,
+                    push_constants->size,
+                    push_constants->data
                 );
                 break;
             }

@@ -161,3 +161,17 @@ void render_cmd_shader_set_int_array(
 
     vara_copy_memory(cmd->array, array, count * sizeof(i32));
 }
+
+void render_cmd_push_constants(
+    RenderCommandBuffer* buffer, RenderPipeline* pipeline, u32 offset, u32 size, const void* data
+) {
+    RenderCmdPushConstants* cmd =
+        render_cmd_allocate(buffer, sizeof(RenderCmdPushConstants));
+    cmd->header.type = RENDER_CMD_PUSH_CONSTANTS;
+    cmd->header.size = sizeof(RenderCmdPushConstants);
+    cmd->pipeline = pipeline;
+    cmd->offset = offset;
+    cmd->size = size;
+
+    vara_copy_memory(cmd->data, data, size);
+}

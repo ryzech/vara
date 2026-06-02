@@ -20,6 +20,7 @@ typedef struct RenderCmdSetViewport RenderCmdSetViewport;
 typedef struct RenderCmdSetScissor RenderCmdSetScissor;
 typedef struct RenderCmdSetShaderMat4 RenderCmdSetShaderMat4;
 typedef struct RenderCmdSetShaderIntArray RenderCmdSetShaderIntArray;
+typedef struct RenderCmdPushConstants RenderCmdPushConstants;
 
 struct Buffer;
 struct Shader;
@@ -42,6 +43,7 @@ enum RenderCommandType {
     RENDER_CMD_SET_SCISSOR,
     RENDER_CMD_SET_SHADER_MAT4,
     RENDER_CMD_SET_SHADER_INT_ARRAY,
+    RENDER_CMD_PUSH_CONSTANTS,
     RENDER_CMD_END_PASS,
 };
 
@@ -141,6 +143,14 @@ struct RenderCmdSetShaderIntArray {
     const char* name;
 };
 
+struct RenderCmdPushConstants {
+    RenderCommandHeader header;
+    struct RenderPipeline* pipeline;
+    u32 offset;
+    u32 size;
+    u8 data[128];
+};
+
 RenderCommandBuffer* render_cmd_buffer_create(void);
 void render_cmd_buffer_destroy(RenderCommandBuffer* buffer);
 void render_cmd_buffer_reset(RenderCommandBuffer* buffer);
@@ -168,6 +178,13 @@ void render_cmd_shader_set_int_array(
     const char* name,
     const i32* array,
     u32 count
+);
+void render_cmd_push_constants(
+    RenderCommandBuffer* buffer,
+    struct RenderPipeline* pipeline,
+    u32 offset,
+    u32 size,
+    const void* data
 );
 void render_cmd_draw(RenderCommandBuffer* buffer, u32 vertex_count, u32 first_vertex);
 void render_cmd_draw_indexed(RenderCommandBuffer* buffer, u32 index_count, u32 first_index);
